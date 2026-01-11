@@ -1,6 +1,43 @@
 # Docker Compose Configuration
-# Uses environment variables from .env file
-# Copy .env.example to .env and update values as needed
+# Switch between 'dev' and 'prod' modes using the COMPOSE_PROFILES environment variable in .env
+# Example: COMPOSE_PROFILES=dev (Hot Reload) or COMPOSE_PROFILES=prod (Optimized)
+
+x-backend-base: &backend-base
+  build:
+    context: ./backend
+    dockerfile: Dockerfile
+  restart: ${RESTART_POLICY:-unless-stopped}
+  networks:
+    - itqan-network
+  environment: &backend-env
+    SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-itqan_edu}
+    SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+    SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+    SPRING_JPA_HIBERNATE_DDL_AUTO: ${JPA_HIBERNATE_DDL_AUTO:-update}
+    SPRING_JPA_SHOW_SQL: ${JPA_SHOW_SQL:-true}
+    SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+    SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL: "true"
+    JWT_SECRET: ${JWT_SECRET:-itqan-education-platform-secret-key-change-in-production-environment-minimum-256-bits}
+    JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
+    SPRING_WEB_CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000}
+    SPRING_WEB_CORS_ALLOWED_METHODS: GET,POST,PUT,DELETE,PATCH,OPTIONS
+    SPRING_WEB_CORS_ALLOWED_HEADERS: "*"
+    SPRING_WEB_CORS_ALLOW_CREDENTIALS: "true"
+    SPRING_DOCKER_COMPOSE_ENABLED: "false"
+  depends_on:
+    postgres:
+      condition: service_healthy
+
+x-frontend-base: &frontend-base
+  build:
+    context: ./frontend
+    dockerfile: Dockerfile
+  restart: ${RESTART_POLICY:-unless-stopped}
+  networks:
+    - itqan-network
+  environment: &frontend-env
+    NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8080}
 
 services:
   postgres:
@@ -43,51 +80,79 @@ services:
     profiles:
       - pgadmin
 
+  # ==========================================
+  # DEVELOPMENT SERVICES (Profile: dev)
+  # ==========================================
+  
   backend:
+    <<: *backend-base
+    profiles: [dev]
+    container_name: itqan-backend-dev
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: itqan-backend
+      target: development
     ports:
       - "${BACKEND_PORT:-8080}:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-itqan_edu}
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
-      SPRING_JPA_HIBERNATE_DDL_AUTO: ${JPA_HIBERNATE_DDL_AUTO:-update}
-      SPRING_JPA_SHOW_SQL: ${JPA_SHOW_SQL:-true}
-      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
-      SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL: "true"
-      JWT_SECRET: ${JWT_SECRET:-itqan-education-platform-secret-key-change-in-production-environment-minimum-256-bits}
-      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
-      SPRING_WEB_CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000}
-      SPRING_WEB_CORS_ALLOWED_METHODS: GET,POST,PUT,DELETE,PATCH,OPTIONS
-      SPRING_WEB_CORS_ALLOWED_HEADERS: "*"
-      SPRING_WEB_CORS_ALLOW_CREDENTIALS: "true"
-      SPRING_DOCKER_COMPOSE_ENABLED: "false"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - itqan-network
-    restart: ${RESTART_POLICY:-unless-stopped}
+      <<: *backend-env
+      SPRING_DEVTOOLS_RESTART_ENABLED: "true"
+    volumes:
+      - ./backend:/app
+      - /app/target
+
 
   frontend:
+    <<: *frontend-base
+    profiles: [dev]
+    container_name: itqan-frontend-dev
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: itqan-frontend
+      target: development
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      <<: *frontend-env
+      NODE_ENV: development
+    depends_on:
+      - backend
+    command: npm run dev
+
+  # ==========================================
+  # PRODUCTION SERVICES (Profile: prod)
+  # ==========================================
+
+  backend-prod:
+    <<: *backend-base
+    profiles: [prod]
+    container_name: itqan-backend-prod
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: production
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+
+  frontend-prod:
+    <<: *frontend-base
+    profiles: [prod]
+    container_name: itqan-frontend-prod
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: production
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
     environment:
-      NODE_ENV: ${NODE_ENV:-production}
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8080}
+      <<: *frontend-env
+      NODE_ENV: production
     depends_on:
-      - backend
-    networks:
-      - itqan-network
-    restart: ${RESTART_POLICY:-unless-stopped}
+      - backend-prod
 
 volumes:
   postgres_data:

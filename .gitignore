@@ -1,0 +1,53 @@
+# Maven
+backend/target/
+backend/.mvn/
+backend/mvnw
+backend/mvnw.cmd
+backend/.mvn/wrapper/maven-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Environment variables
+.env
+!.env.example
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Next.js
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/dist/
+frontend/node_modules/
+frontend/.vercel
+
+# Generated API files (optional - you might want to commit these)
+# frontend/src/lib/api/
+
+# OpenAPI generated files
+frontend/openapi.json
+
+# Database
+*.db
+*.sqlite
+
+# Docker
+docker-compose.override.yml

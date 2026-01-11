@@ -164,13 +164,20 @@ class GoogleAuthIntegrationTest extends BaseIntegrationTest {
                 .idToken("invalid-token")
                 .build();
 
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-                BASE_URL + "/google",
-                request,
-                Map.class
-        );
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        try {
+            ResponseEntity<Map> response = restTemplate.postForEntity(
+                    BASE_URL + "/google",
+                    request,
+                    Map.class
+            );
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        } catch (org.springframework.web.client.HttpClientErrorException.Unauthorized e) {
+            // Expected - 401 response
+            assertThat(e.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        } catch (org.springframework.web.client.ResourceAccessException e) {
+            // TestRestTemplate streaming issue with 401 - verify it's the expected error
+            assertThat(e.getMessage()).contains("authentication");
+        }
     }
 
     @Test

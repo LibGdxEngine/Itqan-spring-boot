@@ -23,6 +23,7 @@
         <mapstruct.version>1.5.5.Final</mapstruct.version>
         <jjwt.version>0.12.3</jjwt.version>
         <springdoc.version>2.3.0</springdoc.version>
+        <testcontainers.version>1.20.6</testcontainers.version>
     </properties>
     
     <dependencies>
@@ -134,7 +135,14 @@
             <version>2.2.0</version>
         </dependency>
         
-        <!-- Testcontainers -->
+        <!-- H2 Database for Testing -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+        
+        <!-- Testcontainers (optional, kept for future use when Docker API is compatible) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-testcontainers</artifactId>

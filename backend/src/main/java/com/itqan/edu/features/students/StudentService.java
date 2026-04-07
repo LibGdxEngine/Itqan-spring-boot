@@ -40,6 +40,12 @@ public class StudentService {
         return studentMapper.toResponse(student);
     }
 
+    public StudentResponse getStudentByEmail(String email) {
+        Student student = studentRepository.findByEmail(email)
+                .orElseThrow(() -> new BusinessException(ErrorCode.STUDENT_NOT_FOUND));
+        return studentMapper.toResponse(student);
+    }
+
     public List<StudentResponse> getAllStudents() {
         return studentRepository.findAll().stream()
                 .map(studentMapper::toResponse)
@@ -58,14 +64,14 @@ public class StudentService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.STUDENT_NOT_FOUND));
 
         // Check if email is being changed and if it's already taken
-        if (!student.getEmail().equals(request.getEmail()) && 
-            studentRepository.existsByEmail(request.getEmail())) {
+        if (!student.getEmail().equals(request.getEmail()) &&
+                studentRepository.existsByEmail(request.getEmail())) {
             throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
         // Check if phone number is being changed and if it's already taken
-        if (!student.getPhoneNumber().equals(request.getPhoneNumber()) && 
-            studentRepository.existsByPhoneNumber(request.getPhoneNumber())) {
+        if (!student.getPhoneNumber().equals(request.getPhoneNumber()) &&
+                studentRepository.existsByPhoneNumber(request.getPhoneNumber())) {
             throw new BusinessException(ErrorCode.VALIDATION_ERROR, "Phone number already exists");
         }
 

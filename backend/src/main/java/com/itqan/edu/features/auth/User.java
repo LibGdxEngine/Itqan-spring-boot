@@ -50,6 +50,10 @@ public class User implements UserDetails {
     @Builder.Default
     private Role role = Role.STUDENT;
 
+    @Column
+    @Builder.Default
+    private Boolean superAdmin = false;
+
     @Column(nullable = false)
     @Builder.Default
     private Boolean enabled = true;
@@ -59,6 +63,8 @@ public class User implements UserDetails {
 
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    private LocalDateTime lastLoginAt;
 
     @PrePersist
     protected void onCreate() {

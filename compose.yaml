@@ -20,13 +20,38 @@ x-backend-base: &backend-base
     SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL: "true"
     JWT_SECRET: ${JWT_SECRET:-itqan-education-platform-secret-key-change-in-production-environment-minimum-256-bits}
     JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
+    APP_SUPER_ADMIN_EMAIL: ${APP_SUPER_ADMIN_EMAIL:-superadmin@itqan.edu}
+    APP_SUPER_ADMIN_PASSWORD: ${APP_SUPER_ADMIN_PASSWORD:-Admin@123456}
+    APP_SUPER_ADMIN_FIRST_NAME: ${APP_SUPER_ADMIN_FIRST_NAME:-Super}
+    APP_SUPER_ADMIN_LAST_NAME: ${APP_SUPER_ADMIN_LAST_NAME:-Admin}
+    STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-sk_test_dummy}
+    STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-whsec_dummy}
+    STRIPE_SUCCESS_URL: ${STRIPE_SUCCESS_URL:-http://localhost:3000/courses/success}
+    STRIPE_CANCEL_URL: ${STRIPE_CANCEL_URL:-http://localhost:3000/courses/cancel}
+    STRIPE_CURRENCY: ${STRIPE_CURRENCY:-usd}
     SPRING_WEB_CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000}
     SPRING_WEB_CORS_ALLOWED_METHODS: GET,POST,PUT,DELETE,PATCH,OPTIONS
     SPRING_WEB_CORS_ALLOWED_HEADERS: "*"
     SPRING_WEB_CORS_ALLOW_CREDENTIALS: "true"
     SPRING_DOCKER_COMPOSE_ENABLED: "false"
+    APP_STORAGE_S3_ENDPOINT: ${APP_STORAGE_S3_ENDPOINT:-http://minio:9000}
+    APP_STORAGE_S3_REGION: ${APP_STORAGE_S3_REGION:-us-east-1}
+    APP_STORAGE_S3_ACCESS_KEY: ${APP_STORAGE_S3_ACCESS_KEY:-minioadmin}
+    APP_STORAGE_S3_SECRET_KEY: ${APP_STORAGE_S3_SECRET_KEY:-minioadmin}
+    APP_STORAGE_S3_BUCKET: ${APP_STORAGE_S3_BUCKET:-itqan-videos}
+    APP_STORAGE_S3_PATH_STYLE_ACCESS_ENABLED: "true"
+    APP_VIDEO_MAX_SIZE_BYTES: ${APP_VIDEO_MAX_SIZE_BYTES:-5368709120}
+    APP_VIDEO_MULTIPART_PART_SIZE_BYTES: ${APP_VIDEO_MULTIPART_PART_SIZE_BYTES:-16777216}
+    APP_VIDEO_PRESIGN_EXPIRY_MINUTES: ${APP_VIDEO_PRESIGN_EXPIRY_MINUTES:-15}
+    APP_VIDEO_PLAYBACK_URL_EXPIRY_MINUTES: ${APP_VIDEO_PLAYBACK_URL_EXPIRY_MINUTES:-60}
+    MEILI_HOST: ${MEILI_HOST:-http://meilisearch:7700}
+    MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:-masterKey123}
   depends_on:
     postgres:
+      condition: service_healthy
+    minio-init:
+      condition: service_completed_successfully
+    meilisearch:
       condition: service_healthy
 
 x-frontend-base: &frontend-base
@@ -38,8 +63,62 @@ x-frontend-base: &frontend-base
     - itqan-network
   environment: &frontend-env
     NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8080}
+    NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
 
 services:
+  minio:
+    image: quay.io/minio/minio:latest
+    container_name: itqan-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      MINIO_API_CORS_ALLOW_ORIGIN: ${MINIO_API_CORS_ALLOW_ORIGIN:-*}
+    ports:
+      - "${MINIO_API_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - itqan-network
+    restart: ${RESTART_POLICY:-unless-stopped}
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.12
+    container_name: itqan-meilisearch
+    environment:
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:-masterKey123}
+      MEILI_ENV: ${MEILI_ENV:-development}
+    ports:
+      - "${MEILI_PORT:-7700}:7700"
+    volumes:
+      - meili_data:/meili_data
+    networks:
+      - itqan-network
+    restart: ${RESTART_POLICY:-unless-stopped}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7700/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio-init:
+    image: quay.io/minio/mc:latest
+    container_name: itqan-minio-init
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      until mc alias set local http://minio:9000 ${MINIO_ROOT_USER:-minioadmin} ${MINIO_ROOT_PASSWORD:-minioadmin}; do
+        echo 'Waiting for MinIO...';
+        sleep 2;
+      done;
+      mc mb --ignore-existing local/${APP_STORAGE_S3_BUCKET:-itqan-videos};
+      "
+    networks:
+      - itqan-network
+    restart: "no"
+
   postgres:
     image: postgres:16-alpine
     container_name: itqan-postgres
@@ -94,12 +173,15 @@ services:
       target: development
     ports:
       - "${BACKEND_PORT:-8080}:8080"
+      - "35729:35729"
     environment:
       <<: *backend-env
       SPRING_DEVTOOLS_RESTART_ENABLED: "true"
+      SPRING_DEVTOOLS_REMOTE_SECRET: "itqan-dev"
     volumes:
-      - ./backend:/app
-      - /app/target
+      - ./backend/src:/app/src
+      - ./backend/pom.xml:/app/pom.xml
+      - maven_cache:/root/.m2
 
 
   frontend:
@@ -113,12 +195,14 @@ services:
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
     volumes:
-      - ./frontend:/app
-      - /app/node_modules
-      - /app/.next
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      - ./frontend/next.config.ts:/app/next.config.ts
+      - ./frontend/messages:/app/messages
     environment:
       <<: *frontend-env
       NODE_ENV: development
+      WATCHPACK_POLLING: "true"
     depends_on:
       - backend
     command: npm run dev
@@ -157,6 +241,9 @@ services:
 volumes:
   postgres_data:
   pgadmin_data:
+  maven_cache:
+  minio_data:
+  meili_data:
 
 networks:
   itqan-network:

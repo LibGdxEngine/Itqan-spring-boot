@@ -8,7 +8,7 @@ import lombok.Data;
 
 @Data
 public class CourseRequest {
-    
+
     @NotBlank(message = "Title is required")
     @Size(min = 3, max = 200, message = "Title must be between 3 and 200 characters")
     private String title;
@@ -30,4 +30,11 @@ public class CourseRequest {
 
     @NotBlank(message = "Level is required")
     private String level; // BEGINNER, INTERMEDIATE, ADVANCED
+
+    @NotBlank(message = "Category is required")
+    private String category; // PROGRAMMING, DESIGN, BUSINESS, MARKETING, etc.
+
+    private String thumbnailUrl;
+
+    private java.util.List<String> tags;
 }

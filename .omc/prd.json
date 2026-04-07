@@ -1,0 +1,109 @@
+{
+  "title": "Phase 1: Admin Dashboard — Analytics & Course Content Management",
+  "stories": [
+    {
+      "id": "US-001",
+      "title": "Database migration and lastLoginAt tracking",
+      "priority": 1,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Flyway migration V9__add_analytics_support.sql exists at backend/src/main/resources/db/migration/",
+        "Migration adds last_login_at TIMESTAMP column to users table",
+        "Migration adds indexes: idx_payments_status_created, idx_enrollments_course_status, idx_enrollments_enrolled_at, idx_users_created_at, idx_users_role, idx_lesson_enrollments_lesson_completed",
+        "User.java has lastLoginAt LocalDateTime field",
+        "AuthService.login() updates lastLoginAt on successful login",
+        "AuthService.authenticateWithGoogle() updates lastLoginAt on successful login",
+        "application.properties has jakarta.persistence.query.timeout=5000"
+      ]
+    },
+    {
+      "id": "US-002",
+      "title": "Analytics repository layer with aggregate queries",
+      "priority": 2,
+      "passes": false,
+      "acceptanceCriteria": [
+        "PaymentRepository has sumRevenueByCurrency method with @Query returning List<Object[]> (currency, sum) for COMPLETED payments in date range",
+        "PaymentRepository has findRevenueByCourseSorted method returning List<Object[]> (courseId, title, revenue, count)",
+        "PaymentRepository has findRevenueTrend method returning List<Object[]> (date, sum) grouped by date",
+        "AuthRepository has countByCreatedAtBetween method for signup counts",
+        "AuthRepository has countByLastLoginAtAfter method for active user count",
+        "AuthRepository has countByRoleGrouped method returning List<Object[]> (role, count)",
+        "EnrollmentRepository has findCoursePopularity method returning List<Object[]> (courseId, title, enrollCount, completedCount, avgProgress)",
+        "EnrollmentRepository has findCompletionStatsByCourse method",
+        "LessonEnrollmentRepository has findLessonCompletionRatesByCourse method"
+      ]
+    },
+    {
+      "id": "US-003",
+      "title": "Analytics service, controller and DTOs",
+      "priority": 3,
+      "passes": false,
+      "acceptanceCriteria": [
+        "AdminAnalyticsController exists at features/admin/analytics/ with @PreAuthorize hasRole ADMIN",
+        "GET /api/admin/analytics/overview endpoint returns AnalyticsOverviewResponse",
+        "GET /api/admin/analytics/revenue endpoint accepts from, to, granularity params and returns RevenueTrendResponse",
+        "GET /api/admin/analytics/revenue/by-course endpoint returns List<CourseRevenueResponse>",
+        "GET /api/admin/analytics/users endpoint returns UserAnalyticsResponse",
+        "GET /api/admin/analytics/enrollments/popular returns List<CoursePopularityResponse>",
+        "GET /api/admin/analytics/progress endpoint accepts courseId param and returns CourseProgressResponse",
+        "AdminAnalyticsService applies default date range (last 30 days) when from/to not provided",
+        "AdminAnalyticsService enforces max 12-month date range",
+        "Revenue is aggregated per currency — no cross-currency summing",
+        "All 7 DTO classes exist in features/admin/analytics/dto/"
+      ]
+    },
+    {
+      "id": "US-004",
+      "title": "Admin content management backend — module reorder + course duplication + bulk upload",
+      "priority": 4,
+      "passes": false,
+      "acceptanceCriteria": [
+        "AdminContentController exists at features/admin/content/ with @PreAuthorize hasRole ADMIN",
+        "PATCH /api/admin/courses/{courseId}/modules/reorder accepts ModuleReorderRequest with List<Long> moduleIds",
+        "Module reorder validates all moduleIds belong to the course and updates orderIndex sequentially",
+        "POST /api/admin/courses/{courseId}/duplicate endpoint exists",
+        "Course duplication deep-copies course -> modules -> lessons -> quizzes -> questions -> options",
+        "Duplicated course title is '[Original] (Copy)', active=false, ownerUserId=admin's userId",
+        "Video S3 keys are referenced (shared) in duplicated lessons, not re-uploaded",
+        "POST /api/admin/modules/{moduleId}/lessons/bulk-upload accepts multipart files (max 20)",
+        "Bulk upload creates one lesson per file with title from filename, type=VIDEO, sequential orderIndex",
+        "Bulk upload is atomic — all succeed or all fail via @Transactional"
+      ]
+    },
+    {
+      "id": "US-005",
+      "title": "Frontend admin layout and analytics dashboard",
+      "priority": 5,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Admin layout with sidebar exists at frontend/src/app/admin/layout.tsx",
+        "Sidebar has navigation links: Dashboard, Courses, Users, Admins",
+        "Admin layout has auth guard redirecting non-ADMIN users",
+        "Dashboard page exists at frontend/src/app/admin/dashboard/page.tsx",
+        "Dashboard displays stat cards (Total Students, Revenue, Active Users, Enrollments)",
+        "Dashboard has a revenue trend chart component",
+        "Dashboard has a course popularity chart component",
+        "DateRangePicker component exists with presets (7d, 30d, 90d, 12m)",
+        "API helper file exists at frontend/src/lib/admin-analytics.ts with types and fetch functions",
+        "recharts is added as a dependency in package.json"
+      ]
+    },
+    {
+      "id": "US-006",
+      "title": "Frontend course content management page",
+      "priority": 6,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Course management page exists at frontend/src/app/admin/courses/page.tsx",
+        "Page displays list of all courses with search/filter",
+        "Courses expand to show modules and lessons in tree view",
+        "Drag-and-drop module reordering calls PATCH /api/admin/courses/{id}/modules/reorder",
+        "Drag-and-drop lesson reordering calls existing PATCH /api/modules/{id}/lessons/reorder",
+        "Duplicate Course button triggers POST /api/admin/courses/{id}/duplicate with confirmation dialog",
+        "Bulk Upload Videos button on modules triggers file picker (max 20 video files)",
+        "@dnd-kit/core and @dnd-kit/sortable added as dependencies in package.json",
+        "API helper file exists at frontend/src/lib/admin-content.ts"
+      ]
+    }
+  ]
+}

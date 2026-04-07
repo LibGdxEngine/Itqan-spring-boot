@@ -16,10 +16,15 @@ public class CourseResponse {
     private String title;
     private String description;
     private String instructor;
+    private Long ownerUserId;
     private Double price;
     private Integer duration;
     private String level;
+    private String category;
+    private String thumbnailUrl;
+    private java.util.List<String> tags;
     private Boolean active;
+    private java.util.List<ModuleResponse> modules;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

@@ -1,0 +1,374 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1775531974538,
+  "projectRoot": "/home/ahmed/Documents/Itqan",
+  "techStack": {
+    "languages": [],
+    "frameworks": [],
+    "packageManager": null,
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [],
+    "gitBranches": null
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "backend": {
+      "path": "backend",
+      "purpose": null,
+      "fileCount": 3,
+      "lastAccessed": 1775531974533,
+      "keyFiles": [
+        "Dockerfile",
+        "mvnw",
+        "pom.xml"
+      ]
+    },
+    "frontend": {
+      "path": "frontend",
+      "purpose": null,
+      "fileCount": 11,
+      "lastAccessed": 1775531974533,
+      "keyFiles": [
+        "Dockerfile",
+        "README.md",
+        "eslint.config.mjs",
+        "next-env.d.ts",
+        "next.config.ts"
+      ]
+    },
+    "backend/src": {
+      "path": "backend/src",
+      "purpose": "Source code",
+      "fileCount": 0,
+      "lastAccessed": 1775531974536,
+      "keyFiles": []
+    },
+    "frontend/node_modules": {
+      "path": "frontend/node_modules",
+      "purpose": "Dependencies",
+      "fileCount": 1,
+      "lastAccessed": 1775531974537,
+      "keyFiles": []
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "backend/src/main/resources/application.properties",
+      "accessCount": 9,
+      "lastAccessed": 1775543173752,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/java/com/itqan/edu/features/courses/Course.java",
+      "accessCount": 8,
+      "lastAccessed": 1775541951391,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/java/com/itqan/edu/features/enrollments/EnrollmentRepository.java",
+      "accessCount": 7,
+      "lastAccessed": 1775540089776,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/java/com/itqan/edu/features/payments/PaymentRepository.java",
+      "accessCount": 7,
+      "lastAccessed": 1775540090231,
+      "type": "file"
+    },
+    {
+      "path": "backend/pom.xml",
+      "accessCount": 7,
+      "lastAccessed": 1775543162880,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/java/com/itqan/edu/features/auth/AuthRepository.java",
+      "accessCount": 6,
+      "lastAccessed": 1775536859486,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/java/com/itqan/edu/features/enrollments/LessonEnrollmentRepository.java",
+      "accessCount": 6,
+      "lastAccessed": 1775536860539,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/java/com/itqan/edu/features/auth/User.java",
+      "accessCount": 5,
+      "lastAccessed": 1775537306885,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/java/com/itqan/edu/features/courses/Module.java",
+      "accessCount": 5,
+      "lastAccessed": 1775537310105,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/java/com/itqan/edu/features/courses/Lesson.java",
+      "accessCount": 5,
+      "lastAccessed": 1775537310521,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/java/com/itqan/edu/features/students/Student.java",
+      "accessCount": 5,
+      "lastAccessed": 1775540097321,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/java/com/itqan/edu/features/enrollments/Enrollment.java",
+      "accessCount": 5,
+      "lastAccessed": 1775540097960,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/java/com/itqan/edu/features/payments/Payment.java",
+      "accessCount": 5,
+      "lastAccessed": 1775540098249,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/java/com/itqan/edu/common/config/SecurityConfig.java",
+      "accessCount": 5,
+      "lastAccessed": 1775540542283,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/java/com/itqan/edu/features/courses/CourseController.java",
+      "accessCount": 5,
+      "lastAccessed": 1775543191874,
+      "type": "file"
+    },
+    {
+      "path": "",
+      "accessCount": 4,
+      "lastAccessed": 1775538803608,
+      "type": "directory"
+    },
+    {
+      "path": "backend/src/main/java/com/itqan/edu/features/admin/analytics/dto/AnalyticsOverviewResponse.java",
+      "accessCount": 4,
+      "lastAccessed": 1775540069985,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/java/com/itqan/edu/features/courses/CourseRepository.java",
+      "accessCount": 4,
+      "lastAccessed": 1775540571658,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/java/com/itqan/edu/features/auth/AuthService.java",
+      "accessCount": 4,
+      "lastAccessed": 1775540599216,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/java/com/itqan/edu/features/payments/Coupon.java",
+      "accessCount": 3,
+      "lastAccessed": 1775537313441,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/java/com/itqan/edu/features/quizzes/Quiz.java",
+      "accessCount": 3,
+      "lastAccessed": 1775537313484,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/java/com/itqan/edu/features/quizzes/Question.java",
+      "accessCount": 3,
+      "lastAccessed": 1775537313690,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/java/com/itqan/edu/features/admins/AdminController.java",
+      "accessCount": 3,
+      "lastAccessed": 1775537316850,
+      "type": "file"
+    },
+    {
+      "path": "frontend/src/app/admin/page.tsx",
+      "accessCount": 3,
+      "lastAccessed": 1775538827471,
+      "type": "file"
+    },
+    {
+      "path": "frontend/package.json",
+      "accessCount": 3,
+      "lastAccessed": 1775540541623,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/java/com/itqan/edu/features/payments/PaymentService.java",
+      "accessCount": 3,
+      "lastAccessed": 1775540574741,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/java/com/itqan/edu/common/config/StorageConfig.java",
+      "accessCount": 3,
+      "lastAccessed": 1775543191124,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/java/com/itqan/edu/features/admins/AdminService.java",
+      "accessCount": 2,
+      "lastAccessed": 1775532700557,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/java/com/itqan/edu/features/enrollments/LessonEnrollment.java",
+      "accessCount": 2,
+      "lastAccessed": 1775536101680,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/java/com/itqan/edu/features/courses/ModuleController.java",
+      "accessCount": 2,
+      "lastAccessed": 1775536830239,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/java/com/itqan/edu/features/auth/AuthController.java",
+      "accessCount": 2,
+      "lastAccessed": 1775537306441,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/java/com/itqan/edu/features/payments/PaymentController.java",
+      "accessCount": 2,
+      "lastAccessed": 1775537315916,
+      "type": "file"
+    },
+    {
+      "path": "frontend/src/components/Navbar.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1775537686750,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/java/com/itqan/edu/common/config/StorageProperties.java",
+      "accessCount": 2,
+      "lastAccessed": 1775540545838,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/java/com/itqan/edu/common/config/VideoStorageProperties.java",
+      "accessCount": 2,
+      "lastAccessed": 1775540545895,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/java/com/itqan/edu/features/payments/stripe/StripeGatewayImpl.java",
+      "accessCount": 2,
+      "lastAccessed": 1775540603406,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/java/com/itqan/edu/features/auth/UserDetailsServiceImpl.java",
+      "accessCount": 1,
+      "lastAccessed": 1775532130914,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/java/com/itqan/edu/common/config/StripeProperties.java",
+      "accessCount": 1,
+      "lastAccessed": 1775532142546,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V6__add_lesson_progress_tracking.sql",
+      "accessCount": 1,
+      "lastAccessed": 1775532145750,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V8__add_payments_and_coupons.sql",
+      "accessCount": 1,
+      "lastAccessed": 1775532146204,
+      "type": "file"
+    },
+    {
+      "path": "frontend/src/app/page.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1775532165015,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V7__add_lesson_video_storage_fields.sql",
+      "accessCount": 1,
+      "lastAccessed": 1775532181039,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/java/com/itqan/edu/features/courses/ModuleService.java",
+      "accessCount": 1,
+      "lastAccessed": 1775532670461,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/java/com/itqan/edu/features/enrollments/EnrollmentStatus.java",
+      "accessCount": 1,
+      "lastAccessed": 1775532678058,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/java/com/itqan/edu/features/courses/dto/LessonReorderRequest.java",
+      "accessCount": 1,
+      "lastAccessed": 1775532694169,
+      "type": "file"
+    },
+    {
+      "path": "frontend/src/app/dashboard/page.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1775532710553,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/java/com/itqan/edu/features/payments/PaymentStatus.java",
+      "accessCount": 1,
+      "lastAccessed": 1775536109248,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V9__add_analytics_support.sql",
+      "accessCount": 1,
+      "lastAccessed": 1775536185871,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/java/com/itqan/edu/features/admin/analytics/dto/RevenueTrendResponse.java",
+      "accessCount": 1,
+      "lastAccessed": 1775536768217,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/main/java/com/itqan/edu/features/admin/analytics/dto/CourseRevenueResponse.java",
+      "accessCount": 1,
+      "lastAccessed": 1775536769931,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}

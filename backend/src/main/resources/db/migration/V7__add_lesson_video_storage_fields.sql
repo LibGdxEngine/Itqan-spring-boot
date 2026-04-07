@@ -1,0 +1,7 @@
+ALTER TABLE lessons ADD COLUMN IF NOT EXISTS video_object_key VARCHAR(512);
+ALTER TABLE lessons ADD COLUMN IF NOT EXISTS video_mime_type VARCHAR(255);
+ALTER TABLE lessons ADD COLUMN IF NOT EXISTS video_size_bytes BIGINT;
+ALTER TABLE lessons ADD COLUMN IF NOT EXISTS video_status VARCHAR(32) NOT NULL DEFAULT 'PENDING';
+ALTER TABLE lessons ADD COLUMN IF NOT EXISTS video_uploaded_at TIMESTAMP;
+
+CREATE INDEX IF NOT EXISTS idx_lessons_video_status ON lessons(video_status);

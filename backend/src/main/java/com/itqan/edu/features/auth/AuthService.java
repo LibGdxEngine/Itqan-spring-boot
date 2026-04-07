@@ -6,6 +6,8 @@ import com.itqan.edu.common.security.JwtTokenProvider;
 import com.itqan.edu.common.service.EmailService;
 import com.itqan.edu.features.auth.dto.*;
 import com.itqan.edu.features.auth.mapper.AuthMapper;
+import com.itqan.edu.features.students.Student;
+import com.itqan.edu.features.students.StudentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +28,7 @@ import java.time.LocalDateTime;
 public class AuthService {
 
     private final AuthRepository authRepository;
+    private final StudentRepository studentRepository;
     private final PasswordResetRepository passwordResetRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
@@ -48,7 +51,17 @@ public class AuthService {
         User user = authMapper.toEntity(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(User.Role.STUDENT);
+        user.setSuperAdmin(false);
         user = authRepository.save(user);
+
+        // Create corresponding student profile
+        Student student = Student.builder()
+                .email(user.getEmail())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .active(true)
+                .build();
+        studentRepository.save(student);
 
         String token = jwtTokenProvider.generateToken(user);
         AuthResponse response = authMapper.toResponse(user);
@@ -57,16 +70,18 @@ public class AuthService {
         return response;
     }
 
+    @Transactional
     public AuthResponse login(LoginRequest request) {
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             request.getEmail(),
-                            request.getPassword()
-                    )
-            );
+                            request.getPassword()));
 
             User user = (User) authentication.getPrincipal();
+            user.setLastLoginAt(LocalDateTime.now());
+            authRepository.save(user);
+
             String token = jwtTokenProvider.generateToken(user);
             AuthResponse response = authMapper.toResponse(user);
             response.setToken(token);
@@ -93,9 +108,20 @@ public class AuthService {
                     .authProvider(User.AuthProvider.GOOGLE)
                     .providerId(googleUser.getProviderId())
                     .role(User.Role.STUDENT)
+                    .superAdmin(false)
                     .enabled(true)
                     .build();
             user = authRepository.save(user);
+
+            // Create corresponding student profile
+            Student student = Student.builder()
+                    .email(user.getEmail())
+                    .firstName(user.getFirstName())
+                    .lastName(user.getLastName())
+                    .active(true)
+                    .build();
+            studentRepository.save(student);
+
             log.info("New user created from Google auth: {}", email);
         } else if (user.getAuthProvider() == User.AuthProvider.LOCAL) {
             // Link Google account to existing local account
@@ -104,6 +130,9 @@ public class AuthService {
             user = authRepository.save(user);
             log.info("Linked Google account to existing user: {}", email);
         }
+
+        user.setLastLoginAt(LocalDateTime.now());
+        user = authRepository.save(user);
 
         String token = jwtTokenProvider.generateToken(user);
         AuthResponse response = authMapper.toResponse(user);
@@ -115,7 +144,7 @@ public class AuthService {
     @Transactional
     public void forgotPassword(ForgotPasswordRequest request) {
         String email = request.getEmail().toLowerCase();
-        
+
         // Always return success to prevent email enumeration attacks
         if (!authRepository.existsByEmail(email)) {
             log.info("Password reset requested for non-existent email: {}", email);
@@ -127,7 +156,7 @@ public class AuthService {
 
         // Generate 6-digit OTP
         String otp = generateOtp();
-        
+
         // Store hashed OTP
         PasswordResetToken token = PasswordResetToken.builder()
                 .email(email)
@@ -143,7 +172,7 @@ public class AuthService {
 
     public boolean verifyOtp(VerifyOtpRequest request) {
         String email = request.getEmail().toLowerCase();
-        
+
         PasswordResetToken token = passwordResetRepository.findByEmailAndUsedFalse(email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.OTP_INVALID));
 
@@ -161,7 +190,7 @@ public class AuthService {
     @Transactional
     public void resetPassword(ResetPasswordRequest request) {
         String email = request.getEmail().toLowerCase();
-        
+
         PasswordResetToken token = passwordResetRepository.findByEmailAndUsedFalse(email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.OTP_INVALID));
 
@@ -180,7 +209,7 @@ public class AuthService {
         // Update password
         User user = authRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-        
+
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         authRepository.save(user);
 

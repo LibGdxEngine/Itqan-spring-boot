@@ -1,8 +1,10 @@
 FROM maven:3.9-eclipse-temurin-21 AS development
 WORKDIR /app
 COPY pom.xml .
+RUN mvn dependency:go-offline -B
 COPY src ./src
-ENTRYPOINT ["mvn", "spring-boot:run"]
+EXPOSE 8080
+ENTRYPOINT ["mvn", "spring-boot:run", "-Dspring-boot.run.jvmArguments=-Dspring.devtools.restart.pollInterval=2000 -Dspring.devtools.restart.quietPeriod=1000"]
 
 FROM maven:3.9-eclipse-temurin-21 AS build
 

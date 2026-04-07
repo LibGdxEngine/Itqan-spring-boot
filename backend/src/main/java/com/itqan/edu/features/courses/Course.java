@@ -29,6 +29,9 @@ public class Course {
     @Column(nullable = false)
     private String instructor;
 
+    @Column(name = "owner_user_id")
+    private Long ownerUserId;
+
     @Column(nullable = false)
     private Double price;
 
@@ -41,6 +44,17 @@ public class Course {
     @Column(nullable = false)
     @Builder.Default
     private Boolean active = true;
+
+    @Column(nullable = false)
+    private String category; // PROGRAMMING, DESIGN, BUSINESS, MARKETING, etc.
+
+    private String thumbnailUrl;
+
+    @ElementCollection
+    @CollectionTable(name = "course_tags", joinColumns = @JoinColumn(name = "course_id"))
+    @Column(name = "tag")
+    @Builder.Default
+    private java.util.List<String> tags = new java.util.ArrayList<>();
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
@@ -58,4 +72,9 @@ public class Course {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("orderIndex ASC")
+    @Builder.Default
+    private java.util.List<Module> modules = new java.util.ArrayList<>();
 }

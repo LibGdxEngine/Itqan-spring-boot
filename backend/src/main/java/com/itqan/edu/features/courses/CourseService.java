@@ -2,9 +2,11 @@ package com.itqan.edu.features.courses;
 
 import com.itqan.edu.common.exception.BusinessException;
 import com.itqan.edu.common.exception.ErrorCode;
+import com.itqan.edu.features.auth.User;
 import com.itqan.edu.features.courses.dto.CourseRequest;
 import com.itqan.edu.features.courses.dto.CourseResponse;
 import com.itqan.edu.features.courses.mapper.CourseMapper;
+import com.itqan.edu.features.courses.search.CourseSearchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,12 +20,19 @@ public class CourseService {
 
     private final CourseRepository courseRepository;
     private final CourseMapper courseMapper;
+    private final CourseSearchService courseSearchService;
 
     @Transactional
-    public CourseResponse createCourse(CourseRequest request) {
+    public CourseResponse createCourse(CourseRequest request, User currentUser) {
         Course course = courseMapper.toEntity(request);
         course.setActive(true);
+        course.setOwnerUserId(currentUser.getId());
+        if (currentUser.getRole() == User.Role.INSTRUCTOR) {
+            String fullName = (currentUser.getFirstName() + " " + currentUser.getLastName()).trim();
+            course.setInstructor(fullName.isBlank() ? request.getInstructor() : fullName);
+        }
         course = courseRepository.save(course);
+        courseSearchService.indexCourse(course);
         return courseMapper.toResponse(course);
     }
 
@@ -45,10 +54,21 @@ public class CourseService {
                 .collect(Collectors.toList());
     }
 
+    public List<CourseResponse> getMyCourses(User currentUser) {
+        List<Course> courses = currentUser.getRole() == User.Role.ADMIN
+                ? courseRepository.findAll()
+                : courseRepository.findByOwnerUserId(currentUser.getId());
+        return courses.stream()
+                .map(courseMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
     @Transactional
-    public CourseResponse updateCourse(Long id, CourseRequest request) {
+    public CourseResponse updateCourse(Long id, CourseRequest request, User currentUser) {
         Course course = courseRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.COURSE_NOT_FOUND));
+
+        enforceOwnerScopeIfInstructor(currentUser, course);
 
         course.setTitle(request.getTitle());
         course.setDescription(request.getDescription());
@@ -56,24 +76,46 @@ public class CourseService {
         course.setPrice(request.getPrice());
         course.setDuration(request.getDuration());
         course.setLevel(request.getLevel());
+        course.setCategory(request.getCategory());
+        course.setThumbnailUrl(request.getThumbnailUrl());
+        course.setTags(request.getTags());
 
         course = courseRepository.save(course);
+        courseSearchService.indexCourse(course);
         return courseMapper.toResponse(course);
     }
 
-    @Transactional
-    public void deleteCourse(Long id) {
-        Course course = courseRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(ErrorCode.COURSE_NOT_FOUND));
-        courseRepository.delete(course);
+    public List<CourseResponse> searchAndFilterCourses(String query, String level, String category,
+            Double minPrice, Double maxPrice, String sort) {
+        return courseSearchService.search(query, level, category, minPrice, maxPrice, sort);
     }
 
     @Transactional
-    public CourseResponse deactivateCourse(Long id) {
+    public void deleteCourse(Long id, User currentUser) {
         Course course = courseRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.COURSE_NOT_FOUND));
+        enforceOwnerScopeIfInstructor(currentUser, course);
+        courseRepository.delete(course);
+        courseSearchService.removeCourse(id);
+    }
+
+    @Transactional
+    public CourseResponse deactivateCourse(Long id, User currentUser) {
+        Course course = courseRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(ErrorCode.COURSE_NOT_FOUND));
+        enforceOwnerScopeIfInstructor(currentUser, course);
         course.setActive(false);
         course = courseRepository.save(course);
+        courseSearchService.removeCourse(id);
         return courseMapper.toResponse(course);
+    }
+
+    private void enforceOwnerScopeIfInstructor(User currentUser, Course course) {
+        if (currentUser.getRole() != User.Role.INSTRUCTOR) {
+            return;
+        }
+        if (course.getOwnerUserId() == null || !course.getOwnerUserId().equals(currentUser.getId())) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
     }
 }

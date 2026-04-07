@@ -1,0 +1,7 @@
+{
+  "tool_name": "Read",
+  "tool_input_preview": "{\"file_path\":\"/home/ahmed/Documents/Itqan/backend/src/main/resources/db/migration/V1__initial_schema.sql\",\"limit\":100}",
+  "error": "File does not exist. Note: your current working directory is /home/ahmed/Documents/Itqan.",
+  "timestamp": "2026-04-07T05:42:40.513Z",
+  "retry_count": 1
+}

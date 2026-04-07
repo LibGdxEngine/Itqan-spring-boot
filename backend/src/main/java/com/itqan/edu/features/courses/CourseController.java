@@ -1,5 +1,6 @@
 package com.itqan.edu.features.courses;
 
+import com.itqan.edu.common.security.CurrentUserService;
 import com.itqan.edu.features.courses.dto.CourseRequest;
 import com.itqan.edu.features.courses.dto.CourseResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -9,6 +10,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,11 +24,15 @@ import java.util.List;
 public class CourseController {
 
     private final CourseService courseService;
+    private final CurrentUserService currentUserService;
 
     @PostMapping
+    @PreAuthorize("hasRole('INSTRUCTOR') or hasRole('ADMIN')")
     @Operation(summary = "Create a new course", description = "Create a new course")
-    public ResponseEntity<CourseResponse> createCourse(@Valid @RequestBody CourseRequest request) {
-        CourseResponse response = courseService.createCourse(request);
+    public ResponseEntity<CourseResponse> createCourse(
+            @Valid @RequestBody CourseRequest request,
+            Authentication authentication) {
+        CourseResponse response = courseService.createCourse(request, currentUserService.getCurrentUser(authentication));
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -50,26 +57,52 @@ public class CourseController {
         return ResponseEntity.ok(courses);
     }
 
+    @GetMapping("/mine")
+    @PreAuthorize("hasRole('INSTRUCTOR') or hasRole('ADMIN')")
+    @Operation(summary = "Get current instructor courses", description = "Get courses owned by current instructor")
+    public ResponseEntity<List<CourseResponse>> getMyCourses(Authentication authentication) {
+        List<CourseResponse> courses = courseService.getMyCourses(currentUserService.getCurrentUser(authentication));
+        return ResponseEntity.ok(courses);
+    }
+
+    @GetMapping("/search")
+    @Operation(summary = "Search and filter courses", description = "Search courses with optional filters")
+    public ResponseEntity<List<CourseResponse>> searchCourses(
+            @RequestParam(required = false) String query,
+            @RequestParam(required = false) String level,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false, defaultValue = "newest") String sort) {
+        List<CourseResponse> courses = courseService.searchAndFilterCourses(
+                query, level, category, minPrice, maxPrice, sort);
+        return ResponseEntity.ok(courses);
+    }
+
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('INSTRUCTOR') or hasRole('ADMIN')")
     @Operation(summary = "Update course", description = "Update an existing course")
     public ResponseEntity<CourseResponse> updateCourse(
             @PathVariable Long id,
-            @Valid @RequestBody CourseRequest request) {
-        CourseResponse response = courseService.updateCourse(id, request);
+            @Valid @RequestBody CourseRequest request,
+            Authentication authentication) {
+        CourseResponse response = courseService.updateCourse(id, request, currentUserService.getCurrentUser(authentication));
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('INSTRUCTOR') or hasRole('ADMIN')")
     @Operation(summary = "Delete course", description = "Delete a course")
-    public ResponseEntity<Void> deleteCourse(@PathVariable Long id) {
-        courseService.deleteCourse(id);
+    public ResponseEntity<Void> deleteCourse(@PathVariable Long id, Authentication authentication) {
+        courseService.deleteCourse(id, currentUserService.getCurrentUser(authentication));
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}/deactivate")
+    @PreAuthorize("hasRole('INSTRUCTOR') or hasRole('ADMIN')")
     @Operation(summary = "Deactivate course", description = "Deactivate a course")
-    public ResponseEntity<CourseResponse> deactivateCourse(@PathVariable Long id) {
-        CourseResponse response = courseService.deactivateCourse(id);
+    public ResponseEntity<CourseResponse> deactivateCourse(@PathVariable Long id, Authentication authentication) {
+        CourseResponse response = courseService.deactivateCourse(id, currentUserService.getCurrentUser(authentication));
         return ResponseEntity.ok(response);
     }
 }

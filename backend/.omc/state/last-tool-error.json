@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"java -version 2>&1; ls /usr/lib/jvm/ 2>/dev/null; ls ~/.sdkman/candidates/java/ 2>/dev/null\",\"description\":\"Check available Java versions\"}",
+  "error": "Exit code 2\nopenjdk version \"17.0.18\" 2026-01-20\nOpenJDK Runtime Environment (build 17.0.18+8-Ubuntu-124.04.1)\nOpenJDK 64-Bit Server VM (build 17.0.18+8-Ubuntu-124.04.1, mixed mode, sharing)\njava-1.17.0-openjdk-amd64\njava-17-openjdk-amd64\njava-1.8.0-openjdk-amd64\njava-8-openjdk-amd64\nopenjdk-17\n[rerun: b3]",
+  "timestamp": "2026-04-07T04:42:36.003Z",
+  "retry_count": 1
+}

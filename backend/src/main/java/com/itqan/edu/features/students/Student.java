@@ -30,12 +30,12 @@ public class Student {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false, unique = true)
+    @Column(unique = true)
     private String phoneNumber;
 
     private LocalDate dateOfBirth;
 
-    @Column(nullable = false)
+    @Column
     private String address;
 
     @Column(nullable = false)
@@ -58,4 +58,8 @@ public class Student {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private java.util.List<com.itqan.edu.features.enrollments.Enrollment> enrollments = new java.util.ArrayList<>();
 }

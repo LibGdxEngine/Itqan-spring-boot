@@ -1,0 +1,256 @@
+{
+  "common": {
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "getStarted": "Get started",
+    "learnMore": "Learn more",
+    "watchDemo": "Watch demo",
+    "createAccount": "Create account",
+    "createFreeAccount": "Create free account",
+    "startLearning": "Start learning for free",
+    "orContinueWithEmail": "Or continue with email",
+    "alreadyHaveAccount": "Already have an account?",
+    "dontHaveAccount": "Don't have an account?",
+    "forgotPassword": "Forgot password?",
+    "rememberMe": "Remember me for 30 days",
+    "termsOfService": "Terms of Service",
+    "privacyPolicy": "Privacy Policy",
+    "allRightsReserved": "All rights reserved",
+    "newCoursesAvailable": "New courses available",
+    "studentsEnrolled": "already enrolled",
+    "students": "students",
+    "profile": "Profile",
+    "signOut": "Sign out",
+    "active": "Active",
+    "draft": "Draft",
+    "modules": "Modules",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit"
+  },
+  "nav": {
+    "brand": "Itqan",
+    "courses": "Courses",
+    "publicCourses": "Courses",
+    "instructors": "Instructors",
+    "dashboard": "Dashboard",
+    "admin": "Admin",
+    "instructor": "Instructor Portal",
+    "myLearning": "My Learning"
+  },
+  "instructors": {
+    "title": "Our Instructors",
+    "subtitle": "Learn from experienced educators and industry professionals dedicated to helping you succeed.",
+    "meetOurTeam": "Meet Our Team",
+    "viewAllCourses": "View All Courses",
+    "courses": "courses",
+    "noInstructors": "No instructors found",
+    "noInstructorsDesc": "Check back soon as we continue to grow our instructor community."
+  },
+  "profile": {
+    "title": "My Profile",
+    "subtitle": "View and manage your personal information",
+    "editProfile": "Edit Profile",
+    "saveChanges": "Save Changes",
+    "cancel": "Cancel",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email",
+    "phone": "Phone Number",
+    "dateOfBirth": "Date of Birth",
+    "address": "Address",
+    "role": "Role",
+    "updated": "Profile updated successfully",
+    "updateFailed": "Failed to update profile"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back, {name}!",
+    "noCourses": "No courses yet",
+    "noCoursesDesc": "Start your learning journey by exploring our course catalog.",
+    "browseCourses": "Browse Courses"
+  },
+  "admin": {
+    "dashboard": "Admin Dashboard",
+    "welcome": "Welcome back, {name}.",
+    "stats": {
+      "totalAdmins": "Total Admins",
+      "superAdmins": "Super Admins",
+      "totalStudents": "Total Students",
+      "activeStudents": "Active Students",
+      "totalCourses": "Total Courses",
+      "activeCourses": "Active Courses"
+    },
+    "admins": {
+      "title": "Admins",
+      "createTitle": "Create New Admin",
+      "editTitle": "Edit Admin",
+      "permissionsHint": "Only super admins can create or edit admins.",
+      "name": "Name",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "password": "Password",
+      "newPassword": "New Password",
+      "passwordOptional": "Leave blank to keep current password",
+      "enabled": "Enabled",
+      "superAdmin": "Super Admin",
+      "admin": "Admin",
+      "accountType": "Account Type",
+      "createdAt": "Created",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "students": {
+      "title": "Students",
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "createdAt": "Created",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "courses": {
+      "title": "Courses",
+      "titleCol": "Title",
+      "instructor": "Instructor",
+      "price": "Price",
+      "createdAt": "Created",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "actions": {
+      "createAdmin": "Create Admin",
+      "creating": "Creating...",
+      "edit": "Edit",
+      "editing": "Editing...",
+      "save": "Save Changes",
+      "saving": "Saving...",
+      "cancel": "Cancel",
+      "deactivate": "Deactivate",
+      "deactivating": "Deactivating...",
+      "retry": "Retry",
+      "adminCreated": "Admin created",
+      "adminUpdated": "Admin updated",
+      "studentDeactivated": "Student deactivated",
+      "courseDeactivated": "Course deactivated"
+    },
+    "states": {
+      "failed": "Action failed",
+      "noAdmins": "No admins found.",
+      "noStudents": "No students found.",
+      "noCourses": "No courses found."
+    }
+  },
+  "home": {
+    "heroTitle1": "Master Your",
+    "heroTitle2": "Learning Journey",
+    "heroDescription": "Join thousands of students achieving their educational goals with our comprehensive platform. Expert-led courses, personalized learning paths, and a supportive community.",
+    "socialProof": {
+      "count": "10,000+ students",
+      "label": "already enrolled"
+    },
+    "features": {
+      "title": "Why choose Itqan?",
+      "description": "Everything you need to succeed in your educational journey",
+      "expertInstructors": {
+        "title": "Expert Instructors",
+        "description": "Learn from industry professionals and experienced educators who are passionate about teaching."
+      },
+      "certifiedCourses": {
+        "title": "Certified Courses",
+        "description": "Earn recognized certificates that showcase your skills and knowledge to employers."
+      },
+      "learnAtYourPace": {
+        "title": "Learn at Your Pace",
+        "description": "Access courses anytime, anywhere. Study at your own speed with lifetime access."
+      }
+    },
+    "cta": {
+      "title": "Ready to start your learning journey?",
+      "description": "Join our community of learners and unlock your full potential. Get started with a free account today."
+    },
+    "badge": "Islamic Learning Platform",
+    "heroSubtitle": "Trusted by thousands of students achieving their educational and Islamic knowledge goals with our comprehensive platform.",
+    "stats": {
+      "activeStudents": "Active Students",
+      "courses": "Courses",
+      "successRate": "Success Rate",
+      "studentsCount": "10,000+",
+      "coursesCount": "200+",
+      "successRateValue": "95%"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome back",
+      "description": "Enter your credentials to access your account",
+      "email": "Email",
+      "emailPlaceholder": "name@example.com",
+      "password": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "signingIn": "Signing in...",
+      "success": "Welcome back! You have signed in successfully."
+    },
+    "register": {
+      "title": "Create an account",
+      "description": "Start your learning journey today",
+      "fullName": "Full Name",
+      "namePlaceholder": "John Doe",
+      "email": "Email",
+      "emailPlaceholder": "name@example.com",
+      "password": "Password",
+      "passwordPlaceholder": "Create a strong password",
+      "confirmPassword": "Confirm Password",
+      "confirmPasswordPlaceholder": "Confirm your password",
+      "acceptTerms": "I agree to the",
+      "and": "and",
+      "creatingAccount": "Creating account...",
+      "passwordRequirements": {
+        "minLength": "At least 8 characters",
+        "uppercase": "One uppercase letter",
+        "lowercase": "One lowercase letter",
+        "number": "One number"
+      },
+      "success": "Account created successfully! Welcome to Itqan."
+    },
+    "branding": {
+      "tagline": "Master Your Learning Journey",
+      "description": "Join thousands of students achieving their educational goals with our comprehensive learning platform."
+    },
+    "validation": {
+      "emailInvalid": "Please enter a valid email address",
+      "passwordMinLength": "Password must be at least 8 characters",
+      "passwordUppercase": "Password must contain at least one uppercase letter",
+      "passwordLowercase": "Password must contain at least one lowercase letter",
+      "passwordNumber": "Password must contain at least one number",
+      "passwordsNoMatch": "Passwords don't match",
+      "nameMinLength": "Name must be at least 2 characters",
+      "acceptTermsRequired": "You must accept the terms and conditions"
+    }
+  },
+  "footer": {
+    "tagline": "Empowering learners with authentic Islamic knowledge and modern education.",
+    "quickLinks": "Quick Links",
+    "platform": "Platform",
+    "contact": "Contact",
+    "linkHome": "Home",
+    "linkCourses": "Courses",
+    "linkAbout": "About",
+    "linkLogin": "Sign In",
+    "linkRegister": "Get Started",
+    "linkDashboard": "Dashboard",
+    "linkMyCourses": "My Learning",
+    "email": "support@itqan.edu",
+    "rights": "All rights reserved."
+  },
+  "language": {
+    "english": "English",
+    "arabic": "العربية",
+    "switchLanguage": "Switch language"
+  }
+}

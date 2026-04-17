@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -36,9 +37,16 @@ public class AuthService {
     private final AuthMapper authMapper;
     private final EmailService emailService;
     private final GoogleAuthService googleAuthService;
+    private final RefreshTokenService refreshTokenService;
 
     @Value("${otp.expiry-minutes:15}")
     private int otpExpiryMinutes;
+
+    @Value("${security.account-lockout.max-attempts:5}")
+    private int maxFailedAttempts;
+
+    @Value("${security.account-lockout.duration-minutes:15}")
+    private int lockoutDurationMinutes;
 
     private static final SecureRandom RANDOM = new SecureRandom();
 
@@ -64,32 +72,74 @@ public class AuthService {
         studentRepository.save(student);
 
         String token = jwtTokenProvider.generateToken(user);
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
+
         AuthResponse response = authMapper.toResponse(user);
         response.setToken(token);
+        response.setRefreshToken(refreshToken.getToken());
 
         return response;
     }
 
     @Transactional
     public AuthResponse login(LoginRequest request) {
+        // Check lockout before attempting authentication
+        User user = authRepository.findByEmail(request.getEmail()).orElse(null);
+        if (user != null) {
+            checkAccountLockout(user);
+        }
+
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             request.getEmail(),
                             request.getPassword()));
 
-            User user = (User) authentication.getPrincipal();
+            user = (User) authentication.getPrincipal();
+
+            // Reset failed attempts on successful login
+            if (user.getFailedLoginAttempts() > 0) {
+                user.setFailedLoginAttempts(0);
+                user.setLockedUntil(null);
+            }
             user.setLastLoginAt(LocalDateTime.now());
             authRepository.save(user);
 
             String token = jwtTokenProvider.generateToken(user);
+            RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
+
             AuthResponse response = authMapper.toResponse(user);
             response.setToken(token);
+            response.setRefreshToken(refreshToken.getToken());
 
             return response;
+        } catch (LockedException e) {
+            throw new BusinessException(ErrorCode.ACCOUNT_LOCKED);
         } catch (BadCredentialsException e) {
+            // Increment failed attempts
+            if (user != null) {
+                handleFailedLogin(user);
+            }
             throw new BusinessException(ErrorCode.INVALID_CREDENTIALS);
         }
+    }
+
+    @Transactional
+    public AuthResponse refreshAccessToken(RefreshTokenRequest request) {
+        RefreshToken rotated = refreshTokenService.verifyAndRotate(request.getRefreshToken());
+        User user = rotated.getUser();
+
+        String newAccessToken = jwtTokenProvider.generateToken(user);
+
+        AuthResponse response = authMapper.toResponse(user);
+        response.setToken(newAccessToken);
+        response.setRefreshToken(rotated.getToken());
+        return response;
+    }
+
+    @Transactional
+    public void logout(Long userId) {
+        refreshTokenService.revokeAllUserTokens(userId);
     }
 
     @Transactional
@@ -135,8 +185,11 @@ public class AuthService {
         user = authRepository.save(user);
 
         String token = jwtTokenProvider.generateToken(user);
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
+
         AuthResponse response = authMapper.toResponse(user);
         response.setToken(token);
+        response.setRefreshToken(refreshToken.getToken());
 
         return response;
     }
@@ -211,9 +264,39 @@ public class AuthService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        // Reset lockout on password reset
+        user.setFailedLoginAttempts(0);
+        user.setLockedUntil(null);
         authRepository.save(user);
 
+        // Revoke all existing refresh tokens
+        refreshTokenService.revokeAllUserTokens(user.getId());
+
         log.info("Password reset successful for: {}", email);
+    }
+
+    private void checkAccountLockout(User user) {
+        if (user.getLockedUntil() != null && LocalDateTime.now().isBefore(user.getLockedUntil())) {
+            throw new BusinessException(ErrorCode.ACCOUNT_LOCKED);
+        }
+        // Auto-unlock if lockout has expired
+        if (user.getLockedUntil() != null && LocalDateTime.now().isAfter(user.getLockedUntil())) {
+            user.setFailedLoginAttempts(0);
+            user.setLockedUntil(null);
+            authRepository.save(user);
+        }
+    }
+
+    private void handleFailedLogin(User user) {
+        int attempts = user.getFailedLoginAttempts() + 1;
+        user.setFailedLoginAttempts(attempts);
+
+        if (attempts >= maxFailedAttempts) {
+            user.setLockedUntil(LocalDateTime.now().plusMinutes(lockoutDurationMinutes));
+            log.warn("Account locked for user {} after {} failed attempts", user.getEmail(), attempts);
+        }
+
+        authRepository.save(user);
     }
 
     private String generateOtp() {

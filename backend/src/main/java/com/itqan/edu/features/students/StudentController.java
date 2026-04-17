@@ -7,12 +7,13 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/students")
@@ -40,9 +41,10 @@ public class StudentController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('INSTRUCTOR')")
-    @Operation(summary = "Get all students", description = "Get all students")
-    public ResponseEntity<List<StudentResponse>> getAllStudents() {
-        List<StudentResponse> students = studentService.getAllStudents();
+    @Operation(summary = "Get all students (paginated)", description = "Get all students with pagination")
+    public ResponseEntity<Page<StudentResponse>> getAllStudents(
+            @PageableDefault(size = 20) Pageable pageable) {
+        Page<StudentResponse> students = studentService.getAllStudents(pageable);
         return ResponseEntity.ok(students);
     }
 
@@ -57,9 +59,10 @@ public class StudentController {
 
     @GetMapping("/active")
     @PreAuthorize("hasRole('ADMIN') or hasRole('INSTRUCTOR')")
-    @Operation(summary = "Get active students", description = "Get all active students")
-    public ResponseEntity<List<StudentResponse>> getActiveStudents() {
-        List<StudentResponse> students = studentService.getActiveStudents();
+    @Operation(summary = "Get active students (paginated)", description = "Get all active students with pagination")
+    public ResponseEntity<Page<StudentResponse>> getActiveStudents(
+            @PageableDefault(size = 20) Pageable pageable) {
+        Page<StudentResponse> students = studentService.getActiveStudents(pageable);
         return ResponseEntity.ok(students);
     }
 

@@ -85,6 +85,16 @@ public enum ErrorCode {
     GOOGLE_AUTH_FAILED(401, "OAUTH_001", "Google authentication failed"),
     OAUTH_EMAIL_NOT_VERIFIED(400, "OAUTH_002", "Email not verified with OAuth provider"),
 
+    // Account Lockout
+    ACCOUNT_LOCKED(423, "AUTH_007", "Account is temporarily locked due to too many failed login attempts"),
+
+    // Refresh Token
+    REFRESH_TOKEN_INVALID(401, "AUTH_008", "Invalid refresh token"),
+    REFRESH_TOKEN_EXPIRED(401, "AUTH_009", "Refresh token has expired"),
+
+    // Rate Limiting
+    RATE_LIMITED(429, "RATE_001", "Too many requests, please try again later"),
+
     // Internal Server Error
     INTERNAL_ERROR(500, "SYS_001", "Internal server error");
 

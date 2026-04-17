@@ -19,7 +19,8 @@ x-backend-base: &backend-base
     SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
     SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL: "true"
     JWT_SECRET: ${JWT_SECRET:-itqan-education-platform-secret-key-change-in-production-environment-minimum-256-bits}
-    JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
+    JWT_EXPIRATION: ${JWT_EXPIRATION:-900000}
+    JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION:-604800000}
     APP_SUPER_ADMIN_EMAIL: ${APP_SUPER_ADMIN_EMAIL:-superadmin@itqan.edu}
     APP_SUPER_ADMIN_PASSWORD: ${APP_SUPER_ADMIN_PASSWORD:-Admin@123456}
     APP_SUPER_ADMIN_FIRST_NAME: ${APP_SUPER_ADMIN_FIRST_NAME:-Super}
@@ -31,7 +32,7 @@ x-backend-base: &backend-base
     STRIPE_CURRENCY: ${STRIPE_CURRENCY:-usd}
     SPRING_WEB_CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000}
     SPRING_WEB_CORS_ALLOWED_METHODS: GET,POST,PUT,DELETE,PATCH,OPTIONS
-    SPRING_WEB_CORS_ALLOWED_HEADERS: "*"
+    SPRING_WEB_CORS_ALLOWED_HEADERS: "Authorization,Content-Type,Accept,Origin,X-Requested-With,Cache-Control"
     SPRING_WEB_CORS_ALLOW_CREDENTIALS: "true"
     SPRING_DOCKER_COMPOSE_ENABLED: "false"
     APP_STORAGE_S3_ENDPOINT: ${APP_STORAGE_S3_ENDPOINT:-http://minio:9000}
@@ -46,12 +47,22 @@ x-backend-base: &backend-base
     APP_VIDEO_PLAYBACK_URL_EXPIRY_MINUTES: ${APP_VIDEO_PLAYBACK_URL_EXPIRY_MINUTES:-60}
     MEILI_HOST: ${MEILI_HOST:-http://meilisearch:7700}
     MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:-masterKey123}
+    REDIS_HOST: ${REDIS_HOST:-redis}
+    REDIS_PORT: ${REDIS_PORT:-6379}
+    REDIS_PASSWORD: ${REDIS_PASSWORD:-redispassword}
+    RATE_LIMIT_GENERAL: ${RATE_LIMIT_GENERAL:-60}
+    RATE_LIMIT_AUTH: ${RATE_LIMIT_AUTH:-10}
+    ACCOUNT_LOCKOUT_MAX_ATTEMPTS: ${ACCOUNT_LOCKOUT_MAX_ATTEMPTS:-5}
+    ACCOUNT_LOCKOUT_DURATION_MINUTES: ${ACCOUNT_LOCKOUT_DURATION_MINUTES:-15}
+    SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-default}
   depends_on:
     postgres:
       condition: service_healthy
     minio-init:
       condition: service_completed_successfully
     meilisearch:
+      condition: service_healthy
+    redis:
       condition: service_healthy
 
 x-frontend-base: &frontend-base
@@ -162,7 +173,7 @@ services:
   # ==========================================
   # DEVELOPMENT SERVICES (Profile: dev)
   # ==========================================
-  
+
   backend:
     <<: *backend-base
     profiles: [dev]
@@ -182,6 +193,12 @@ services:
       - ./backend/src:/app/src
       - ./backend/pom.xml:/app/pom.xml
       - maven_cache:/root/.m2
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
 
 
   frontend:
@@ -219,8 +236,15 @@ services:
       context: ./backend
       dockerfile: Dockerfile
       target: production
-    ports:
-      - "${BACKEND_PORT:-8080}:8080"
+    environment:
+      <<: *backend-env
+      SPRING_PROFILES_ACTIVE: prod
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
 
   frontend-prod:
     <<: *frontend-base
@@ -230,13 +254,72 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       target: production
-    ports:
-      - "${FRONTEND_PORT:-3000}:3000"
     environment:
       <<: *frontend-env
       NODE_ENV: production
     depends_on:
       - backend-prod
+
+  # Caddy reverse proxy with automatic HTTPS
+  caddy:
+    image: caddy:2-alpine
+    container_name: itqan-caddy
+    profiles: [prod]
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+    depends_on:
+      - backend-prod
+      - frontend-prod
+    networks:
+      - itqan-network
+    restart: always
+
+  redis:
+    image: redis:7-alpine
+    container_name: itqan-redis
+    command: redis-server --requirepass ${REDIS_PASSWORD:-redispassword} --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - itqan-network
+    restart: ${RESTART_POLICY:-unless-stopped}
+    healthcheck:
+      test: ["CMD", "redis-cli", "--no-auth-warning", "-a", "${REDIS_PASSWORD:-redispassword}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres-backup:
+    image: postgres:16-alpine
+    container_name: itqan-postgres-backup
+    profiles: [prod, backup]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGHOST: postgres
+      PGUSER: ${POSTGRES_USER:-postgres}
+      PGPASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      PGDATABASE: ${POSTGRES_DB:-itqan_edu}
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-7}
+    volumes:
+      - ./scripts/db-backup.sh:/usr/local/bin/db-backup.sh:ro
+      - backup_data:/backups
+    networks:
+      - itqan-network
+    entrypoint: /bin/sh
+    command: -c "apk add --no-cache dcron && echo '0 2 * * * /usr/local/bin/db-backup.sh' | crontab - && crond -f -l 2"
+    restart: ${RESTART_POLICY:-unless-stopped}
 
 volumes:
   postgres_data:
@@ -244,6 +327,10 @@ volumes:
   maven_cache:
   minio_data:
   meili_data:
+  caddy_data:
+  caddy_config:
+  redis_data:
+  backup_data:
 
 networks:
   itqan-network:

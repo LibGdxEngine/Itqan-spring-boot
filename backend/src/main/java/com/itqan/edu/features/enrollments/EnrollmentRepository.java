@@ -1,5 +1,7 @@
 package com.itqan.edu.features.enrollments;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,6 +13,8 @@ import java.util.Optional;
 @Repository
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     List<Enrollment> findByStudentId(Long studentId);
+
+    Page<Enrollment> findByStudentId(Long studentId, Pageable pageable);
 
     List<Enrollment> findByCourseId(Long courseId);
 

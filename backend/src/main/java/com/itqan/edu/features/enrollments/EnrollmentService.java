@@ -2,6 +2,7 @@ package com.itqan.edu.features.enrollments;
 
 import com.itqan.edu.common.exception.BusinessException;
 import com.itqan.edu.common.exception.ErrorCode;
+import com.itqan.edu.features.audit.AuditLogService;
 import com.itqan.edu.features.courses.Course;
 import com.itqan.edu.features.courses.CourseRepository;
 import com.itqan.edu.features.enrollments.dto.EnrollmentRequest;
@@ -11,10 +12,13 @@ import com.itqan.edu.features.payments.PaymentRepository;
 import com.itqan.edu.features.students.Student;
 import com.itqan.edu.features.students.StudentRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,6 +32,7 @@ public class EnrollmentService {
     private final LessonEnrollmentRepository lessonEnrollmentRepository;
     private final com.itqan.edu.features.courses.LessonRepository lessonRepository;
     private final PaymentRepository paymentRepository;
+    private final AuditLogService auditLogService;
 
     @Transactional
     public EnrollmentResponse enrollStudent(EnrollmentRequest request) {
@@ -61,6 +66,8 @@ public class EnrollmentService {
         enrollment.setStatus(EnrollmentStatus.ACTIVE);
 
         enrollment = enrollmentRepository.save(enrollment);
+        auditLogService.recordSuccess("ENROLLMENT_CREATED", "ENROLLMENT", String.valueOf(enrollment.getId()),
+                Map.of("studentId", student.getId(), "courseId", course.getId()));
         return enrollmentMapper.toResponse(enrollment);
     }
 
@@ -73,6 +80,14 @@ public class EnrollmentService {
                 .collect(Collectors.toList());
     }
 
+    public Page<EnrollmentResponse> getStudentEnrollments(Long studentId, Pageable pageable) {
+        if (!studentRepository.existsById(studentId)) {
+            throw new BusinessException(ErrorCode.STUDENT_NOT_FOUND);
+        }
+        return enrollmentRepository.findByStudentId(studentId, pageable)
+                .map(enrollmentMapper::toResponse);
+    }
+
     public boolean checkEnrollment(Long studentId, Long courseId) {
         return enrollmentRepository.existsByStudentIdAndCourseId(studentId, courseId);
     }
@@ -82,6 +97,7 @@ public class EnrollmentService {
         Enrollment enrollment = enrollmentRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENROLLMENT_NOT_FOUND));
         enrollmentRepository.delete(enrollment);
+        auditLogService.recordSuccess("ENROLLMENT_DELETED", "ENROLLMENT", String.valueOf(id), null);
     }
 
     @Transactional

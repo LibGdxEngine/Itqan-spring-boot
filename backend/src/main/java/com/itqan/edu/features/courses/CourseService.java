@@ -8,6 +8,10 @@ import com.itqan.edu.features.courses.dto.CourseResponse;
 import com.itqan.edu.features.courses.mapper.CourseMapper;
 import com.itqan.edu.features.courses.search.CourseSearchService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +26,7 @@ public class CourseService {
     private final CourseMapper courseMapper;
     private final CourseSearchService courseSearchService;
 
+    @CacheEvict(value = "courses", allEntries = true)
     @Transactional
     public CourseResponse createCourse(CourseRequest request, User currentUser) {
         Course course = courseMapper.toEntity(request);
@@ -36,6 +41,7 @@ public class CourseService {
         return courseMapper.toResponse(course);
     }
 
+    @Cacheable(value = "courses", key = "#id")
     public CourseResponse getCourseById(Long id) {
         Course course = courseRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.COURSE_NOT_FOUND));
@@ -48,10 +54,22 @@ public class CourseService {
                 .collect(Collectors.toList());
     }
 
+    public Page<CourseResponse> getAllCourses(Pageable pageable) {
+        return courseRepository.findAll(pageable)
+                .map(courseMapper::toResponse);
+    }
+
+    @Cacheable(value = "courses", key = "'active-list'")
     public List<CourseResponse> getActiveCourses() {
         return courseRepository.findByActiveTrue().stream()
                 .map(courseMapper::toResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Cacheable(value = "courses", key = "'active-page-' + #pageable.pageNumber + '-' + #pageable.pageSize + '-' + #pageable.sort.toString()")
+    public Page<CourseResponse> getActiveCourses(Pageable pageable) {
+        return courseRepository.findByActiveTrue(pageable)
+                .map(courseMapper::toResponse);
     }
 
     public List<CourseResponse> getMyCourses(User currentUser) {
@@ -63,6 +81,13 @@ public class CourseService {
                 .collect(Collectors.toList());
     }
 
+    public Page<CourseResponse> getMyCourses(User currentUser, Pageable pageable) {
+        return currentUser.getRole() == User.Role.ADMIN
+                ? courseRepository.findAll(pageable).map(courseMapper::toResponse)
+                : courseRepository.findByOwnerUserId(currentUser.getId(), pageable).map(courseMapper::toResponse);
+    }
+
+    @CacheEvict(value = "courses", allEntries = true)
     @Transactional
     public CourseResponse updateCourse(Long id, CourseRequest request, User currentUser) {
         Course course = courseRepository.findById(id)
@@ -90,6 +115,7 @@ public class CourseService {
         return courseSearchService.search(query, level, category, minPrice, maxPrice, sort);
     }
 
+    @CacheEvict(value = "courses", allEntries = true)
     @Transactional
     public void deleteCourse(Long id, User currentUser) {
         Course course = courseRepository.findById(id)
@@ -99,6 +125,7 @@ public class CourseService {
         courseSearchService.removeCourse(id);
     }
 
+    @CacheEvict(value = "courses", allEntries = true)
     @Transactional
     public CourseResponse deactivateCourse(Long id, User currentUser) {
         Course course = courseRepository.findById(id)

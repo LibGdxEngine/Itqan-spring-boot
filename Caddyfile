@@ -1,0 +1,55 @@
+# Caddyfile - Reverse Proxy with automatic HTTPS
+# Usage:
+#   Development: Uses localhost with self-signed certs
+#   Production:  Set DOMAIN env var for automatic Let's Encrypt certs
+
+{$DOMAIN:localhost} {
+    # Backend API
+    handle /api/* {
+        reverse_proxy backend-prod:8080 {
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+
+    # Stripe webhook (needs raw body)
+    handle /api/payments/webhook/* {
+        reverse_proxy backend-prod:8080 {
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+
+    # Swagger / OpenAPI docs
+    handle /swagger-ui* {
+        reverse_proxy backend-prod:8080
+    }
+    handle /v3/api-docs* {
+        reverse_proxy backend-prod:8080
+    }
+
+    # Actuator health endpoint
+    handle /actuator/* {
+        reverse_proxy backend-prod:8080
+    }
+
+    # Frontend - Next.js (fallback for all other routes)
+    handle {
+        reverse_proxy frontend-prod:3000 {
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+
+    # Encode responses with gzip
+    encode gzip
+
+    # Logging
+    log {
+        output stdout
+        format console
+    }
+}

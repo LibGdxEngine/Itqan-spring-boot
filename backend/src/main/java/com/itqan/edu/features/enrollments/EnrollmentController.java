@@ -10,6 +10,9 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -43,12 +46,13 @@ public class EnrollmentController {
     }
 
     @GetMapping("/student/{studentId}")
-    @Operation(summary = "Get student enrollments", description = "Get all enrollments for a student")
-    public ResponseEntity<List<EnrollmentResponse>> getStudentEnrollments(
+    @Operation(summary = "Get student enrollments (paginated)", description = "Get all enrollments for a student with pagination")
+    public ResponseEntity<Page<EnrollmentResponse>> getStudentEnrollments(
             @PathVariable Long studentId,
+            @PageableDefault(size = 20) Pageable pageable,
             Authentication authentication) {
         enforceStudentScope(authentication, studentId);
-        List<EnrollmentResponse> enrollments = enrollmentService.getStudentEnrollments(studentId);
+        Page<EnrollmentResponse> enrollments = enrollmentService.getStudentEnrollments(studentId, pageable);
         return ResponseEntity.ok(enrollments);
     }
 

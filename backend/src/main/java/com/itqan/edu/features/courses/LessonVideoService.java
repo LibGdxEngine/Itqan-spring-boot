@@ -235,6 +235,72 @@ public class LessonVideoService {
         }
     }
 
+    /**
+     * Validates the content of an uploaded video file by inspecting its magic bytes.
+     *
+     * <p>This method is designed to be called from the controller or a completion callback
+     * once the first part bytes are available. In the current presigned-URL multipart upload
+     * flow, file bytes never pass through this service directly, so this method acts as a
+     * public validation hook. The controller should read the first 12 bytes of the first
+     * uploaded part (e.g., via a HEAD/GET on the S3 object after upload completes, or by
+     * requiring the client to send the first 12 bytes during initiation) and call this method
+     * before finalising the lesson status to READY.
+     *
+     * <p>Supported formats: MP4/M4V/MOV (ftyp box), WebM/Matroska, AVI (RIFF), MPEG, FLV.
+     *
+     * @param headerBytes   the first 12 bytes of the uploaded file
+     * @param declaredMimeType the MIME type the client declared (used in error messages)
+     * @throws BusinessException with {@code ErrorCode.VIDEO_INVALID_MIME_TYPE} if the content
+     *                           does not match any supported video format
+     */
+    public void validateVideoContent(byte[] headerBytes, String declaredMimeType) {
+        validateVideoMagicNumber(headerBytes, declaredMimeType);
+    }
+
+    private void validateVideoMagicNumber(byte[] header, String declaredMimeType) {
+        // Check first 12 bytes against known video signatures
+        if (header == null || header.length < 12) {
+            throw new BusinessException(ErrorCode.VIDEO_INVALID_MIME_TYPE,
+                    "File too small to determine type");
+        }
+
+        boolean valid = false;
+
+        // MP4 / M4V / MOV — bytes 4-11 should be 'ftyp' followed by brand
+        if (header.length >= 12
+                && header[4] == 'f' && header[5] == 't' && header[6] == 'y' && header[7] == 'p') {
+            valid = true;
+        }
+
+        // WebM / Matroska — starts with 1A 45 DF A3
+        if (!valid && header[0] == (byte) 0x1A && header[1] == (byte) 0x45
+                && header[2] == (byte) 0xDF && header[3] == (byte) 0xA3) {
+            valid = true;
+        }
+
+        // AVI — starts with 'RIFF' ... 'AVI '
+        if (!valid && header[0] == 'R' && header[1] == 'I' && header[2] == 'F' && header[3] == 'F'
+                && header.length >= 12 && header[8] == 'A' && header[9] == 'V' && header[10] == 'I' && header[11] == ' ') {
+            valid = true;
+        }
+
+        // MPEG — starts with 00 00 01 Bx or 00 00 01 Ex
+        if (!valid && header[0] == 0x00 && header[1] == 0x00 && header[2] == 0x01
+                && ((header[3] & 0xF0) == 0xB0 || (header[3] & 0xF0) == 0xE0)) {
+            valid = true;
+        }
+
+        // FLV — starts with 'FLV'
+        if (!valid && header[0] == 'F' && header[1] == 'L' && header[2] == 'V') {
+            valid = true;
+        }
+
+        if (!valid) {
+            throw new BusinessException(ErrorCode.VIDEO_INVALID_MIME_TYPE,
+                    "File content does not match any supported video format. Declared: " + declaredMimeType);
+        }
+    }
+
     private Lesson getLessonOrThrow(Long lessonId) {
         return lessonRepository.findById(lessonId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.LESSON_NOT_FOUND));

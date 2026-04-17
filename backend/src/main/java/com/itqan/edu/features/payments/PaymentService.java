@@ -15,6 +15,7 @@ import com.itqan.edu.features.payments.dto.CreateCheckoutSessionResponse;
 import com.itqan.edu.features.payments.dto.PaymentResponse;
 import com.itqan.edu.features.payments.stripe.StripeCheckoutSessionRequest;
 import com.itqan.edu.features.payments.stripe.StripeCheckoutSessionResult;
+import com.itqan.edu.features.audit.AuditLogService;
 import com.itqan.edu.features.payments.stripe.StripeGateway;
 import com.itqan.edu.features.payments.stripe.StripeWebhookEvent;
 import com.itqan.edu.features.students.Student;
@@ -45,6 +46,7 @@ public class PaymentService {
     private final ProcessedStripeEventRepository processedStripeEventRepository;
     private final StripeGateway stripeGateway;
     private final StripeProperties stripeProperties;
+    private final AuditLogService auditLogService;
 
     @Transactional
     public CreateCheckoutSessionResponse createCheckoutSession(CreateCheckoutSessionRequest request, Long studentId) {
@@ -98,6 +100,10 @@ public class PaymentService {
             if (coupon != null) {
                 markCouponAsRedeemed(payment, null);
             }
+
+            auditLogService.recordSuccess("PAYMENT_COMPLETED", "PAYMENT", String.valueOf(payment.getId()),
+                    Map.of("amount", payment.getAmount(), "currency", payment.getCurrency(),
+                            "studentId", payment.getStudent().getId()));
 
             return CreateCheckoutSessionResponse.builder()
                     .mode(CheckoutMode.FREE_ENROLLED)
@@ -215,6 +221,10 @@ public class PaymentService {
             markCouponAsRedeemed(payment, event.getCheckoutSessionId());
         }
 
+        auditLogService.recordSuccess("PAYMENT_COMPLETED", "PAYMENT", String.valueOf(payment.getId()),
+                Map.of("amount", payment.getAmount(), "currency", payment.getCurrency(),
+                        "studentId", payment.getStudent().getId()));
+
         log.info("Stripe checkout completed for payment {}", payment.getId());
     }
 
@@ -232,6 +242,8 @@ public class PaymentService {
             payment.setStatus(PaymentStatus.CANCELLED);
             payment.setNotes("Stripe checkout session expired");
             paymentRepository.save(payment);
+            auditLogService.recordFailure("PAYMENT_FAILED", "PAYMENT", String.valueOf(payment.getId()),
+                    "Stripe checkout session expired");
         }
 
         couponRedemptionRepository.findByStripeCheckoutSessionId(event.getCheckoutSessionId())

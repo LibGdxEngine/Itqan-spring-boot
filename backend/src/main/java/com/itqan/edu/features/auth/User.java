@@ -66,6 +66,13 @@ public class User implements UserDetails {
 
     private LocalDateTime lastLoginAt;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private Integer failedLoginAttempts = 0;
+
+    @Column
+    private LocalDateTime lockedUntil;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -94,7 +101,10 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        if (lockedUntil == null) {
+            return true;
+        }
+        return LocalDateTime.now().isAfter(lockedUntil);
     }
 
     @Override

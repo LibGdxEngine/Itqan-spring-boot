@@ -8,6 +8,9 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -44,24 +47,28 @@ public class CourseController {
     }
 
     @GetMapping
-    @Operation(summary = "Get all courses", description = "Get all courses")
-    public ResponseEntity<List<CourseResponse>> getAllCourses() {
-        List<CourseResponse> courses = courseService.getAllCourses();
+    @Operation(summary = "Get all courses (paginated)", description = "Get all courses with pagination")
+    public ResponseEntity<Page<CourseResponse>> getAllCourses(
+            @PageableDefault(size = 20) Pageable pageable) {
+        Page<CourseResponse> courses = courseService.getAllCourses(pageable);
         return ResponseEntity.ok(courses);
     }
 
     @GetMapping("/active")
-    @Operation(summary = "Get active courses", description = "Get all active courses")
-    public ResponseEntity<List<CourseResponse>> getActiveCourses() {
-        List<CourseResponse> courses = courseService.getActiveCourses();
+    @Operation(summary = "Get active courses (paginated)", description = "Get all active courses with pagination")
+    public ResponseEntity<Page<CourseResponse>> getActiveCourses(
+            @PageableDefault(size = 20) Pageable pageable) {
+        Page<CourseResponse> courses = courseService.getActiveCourses(pageable);
         return ResponseEntity.ok(courses);
     }
 
     @GetMapping("/mine")
     @PreAuthorize("hasRole('INSTRUCTOR') or hasRole('ADMIN')")
-    @Operation(summary = "Get current instructor courses", description = "Get courses owned by current instructor")
-    public ResponseEntity<List<CourseResponse>> getMyCourses(Authentication authentication) {
-        List<CourseResponse> courses = courseService.getMyCourses(currentUserService.getCurrentUser(authentication));
+    @Operation(summary = "Get current instructor courses (paginated)", description = "Get courses owned by current instructor")
+    public ResponseEntity<Page<CourseResponse>> getMyCourses(
+            Authentication authentication,
+            @PageableDefault(size = 20) Pageable pageable) {
+        Page<CourseResponse> courses = courseService.getMyCourses(currentUserService.getCurrentUser(authentication), pageable);
         return ResponseEntity.ok(courses);
     }
 

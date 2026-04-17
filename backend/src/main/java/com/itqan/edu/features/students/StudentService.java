@@ -6,6 +6,8 @@ import com.itqan.edu.features.students.dto.StudentRequest;
 import com.itqan.edu.features.students.dto.StudentResponse;
 import com.itqan.edu.features.students.mapper.StudentMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,10 +54,20 @@ public class StudentService {
                 .collect(Collectors.toList());
     }
 
+    public Page<StudentResponse> getAllStudents(Pageable pageable) {
+        return studentRepository.findAll(pageable)
+                .map(studentMapper::toResponse);
+    }
+
     public List<StudentResponse> getActiveStudents() {
         return studentRepository.findByActiveTrue().stream()
                 .map(studentMapper::toResponse)
                 .collect(Collectors.toList());
+    }
+
+    public Page<StudentResponse> getActiveStudents(Pageable pageable) {
+        return studentRepository.findByActiveTrue(pageable)
+                .map(studentMapper::toResponse);
     }
 
     @Transactional

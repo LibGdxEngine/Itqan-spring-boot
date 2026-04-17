@@ -1,5 +1,6 @@
 package com.itqan.edu.features.auth;
 
+import com.itqan.edu.common.security.CurrentUserService;
 import com.itqan.edu.features.auth.dto.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -7,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -18,19 +20,35 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthService authService;
+    private final CurrentUserService currentUserService;
 
     @PostMapping("/register")
-    @Operation(summary = "Register a new user", description = "Register a new user and get JWT token")
+    @Operation(summary = "Register a new user", description = "Register a new user and get JWT token with refresh token")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
         AuthResponse response = authService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/login")
-    @Operation(summary = "Login user", description = "Authenticate user and get JWT token")
+    @Operation(summary = "Login user", description = "Authenticate user and get JWT token with refresh token")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         AuthResponse response = authService.login(request);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/refresh")
+    @Operation(summary = "Refresh access token", description = "Get a new access token using a refresh token")
+    public ResponseEntity<AuthResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
+        AuthResponse response = authService.refreshAccessToken(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/logout")
+    @Operation(summary = "Logout user", description = "Revoke all refresh tokens for the current user")
+    public ResponseEntity<Map<String, String>> logout(Authentication authentication) {
+        User user = currentUserService.getCurrentUser(authentication);
+        authService.logout(user.getId());
+        return ResponseEntity.ok(Map.of("message", "Logged out successfully"));
     }
 
     @PostMapping("/forgot-password")

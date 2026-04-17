@@ -5,14 +5,18 @@ import com.itqan.edu.common.exception.ErrorCode;
 import com.itqan.edu.features.admins.dto.AdminCreateRequest;
 import com.itqan.edu.features.admins.dto.AdminResponse;
 import com.itqan.edu.features.admins.dto.AdminUpdateRequest;
+import com.itqan.edu.features.audit.AuditLogService;
 import com.itqan.edu.features.auth.AuthRepository;
 import com.itqan.edu.features.auth.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -20,11 +24,17 @@ public class AdminService {
 
     private final AuthRepository authRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuditLogService auditLogService;
 
     public List<AdminResponse> getAllAdmins() {
         return authRepository.findByRole(User.Role.ADMIN).stream()
                 .map(this::toResponse)
                 .toList();
+    }
+
+    public Page<AdminResponse> getAllAdmins(Pageable pageable) {
+        return authRepository.findByRole(User.Role.ADMIN, pageable)
+                .map(this::toResponse);
     }
 
     @Transactional
@@ -48,6 +58,8 @@ public class AdminService {
                 .build();
 
         admin = authRepository.save(admin);
+        auditLogService.recordSuccess("ADMIN_CREATED", "USER", String.valueOf(admin.getId()),
+                Map.of("email", admin.getEmail(), "superAdmin", admin.getSuperAdmin()));
         return toResponse(admin);
     }
 
@@ -83,6 +95,8 @@ public class AdminService {
         }
 
         admin = authRepository.save(admin);
+        auditLogService.recordSuccess("ADMIN_UPDATED", "USER", String.valueOf(admin.getId()),
+                Map.of("email", admin.getEmail()));
         return toResponse(admin);
     }
 

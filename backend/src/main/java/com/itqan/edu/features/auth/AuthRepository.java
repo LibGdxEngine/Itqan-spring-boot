@@ -1,5 +1,7 @@
 package com.itqan.edu.features.auth;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -13,6 +15,7 @@ public interface AuthRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
     boolean existsByEmail(String email);
     List<User> findByRole(User.Role role);
+    Page<User> findByRole(User.Role role, Pageable pageable);
     Optional<User> findByIdAndRole(Long id, User.Role role);
     boolean existsBySuperAdminTrue();
     boolean existsBySuperAdminTrueAndEnabledTrue();

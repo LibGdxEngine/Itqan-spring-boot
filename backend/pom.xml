@@ -160,7 +160,7 @@
         <dependency>
             <groupId>com.meilisearch.sdk</groupId>
             <artifactId>meilisearch-java</artifactId>
-            <version>0.14.2</version>
+            <version>0.20.0</version>
         </dependency>
 
         <!-- Redis Cache -->

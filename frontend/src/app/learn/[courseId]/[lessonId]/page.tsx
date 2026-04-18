@@ -63,7 +63,7 @@ export default function LessonPage() {
     if (loading) {
         return (
             <div className="h-full flex items-center justify-center p-20">
-                <Loader2 className="h-10 w-10 text-sky-600 animate-spin" />
+                <Loader2 className="h-10 w-10 text-[#c96442] animate-spin" />
             </div>
         );
     }
@@ -125,7 +125,7 @@ export default function LessonPage() {
             <div className="mb-6">
                 <div className="flex items-center justify-between mb-4">
                     <h1 className="text-2xl font-bold text-gray-900">{lesson.title}</h1>
-                    <Button variant="outline" className="text-green-600 border-green-200 hover:bg-green-50">
+                    <Button variant="outline" className="text-[#c96442] border-[#e8e6dc] hover:bg-[#f0eee6]">
                         <CheckCircle className="mr-2 h-4 w-4" />
                         Mark as Complete
                     </Button>
@@ -136,13 +136,13 @@ export default function LessonPage() {
             {/* Description */}
             {lesson.description && (
                 <div className="mb-6">
-                    <p className="text-slate-600">{lesson.description}</p>
+                    <p className="text-[#5e5d59]">{lesson.description}</p>
                 </div>
             )}
 
             {/* Content */}
             {lesson.content && (
-                <div className="prose max-w-none text-slate-700 mb-12 bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                <div className="prose max-w-none text-[#4d4c48] mb-12 bg-[#faf9f5] rounded-xl p-6 shadow-sm border border-[#e8e6dc]">
                     <h2 className="text-xl font-semibold mb-4">Lesson Content</h2>
                     <div dangerouslySetInnerHTML={{ __html: lesson.content || '' }} />
                 </div>
@@ -155,7 +155,7 @@ export default function LessonPage() {
             )}
 
             {/* Navigation Footer */}
-            <div className="flex justify-between mt-auto pt-8 border-t border-slate-200">
+            <div className="flex justify-between mt-auto pt-8 border-t border-[#f0eee6]">
                 <Button variant="ghost" onClick={() => router.back()}>
                     <ChevronLeft className="mr-2 h-4 w-4" />
                     Previous

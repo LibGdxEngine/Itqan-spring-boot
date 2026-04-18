@@ -53,26 +53,26 @@ export default function InstructorDashboardPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-[#f5f4ed]">
         <Navbar />
         <div className="flex items-center justify-center min-h-[60vh]">
-          <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
+          <Loader2 className="w-8 h-8 animate-spin text-[#c96442]" />
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-[#f5f4ed]">
       <Navbar />
     <div className="container max-w-7xl mx-auto px-4 pt-24 pb-10">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-2">
-            <LayoutDashboard className="w-8 h-8 text-sky-600" />
+          <h1 className="text-3xl font-semibold text-[#141413] flex items-center gap-2" style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}>
+            <LayoutDashboard className="w-8 h-8 text-[#c96442]" />
             {t("instructor.dashboard") || "Instructor Dashboard"}
           </h1>
-          <p className="text-slate-600 mt-2">
+          <p className="text-[#5e5d59] mt-2">
             {t("instructor.welcome", { name: user?.firstName || "" }) || "Manage your courses and content."}
           </p>
         </div>
@@ -95,22 +95,22 @@ export default function InstructorDashboardPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {courses.map((course) => (
-          <div key={course.id} className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 hover:shadow-md transition-shadow">
+          <div key={course.id} className="bg-[#faf9f5] rounded-xl border border-[#f0eee6] shadow-[0_0_0_1px_#f0eee6] p-5 hover:shadow-[0_4px_24px_rgba(0,0,0,0.05)] transition-shadow">
             <div className="flex justify-between items-start mb-4">
-               <h3 className="font-semibold text-lg line-clamp-1" title={course.title}>
+               <h3 className="text-lg line-clamp-1 text-[#141413]" style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }} title={course.title}>
                  {course.title}
                </h3>
-               <span className={`px-2 py-1 rounded-full text-xs font-medium ${course.active ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'}`}>
+               <span className={`px-2 py-1 rounded-full text-xs font-medium ${course.active ? 'bg-[#e8e6dc] text-[#4d4c48]' : 'bg-[#f0eee6] text-[#87867f]'}`}>
                  {course.active ? (t("common.active") || "Active") : (t("common.draft") || "Draft")}
                </span>
             </div>
-            
-            <p className="text-sm text-slate-500 mb-4 line-clamp-2">
+
+            <p className="text-sm text-[#87867f] mb-4 line-clamp-2">
               {course.description || "No description provided."}
             </p>
-            
-            <div className="flex items-center justify-between mt-4 border-t pt-4">
-              <div className="text-sm text-slate-500">
+
+            <div className="flex items-center justify-between mt-4 border-t border-[#f0eee6] pt-4">
+              <div className="text-sm text-[#87867f]">
                  {course.modules?.length || 0} {t("common.modules") || "Modules"}
               </div>
               
@@ -125,8 +125,8 @@ export default function InstructorDashboardPage() {
         ))}
         
         {courses.length === 0 && (
-            <div className="col-span-full text-center py-12 border-2 border-dashed border-slate-200 rounded-xl">
-                <p className="text-slate-500 mb-4">{t("instructor.noCourses") || "You haven't created any courses yet."}</p>
+            <div className="col-span-full text-center py-12 border-2 border-dashed border-[#e8e6dc] rounded-xl">
+                <p className="text-[#87867f] mb-4">{t("instructor.noCourses") || "You haven't created any courses yet."}</p>
                 <Dialog>
                   <DialogTrigger asChild>
                     <Button variant="outline">

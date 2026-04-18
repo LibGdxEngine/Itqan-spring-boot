@@ -25,7 +25,6 @@ describe('Button', () => {
   it('applies destructive variant classes', () => {
     const { container } = render(<Button variant="destructive">Delete</Button>);
     const btn = container.querySelector('button');
-    // The destructive variant applies red gradient classes via cva
-    expect(btn?.className).toContain('from-red-500');
+    expect(btn?.className).toContain('bg-[#b53333]');
   });
 });

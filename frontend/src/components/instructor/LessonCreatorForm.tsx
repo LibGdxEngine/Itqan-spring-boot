@@ -154,13 +154,13 @@ export function LessonCreatorForm({
 
       {loading && videoFile && (
         <div className="space-y-2">
-          <div className="flex items-center justify-between text-xs text-slate-500">
+          <div className="flex items-center justify-between text-xs text-[#87867f]">
             <span>Upload Progress</span>
             <span>{uploadProgress}%</span>
           </div>
-          <div className="h-2 overflow-hidden rounded-full bg-slate-200">
+          <div className="h-2 overflow-hidden rounded-full bg-[#e8e6dc]">
             <div
-              className="h-full bg-sky-600 transition-all"
+              className="h-full bg-[#c96442] transition-all"
               style={{ width: `${uploadProgress}%` }}
             />
           </div>

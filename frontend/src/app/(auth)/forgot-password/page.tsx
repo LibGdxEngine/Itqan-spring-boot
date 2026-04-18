@@ -64,19 +64,19 @@ export default function ForgotPasswordPage() {
       <div className="space-y-8 text-center">
         {/* Success icon */}
         <div className="flex justify-center">
-          <div className="p-4 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full shadow-lg shadow-emerald-500/25">
-            <CheckCircle2 className="w-12 h-12 text-white" />
+          <div className="p-4 bg-[#c96442] rounded-full shadow-[0_0_0_1px_#d1cfc5]">
+            <CheckCircle2 className="w-12 h-12 text-[#faf9f5]" />
           </div>
         </div>
 
         {/* Header */}
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold tracking-tight text-[#141413]">
             Check your email
           </h1>
-          <p className="text-slate-500 leading-relaxed">
+          <p className="text-[#87867f] leading-relaxed">
             We&apos;ve sent a 6-digit OTP code to<br />
-            <span className="font-medium text-slate-700">{submittedEmail}</span>
+            <span className="font-medium text-[#4d4c48]">{submittedEmail}</span>
           </p>
         </div>
 
@@ -87,11 +87,11 @@ export default function ForgotPasswordPage() {
         </Button>
 
         {/* Instructions */}
-        <div className="bg-slate-50 rounded-xl p-4 text-sm text-slate-600 space-y-2">
+        <div className="bg-[#f0eee6] rounded-xl p-4 text-sm text-[#5e5d59] space-y-2">
           <p>Didn&apos;t receive the email? Check your spam folder or</p>
           <button
             onClick={() => setIsSubmitted(false)}
-            className="font-medium text-sky-600 hover:text-sky-700 transition-colors"
+            className="font-medium text-[#c96442] hover:text-[#b55836] transition-colors"
           >
             try another email address
           </button>
@@ -112,10 +112,10 @@ export default function ForgotPasswordPage() {
     <div className="space-y-8">
       {/* Header */}
       <div className="space-y-2 text-center">
-        <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+        <h1 className="text-3xl tracking-tight text-[#141413]" style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}>
           Forgot password?
         </h1>
-        <p className="text-slate-500">
+        <p className="text-[#87867f]">
           No worries, we&apos;ll send you a reset code
         </p>
       </div>
@@ -126,7 +126,7 @@ export default function ForgotPasswordPage() {
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <div className="relative">
-            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
             <Input
               id="email"
               type="email"
@@ -160,7 +160,7 @@ export default function ForgotPasswordPage() {
       <div className="text-center">
         <Link
           href="/login"
-          className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors"
+          className="inline-flex items-center gap-2 text-sm font-medium text-[#87867f] hover:text-[#4d4c48] transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to sign in</span>

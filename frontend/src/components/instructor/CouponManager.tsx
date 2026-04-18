@@ -136,27 +136,27 @@ export function CouponManager() {
 
   if (loadingCourses) {
     return (
-      <div className="rounded-xl border border-slate-200 bg-white p-6">
-        <Loader2 className="h-5 w-5 animate-spin text-sky-600" />
+      <div className="rounded-xl border border-[#e8e6dc] bg-[#faf9f5] p-6">
+        <Loader2 className="h-5 w-5 animate-spin text-[#c96442]" />
       </div>
     );
   }
 
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-6">
+    <section className="rounded-xl border border-[#e8e6dc] bg-[#faf9f5] p-6">
       <div className="mb-4 flex items-center gap-2">
-        <TicketPercent className="h-5 w-5 text-sky-600" />
-        <h2 className="text-xl font-semibold text-slate-900">Course Coupons</h2>
+        <TicketPercent className="h-5 w-5 text-[#c96442]" />
+        <h2 className="text-xl font-semibold text-[#141413]">Course Coupons</h2>
       </div>
 
       {courses.length === 0 ? (
-        <p className="text-sm text-slate-500">Create a course first to manage coupons.</p>
+        <p className="text-sm text-[#87867f]">Create a course first to manage coupons.</p>
       ) : (
         <div className="space-y-6">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700">Course</label>
+            <label className="text-sm font-medium text-[#4d4c48]">Course</label>
             <select
-              className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm"
+              className="flex h-10 w-full rounded-md border border-[#e8e6dc] bg-[#faf9f5] px-3 py-2 text-sm"
               value={selectedCourseId ?? ""}
               onChange={(e) => setSelectedCourseId(Number(e.target.value))}
             >
@@ -168,7 +168,7 @@ export function CouponManager() {
             </select>
           </div>
 
-          <form onSubmit={onCreateCoupon} className="grid grid-cols-1 gap-3 rounded-lg border border-slate-100 p-4 md:grid-cols-4">
+          <form onSubmit={onCreateCoupon} className="grid grid-cols-1 gap-3 rounded-lg border border-[#f0eee6] p-4 md:grid-cols-4">
             <Input
               placeholder="Code (optional)"
               value={formState.code}
@@ -204,27 +204,27 @@ export function CouponManager() {
           </form>
 
           <div>
-            <h3 className="mb-2 text-sm font-medium text-slate-700">Existing coupons</h3>
+            <h3 className="mb-2 text-sm font-medium text-[#4d4c48]">Existing coupons</h3>
             {loadingCoupons ? (
-              <Loader2 className="h-4 w-4 animate-spin text-slate-500" />
+              <Loader2 className="h-4 w-4 animate-spin text-[#87867f]" />
             ) : coupons.length === 0 ? (
-              <p className="text-sm text-slate-500">No coupons for this course yet.</p>
+              <p className="text-sm text-[#87867f]">No coupons for this course yet.</p>
             ) : (
               <div className="space-y-2">
                 {coupons.map((coupon) => (
                   <div
                     key={coupon.id}
-                    className="flex flex-col gap-2 rounded-lg border border-slate-100 bg-slate-50 p-3 text-sm md:flex-row md:items-center md:justify-between"
+                    className="flex flex-col gap-2 rounded-lg border border-[#f0eee6] bg-[#f0eee6] p-3 text-sm md:flex-row md:items-center md:justify-between"
                   >
                     <div>
-                      <p className="font-medium text-slate-900">{coupon.code}</p>
-                      <p className="text-slate-500">
+                      <p className="font-medium text-[#141413]">{coupon.code}</p>
+                      <p className="text-[#87867f]">
                         {coupon.discountPercent}% off · used {coupon.usedCount}
                         {coupon.usageLimit ? ` / ${coupon.usageLimit}` : ""}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className={`rounded-full px-2 py-1 text-xs font-medium ${coupon.active ? "bg-green-100 text-green-700" : "bg-slate-200 text-slate-600"}`}>
+                      <span className={`rounded-full px-2 py-1 text-xs font-medium ${coupon.active ? "bg-[#f0eee6] text-[#c96442]" : "bg-[#e8e6dc] text-[#5e5d59]"}`}>
                         {coupon.active ? "Active" : "Inactive"}
                       </span>
                       {coupon.active && (

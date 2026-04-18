@@ -68,12 +68,12 @@ export default function CheckoutSuccessPage() {
   }, [sessionId]);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-[#f5f4ed]">
       <Navbar />
       <main className="mx-auto flex max-w-xl flex-col items-center px-4 py-24 text-center">
-        {status === "loading" && <Loader2 className="mb-4 h-10 w-10 animate-spin text-sky-600" />}
-        {status === "pending" && <Loader2 className="mb-4 h-10 w-10 animate-spin text-sky-600" />}
-        {status === "success" && <CheckCircle2 className="mb-4 h-12 w-12 text-green-600" />}
+        {status === "loading" && <Loader2 className="mb-4 h-10 w-10 animate-spin text-[#c96442]" />}
+        {status === "pending" && <Loader2 className="mb-4 h-10 w-10 animate-spin text-[#c96442]" />}
+        {status === "success" && <CheckCircle2 className="mb-4 h-12 w-12 text-[#c96442]" />}
         {status === "failed" && <AlertCircle className="mb-4 h-12 w-12 text-red-600" />}
 
         {status === "loading" && <h1 className="text-2xl font-semibold">Verifying payment...</h1>}
@@ -81,7 +81,7 @@ export default function CheckoutSuccessPage() {
         {status === "success" && <h1 className="text-2xl font-semibold">Payment successful</h1>}
         {status === "failed" && <h1 className="text-2xl font-semibold">Could not verify payment</h1>}
 
-        {status === "failed" && <p className="mt-2 text-slate-600">{errorMessage}</p>}
+        {status === "failed" && <p className="mt-2 text-[#5e5d59]">{errorMessage}</p>}
 
         <div className="mt-6 flex gap-3">
           {status === "success" && courseId !== null && (

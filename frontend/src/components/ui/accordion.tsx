@@ -42,7 +42,7 @@ export function AccordionItem({ className, children, ...props }: AccordionItemPr
 
   return (
     <AccordionItemContext.Provider value={{ open, setOpen }}>
-      <div className={cn("rounded-md border border-slate-200", className)} {...props}>
+      <div className={cn("rounded-md border border-[#e8e6dc]", className)} {...props}>
         {children}
       </div>
     </AccordionItemContext.Provider>
@@ -60,7 +60,7 @@ export function AccordionTrigger({
     <button
       type="button"
       className={cn(
-        "flex w-full items-center justify-between px-4 py-3 text-left text-sm font-medium hover:bg-slate-50",
+        "flex w-full items-center justify-between px-4 py-3 text-left text-sm font-medium hover:bg-[#f0eee6]",
         className
       )}
       onClick={() => setOpen(!open)}

@@ -15,36 +15,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             lastModified: new Date(),
             changeFrequency: "weekly",
             priority: 1.0,
-            alternates: {
-                languages: {
-                    en: `${SITE_URL}/en`,
-                    ar: `${SITE_URL}/ar`,
-                },
-            },
         },
         {
             url: `${SITE_URL}/courses`,
             lastModified: new Date(),
             changeFrequency: "daily",
             priority: 0.9,
-            alternates: {
-                languages: {
-                    en: `${SITE_URL}/en/courses`,
-                    ar: `${SITE_URL}/ar/courses`,
-                },
-            },
         },
         {
             url: `${SITE_URL}/instructors`,
             lastModified: new Date(),
             changeFrequency: "weekly",
             priority: 0.7,
-            alternates: {
-                languages: {
-                    en: `${SITE_URL}/en/instructors`,
-                    ar: `${SITE_URL}/ar/instructors`,
-                },
-            },
         },
     ];
 
@@ -62,12 +44,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
                     : new Date(),
                 changeFrequency: "weekly" as const,
                 priority: 0.8,
-                alternates: {
-                    languages: {
-                        en: `${SITE_URL}/en/courses/${course.id}`,
-                        ar: `${SITE_URL}/ar/courses/${course.id}`,
-                    },
-                },
             }));
         }
     } catch {

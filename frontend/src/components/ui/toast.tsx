@@ -83,13 +83,13 @@ function ToastItem({
   }
   
   const styles = {
-    success: 'bg-emerald-50 border-emerald-200 text-emerald-800',
+    success: 'bg-[#f0eee6] border-[#e8e6dc] text-[#c96442]',
     error: 'bg-red-50 border-red-200 text-red-800',
     info: 'bg-sky-50 border-sky-200 text-sky-800',
   }
 
   const iconStyles = {
-    success: 'text-emerald-500',
+    success: 'text-[#d97757]',
     error: 'text-red-500',
     info: 'text-sky-500',
   }

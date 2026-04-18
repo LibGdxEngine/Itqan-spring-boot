@@ -77,10 +77,10 @@ export default function LoginPage() {
     <div className="space-y-8">
       {/* Header */}
       <div className="space-y-2 text-center">
-        <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+        <h1 className="text-3xl font-bold tracking-tight text-[#141413]">
           {t("auth.login.title")}
         </h1>
-        <p className="text-slate-500">
+        <p className="text-[#87867f]">
           {t("auth.login.description")}
         </p>
       </div>
@@ -131,7 +131,7 @@ export default function LoginPage() {
           <Separator />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-slate-50/50 px-3 text-slate-500">
+          <span className="bg-[#f5f4ed] px-3 text-[#87867f]">
             {t("common.orContinueWithEmail")}
           </span>
         </div>
@@ -143,7 +143,7 @@ export default function LoginPage() {
         <div className="space-y-2">
           <Label htmlFor="email">{t("auth.login.email")}</Label>
           <div className="relative">
-            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
             <Input
               id="email"
               type="email"
@@ -163,13 +163,13 @@ export default function LoginPage() {
             <Label htmlFor="password">{t("auth.login.password")}</Label>
             <Link
               href="/forgot-password"
-              className="text-sm font-medium text-sky-600 hover:text-sky-700 transition-colors"
+              className="text-sm font-medium text-[#c96442] hover:text-[#b55836] transition-colors"
             >
               {t("common.forgotPassword")}
             </Link>
           </div>
           <div className="relative">
-            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
             <Input
               id="password"
               type={showPassword ? "text" : "password"}
@@ -180,7 +180,7 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#87867f] hover:text-[#5e5d59] transition-colors"
             >
               {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
@@ -215,11 +215,11 @@ export default function LoginPage() {
       </form>
 
       {/* Sign up link */}
-      <p className="text-center text-sm text-slate-500">
+      <p className="text-center text-sm text-[#87867f]">
         {t("common.dontHaveAccount")}{" "}
         <Link
           href="/register"
-          className="font-semibold text-sky-600 hover:text-sky-700 transition-colors"
+          className="font-semibold text-[#c96442] hover:text-[#b55836] transition-colors"
         >
           {t("common.createAccount")}
         </Link>

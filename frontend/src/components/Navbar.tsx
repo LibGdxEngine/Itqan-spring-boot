@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { BookMarked, ArrowRight, User, LogOut, Menu, X } from "lucide-react"
+import { ArrowRight, User, LogOut, Menu, X } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { LanguageSwitcher } from "@/components/ui/language-switcher"
@@ -25,43 +25,40 @@ export function Navbar() {
   const closeMobileMenu = () => setMobileMenuOpen(false)
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-emerald-100/60 bg-white/90 backdrop-blur-xl">
+    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-[#f0eee6] bg-[#f5f4ed]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 ltr-flex">
-          {/* Logo */}
+          {/* Logo — Amiri wordmark */}
           <Link href="/" className="flex items-center gap-2 group ltr-flex">
-            <div className="p-1.5 bg-gradient-to-r from-emerald-600 to-emerald-700 rounded-lg group-hover:shadow-lg group-hover:shadow-emerald-600/25 transition-shadow">
-              <BookMarked className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-emerald-700 to-emerald-600 bg-clip-text text-transparent">
+            <span className="text-xl font-serif-ar text-[#141413] tracking-normal" style={{ fontFamily: "var(--font-serif-ar)" }}>
               {t("nav.brand")}
             </span>
           </Link>
 
           {/* Desktop Links */}
-          <div className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-600">
-            <Link href="/courses" className="hover:text-emerald-600 transition-colors">
+          <div className="hidden md:flex items-center gap-6 text-[15px] font-medium text-[#5e5d59]">
+            <Link href="/courses" className="hover:text-[#141413] transition-colors">
               {t("nav.publicCourses")}
             </Link>
-            <Link href="/instructors" className="hover:text-emerald-600 transition-colors">
+            <Link href="/instructors" className="hover:text-[#141413] transition-colors">
               {t("nav.instructors") || "Instructors"}
             </Link>
             {isAuthenticated && (
               <>
-                <Link href="/dashboard" className="hover:text-emerald-600 transition-colors">
+                <Link href="/dashboard" className="hover:text-[#141413] transition-colors">
                   {t("nav.dashboard")}
                 </Link>
                 {user?.role === "ADMIN" && (
-                  <Link href="/admin" className="hover:text-emerald-600 transition-colors">
+                  <Link href="/admin" className="hover:text-[#141413] transition-colors">
                     {t("nav.admin")}
                   </Link>
                 )}
                 {(user?.role === "INSTRUCTOR" || user?.role === "ADMIN") && (
-                  <Link href="/instructor" className="hover:text-emerald-600 transition-colors">
+                  <Link href="/instructor" className="hover:text-[#141413] transition-colors">
                     {t("nav.instructor")}
                   </Link>
                 )}
-                <Link href="/my-courses" className="hover:text-emerald-600 transition-colors">
+                <Link href="/my-courses" className="hover:text-[#141413] transition-colors">
                   {t("nav.myLearning")}
                 </Link>
               </>
@@ -75,7 +72,7 @@ export function Navbar() {
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0">
                     <Avatar className="h-8 w-8">
                       <AvatarImage src="/avatars/01.png" alt={user?.firstName} />
                       <AvatarFallback>
@@ -91,7 +88,7 @@ export function Navbar() {
                       <p className="text-sm font-medium leading-none">
                         {user?.firstName} {user?.lastName}
                       </p>
-                      <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
+                      <p className="text-xs leading-none text-[#87867f]">{user?.email}</p>
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
@@ -109,7 +106,7 @@ export function Navbar() {
               </DropdownMenu>
             ) : (
               <div className="hidden md:flex items-center gap-3 ltr-flex">
-                <Button variant="ghost" size="sm" asChild>
+                <Button variant="secondary" size="sm" asChild>
                   <Link href="/login">{t("common.signIn")}</Link>
                 </Button>
                 <Button size="sm" asChild>
@@ -121,9 +118,9 @@ export function Navbar() {
               </div>
             )}
 
-            {/* Hamburger button — mobile only */}
+            {/* Hamburger — mobile only */}
             <button
-              className="md:hidden p-2 rounded-lg hover:bg-emerald-50 text-slate-600 hover:text-emerald-600 transition-colors"
+              className="md:hidden p-2 rounded-lg hover:bg-[#e8e6dc] text-[#5e5d59] hover:text-[#141413] transition-colors"
               onClick={() => setMobileMenuOpen((prev) => !prev)}
               aria-label="Toggle menu"
             >
@@ -135,19 +132,19 @@ export function Navbar() {
 
       {/* Mobile drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-emerald-100/60 bg-white/95 backdrop-blur-xl">
+        <div className="md:hidden border-t border-[#f0eee6] bg-[#f5f4ed]">
           <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-2">
             <Link
               href="/courses"
               onClick={closeMobileMenu}
-              className="px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-600 transition-colors"
+              className="px-4 py-2.5 rounded-lg text-sm font-medium text-[#4d4c48] hover:bg-[#e8e6dc] hover:text-[#141413] transition-colors"
             >
               {t("nav.publicCourses")}
             </Link>
             <Link
               href="/instructors"
               onClick={closeMobileMenu}
-              className="px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-600 transition-colors"
+              className="px-4 py-2.5 rounded-lg text-sm font-medium text-[#4d4c48] hover:bg-[#e8e6dc] hover:text-[#141413] transition-colors"
             >
               {t("nav.instructors") || "Instructors"}
             </Link>
@@ -157,7 +154,7 @@ export function Navbar() {
                 <Link
                   href="/dashboard"
                   onClick={closeMobileMenu}
-                  className="px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-600 transition-colors"
+                  className="px-4 py-2.5 rounded-lg text-sm font-medium text-[#4d4c48] hover:bg-[#e8e6dc] hover:text-[#141413] transition-colors"
                 >
                   {t("nav.dashboard")}
                 </Link>
@@ -165,7 +162,7 @@ export function Navbar() {
                   <Link
                     href="/admin"
                     onClick={closeMobileMenu}
-                    className="px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-600 transition-colors"
+                    className="px-4 py-2.5 rounded-lg text-sm font-medium text-[#4d4c48] hover:bg-[#e8e6dc] hover:text-[#141413] transition-colors"
                   >
                     {t("nav.admin")}
                   </Link>
@@ -174,7 +171,7 @@ export function Navbar() {
                   <Link
                     href="/instructor"
                     onClick={closeMobileMenu}
-                    className="px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-600 transition-colors"
+                    className="px-4 py-2.5 rounded-lg text-sm font-medium text-[#4d4c48] hover:bg-[#e8e6dc] hover:text-[#141413] transition-colors"
                   >
                     {t("nav.instructor")}
                   </Link>
@@ -182,22 +179,22 @@ export function Navbar() {
                 <Link
                   href="/my-courses"
                   onClick={closeMobileMenu}
-                  className="px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-600 transition-colors"
+                  className="px-4 py-2.5 rounded-lg text-sm font-medium text-[#4d4c48] hover:bg-[#e8e6dc] hover:text-[#141413] transition-colors"
                 >
                   {t("nav.myLearning")}
                 </Link>
-                <div className="pt-2 border-t border-slate-100">
+                <div className="pt-2 border-t border-[#f0eee6]">
                   <button
                     onClick={() => { logout(); closeMobileMenu() }}
-                    className="w-full px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 hover:bg-red-50 hover:text-red-600 transition-colors text-start"
+                    className="w-full px-4 py-2.5 rounded-lg text-sm font-medium text-[#4d4c48] hover:bg-[#f4e3e3] hover:text-[#b53333] transition-colors text-start"
                   >
                     {t("common.signOut")}
                   </button>
                 </div>
               </>
             ) : (
-              <div className="flex flex-col gap-2 pt-2 border-t border-slate-100">
-                <Button variant="ghost" size="sm" asChild className="justify-start">
+              <div className="flex flex-col gap-2 pt-2 border-t border-[#f0eee6]">
+                <Button variant="secondary" size="sm" asChild className="justify-start">
                   <Link href="/login" onClick={closeMobileMenu}>
                     {t("common.signIn")}
                   </Link>

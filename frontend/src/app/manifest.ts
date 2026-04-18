@@ -1,0 +1,26 @@
+import type { MetadataRoute } from "next";
+
+export default function manifest(): MetadataRoute.Manifest {
+  return {
+    name: "إتقان — منصة العلوم الإسلامية",
+    short_name: "إتقان",
+    description:
+      "تعلم القرآن الكريم والعلوم الإسلامية على يد نخبة من العلماء والمشايخ",
+    start_url: "/",
+    display: "standalone",
+    lang: "ar",
+    dir: "rtl",
+    background_color: "#f5f4ed",
+    theme_color: "#c96442",
+    icons: [
+      { src: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { src: "/icon-512.png", sizes: "512x512", type: "image/png" },
+      {
+        src: "/icon-maskable-512.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "maskable",
+      },
+    ],
+  };
+}

@@ -297,10 +297,10 @@ export default function AdminDashboardPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-[#f5f4ed]">
         <Navbar />
         <div className="flex min-h-[60vh] items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
+          <Loader2 className="h-8 w-8 animate-spin text-[#c96442]" />
         </div>
       </div>
     )
@@ -308,80 +308,80 @@ export default function AdminDashboardPage() {
 
   if (!isAuthenticated || user?.role !== "ADMIN") {
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-[#f5f4ed]">
         <Navbar />
         <div className="flex min-h-[60vh] items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
+          <Loader2 className="h-8 w-8 animate-spin text-[#c96442]" />
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-[#f5f4ed]">
       <Navbar />
     <div className="container mx-auto max-w-7xl px-4 pt-24 pb-10">
       <div className="mb-8">
-        <h1 className="flex items-center gap-2 text-3xl font-bold text-slate-900">
-          <ShieldCheck className="h-8 w-8 text-emerald-600" />
+        <h1 className="flex items-center gap-2 text-3xl font-bold text-[#141413]">
+          <ShieldCheck className="h-8 w-8 text-[#c96442]" />
           {t("admin.dashboard")}
         </h1>
-        <p className="mt-2 text-slate-600">{t("admin.welcome", { name: user.firstName })}</p>
+        <p className="mt-2 text-[#5e5d59]">{t("admin.welcome", { name: user.firstName })}</p>
       </div>
 
       <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-xl border border-slate-200 bg-white p-4">
-          <p className="text-sm text-slate-500">{t("admin.stats.totalAdmins")}</p>
-          <p className="mt-2 flex items-center gap-2 text-2xl font-bold text-slate-900">
-            <UserCog className="h-5 w-5 text-sky-600" />
+        <div className="rounded-xl border border-[#f0eee6] bg-[#faf9f5] p-4">
+          <p className="text-sm text-[#87867f]">{t("admin.stats.totalAdmins")}</p>
+          <p className="mt-2 flex items-center gap-2 text-2xl font-bold text-[#141413]">
+            <UserCog className="h-5 w-5 text-[#87867f]" />
             {stats.totalAdmins}
           </p>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-4">
-          <p className="text-sm text-slate-500">{t("admin.stats.superAdmins")}</p>
-          <p className="mt-2 flex items-center gap-2 text-2xl font-bold text-slate-900">
-            <Crown className="h-5 w-5 text-amber-500" />
+        <div className="rounded-xl border border-[#f0eee6] bg-[#faf9f5] p-4">
+          <p className="text-sm text-[#87867f]">{t("admin.stats.superAdmins")}</p>
+          <p className="mt-2 flex items-center gap-2 text-2xl font-bold text-[#141413]">
+            <Crown className="h-5 w-5 text-[#c96442]" />
             {stats.superAdmins}
           </p>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-4">
-          <p className="text-sm text-slate-500">{t("admin.stats.totalStudents")}</p>
-          <p className="mt-2 flex items-center gap-2 text-2xl font-bold text-slate-900">
-            <Users className="h-5 w-5 text-sky-600" />
+        <div className="rounded-xl border border-[#f0eee6] bg-[#faf9f5] p-4">
+          <p className="text-sm text-[#87867f]">{t("admin.stats.totalStudents")}</p>
+          <p className="mt-2 flex items-center gap-2 text-2xl font-bold text-[#141413]">
+            <Users className="h-5 w-5 text-[#87867f]" />
             {stats.totalStudents}
           </p>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-4">
-          <p className="text-sm text-slate-500">{t("admin.stats.activeStudents")}</p>
-          <p className="mt-2 flex items-center gap-2 text-2xl font-bold text-slate-900">
-            <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+        <div className="rounded-xl border border-[#f0eee6] bg-[#faf9f5] p-4">
+          <p className="text-sm text-[#87867f]">{t("admin.stats.activeStudents")}</p>
+          <p className="mt-2 flex items-center gap-2 text-2xl font-bold text-[#141413]">
+            <CheckCircle2 className="h-5 w-5 text-[#c96442]" />
             {stats.activeStudents}
           </p>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-4">
-          <p className="text-sm text-slate-500">{t("admin.stats.totalCourses")}</p>
-          <p className="mt-2 flex items-center gap-2 text-2xl font-bold text-slate-900">
-            <BookOpen className="h-5 w-5 text-sky-600" />
+        <div className="rounded-xl border border-[#f0eee6] bg-[#faf9f5] p-4">
+          <p className="text-sm text-[#87867f]">{t("admin.stats.totalCourses")}</p>
+          <p className="mt-2 flex items-center gap-2 text-2xl font-bold text-[#141413]">
+            <BookOpen className="h-5 w-5 text-[#87867f]" />
             {stats.totalCourses}
           </p>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-4">
-          <p className="text-sm text-slate-500">{t("admin.stats.activeCourses")}</p>
-          <p className="mt-2 flex items-center gap-2 text-2xl font-bold text-slate-900">
-            <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+        <div className="rounded-xl border border-[#f0eee6] bg-[#faf9f5] p-4">
+          <p className="text-sm text-[#87867f]">{t("admin.stats.activeCourses")}</p>
+          <p className="mt-2 flex items-center gap-2 text-2xl font-bold text-[#141413]">
+            <CheckCircle2 className="h-5 w-5 text-[#c96442]" />
             {stats.activeCourses}
           </p>
         </div>
       </div>
 
-      <section className="mb-8 rounded-xl border border-slate-200 bg-white">
-        <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
-          <h2 className="text-lg font-semibold text-slate-900">{t("admin.admins.title")}</h2>
-          <span className="text-sm text-slate-500">{admins.length}</span>
+      <section className="mb-8 rounded-xl border border-[#f0eee6] bg-[#faf9f5]">
+        <div className="flex items-center justify-between border-b border-[#f0eee6] px-4 py-3">
+          <h2 className="text-lg font-semibold text-[#141413]">{t("admin.admins.title")}</h2>
+          <span className="text-sm text-[#87867f]">{admins.length}</span>
         </div>
 
         {errors.admins && (
-          <div className="flex flex-col gap-3 px-4 py-4 text-sm text-red-600 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-3 px-4 py-4 text-sm text-[#b53333] md:flex-row md:items-center md:justify-between">
             <p>{errors.admins}</p>
             <Button variant="outline" size="sm" onClick={() => void fetchAdminData()}>
               {t("admin.actions.retry")}
@@ -390,14 +390,14 @@ export default function AdminDashboardPage() {
         )}
 
         {!errors.admins && !canManageAdmins && (
-          <div className="mx-4 mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          <div className="mx-4 mt-4 rounded-lg border border-[#e8e6dc] bg-[#f0eee6] px-4 py-3 text-sm text-[#4d4c48]">
             {t("admin.admins.permissionsHint")}
           </div>
         )}
 
         {!errors.admins && canManageAdmins && (
-          <div className="border-b border-slate-200 px-4 py-4">
-            <h3 className="mb-3 text-sm font-semibold text-slate-900">{t("admin.admins.createTitle")}</h3>
+          <div className="border-b border-[#f0eee6] px-4 py-4">
+            <h3 className="mb-3 text-sm font-semibold text-[#141413]">{t("admin.admins.createTitle")}</h3>
             <form className="grid gap-3 md:grid-cols-2 xl:grid-cols-3" onSubmit={createAdmin}>
               <div className="space-y-1.5">
                 <Label htmlFor="create-admin-first-name">{t("admin.admins.firstName")}</Label>
@@ -438,7 +438,7 @@ export default function AdminDashboardPage() {
                   required
                 />
               </div>
-              <label className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700">
+              <label className="flex items-center gap-2 rounded-lg border border-[#f0eee6] px-3 py-2 text-sm text-[#4d4c48]">
                 <input
                   type="checkbox"
                   checked={createForm.enabled}
@@ -446,7 +446,7 @@ export default function AdminDashboardPage() {
                 />
                 {t("admin.admins.enabled")}
               </label>
-              <label className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700">
+              <label className="flex items-center gap-2 rounded-lg border border-[#f0eee6] px-3 py-2 text-sm text-[#4d4c48]">
                 <input
                   type="checkbox"
                   checked={createForm.superAdmin}
@@ -471,8 +471,8 @@ export default function AdminDashboardPage() {
         )}
 
         {!errors.admins && canManageAdmins && editingForm && editingAdminId !== null && (
-          <div className="border-b border-slate-200 px-4 py-4">
-            <h3 className="mb-3 text-sm font-semibold text-slate-900">{t("admin.admins.editTitle")}</h3>
+          <div className="border-b border-[#f0eee6] px-4 py-4">
+            <h3 className="mb-3 text-sm font-semibold text-[#141413]">{t("admin.admins.editTitle")}</h3>
             <form className="grid gap-3 md:grid-cols-2 xl:grid-cols-3" onSubmit={saveAdminChanges}>
               <div className="space-y-1.5">
                 <Label htmlFor="edit-admin-first-name">{t("admin.admins.firstName")}</Label>
@@ -513,7 +513,7 @@ export default function AdminDashboardPage() {
                   placeholder={t("admin.admins.passwordOptional")}
                 />
               </div>
-              <label className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700">
+              <label className="flex items-center gap-2 rounded-lg border border-[#f0eee6] px-3 py-2 text-sm text-[#4d4c48]">
                 <input
                   type="checkbox"
                   checked={editingForm.enabled}
@@ -523,7 +523,7 @@ export default function AdminDashboardPage() {
                 />
                 {t("admin.admins.enabled")}
               </label>
-              <label className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700">
+              <label className="flex items-center gap-2 rounded-lg border border-[#f0eee6] px-3 py-2 text-sm text-[#4d4c48]">
                 <input
                   type="checkbox"
                   checked={editingForm.superAdmin}
@@ -552,12 +552,12 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
-        {!errors.admins && admins.length === 0 && <div className="px-4 py-6 text-sm text-slate-500">{t("admin.states.noAdmins")}</div>}
+        {!errors.admins && admins.length === 0 && <div className="px-4 py-6 text-sm text-[#87867f]">{t("admin.states.noAdmins")}</div>}
 
         {!errors.admins && admins.length > 0 && (
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
-              <thead className="bg-slate-50 text-left text-slate-600">
+              <thead className="bg-[#f0eee6] text-left text-[#5e5d59]">
                 <tr>
                   <th className="px-4 py-3">{t("admin.admins.name")}</th>
                   <th className="px-4 py-3">{t("admin.admins.email")}</th>
@@ -571,16 +571,16 @@ export default function AdminDashboardPage() {
                 {admins.map((admin) => {
                   const isCurrentRowEditing = editingAdminId === admin.id
                   return (
-                    <tr key={admin.id} className="border-t border-slate-100">
-                      <td className="px-4 py-3 font-medium text-slate-900">
+                    <tr key={admin.id} className="border-t border-[#f0eee6]">
+                      <td className="px-4 py-3 font-medium text-[#141413]">
                         {[admin.firstName, admin.lastName].filter(Boolean).join(" ").trim() || "-"}
                       </td>
-                      <td className="px-4 py-3 text-slate-700">{admin.email}</td>
-                      <td className="px-4 py-3 text-slate-700">{formatDate(admin.createdAt)}</td>
+                      <td className="px-4 py-3 text-[#4d4c48]">{admin.email}</td>
+                      <td className="px-4 py-3 text-[#4d4c48]">{formatDate(admin.createdAt)}</td>
                       <td className="px-4 py-3">
                         <span
                           className={`rounded-full px-2 py-1 text-xs font-medium ${
-                            admin.superAdmin ? "bg-amber-100 text-amber-700" : "bg-sky-100 text-sky-700"
+                            admin.superAdmin ? "bg-[#c96442] text-[#faf9f5]" : "bg-[#e8e6dc] text-[#4d4c48]"
                           }`}
                         >
                           {admin.superAdmin ? t("admin.admins.superAdmin") : t("admin.admins.admin")}
@@ -589,7 +589,7 @@ export default function AdminDashboardPage() {
                       <td className="px-4 py-3">
                         <span
                           className={`rounded-full px-2 py-1 text-xs font-medium ${
-                            admin.enabled ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"
+                            admin.enabled ? "bg-[#e8e6dc] text-[#4d4c48]" : "bg-[#f0eee6] text-[#87867f]"
                           }`}
                         >
                           {admin.enabled ? t("admin.status.active") : t("admin.status.inactive")}
@@ -616,14 +616,14 @@ export default function AdminDashboardPage() {
         )}
       </section>
 
-      <section className="mb-8 rounded-xl border border-slate-200 bg-white">
-        <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
-          <h2 className="text-lg font-semibold text-slate-900">{t("admin.students.title")}</h2>
-          <span className="text-sm text-slate-500">{students.length}</span>
+      <section className="mb-8 rounded-xl border border-[#f0eee6] bg-[#faf9f5]">
+        <div className="flex items-center justify-between border-b border-[#f0eee6] px-4 py-3">
+          <h2 className="text-lg font-semibold text-[#141413]">{t("admin.students.title")}</h2>
+          <span className="text-sm text-[#87867f]">{students.length}</span>
         </div>
 
         {errors.students && (
-          <div className="flex flex-col gap-3 px-4 py-4 text-sm text-red-600 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-3 px-4 py-4 text-sm text-[#b53333] md:flex-row md:items-center md:justify-between">
             <p>{errors.students}</p>
             <Button variant="outline" size="sm" onClick={() => void fetchAdminData()}>
               {t("admin.actions.retry")}
@@ -632,13 +632,13 @@ export default function AdminDashboardPage() {
         )}
 
         {!errors.students && students.length === 0 && (
-          <div className="px-4 py-6 text-sm text-slate-500">{t("admin.states.noStudents")}</div>
+          <div className="px-4 py-6 text-sm text-[#87867f]">{t("admin.states.noStudents")}</div>
         )}
 
         {!errors.students && students.length > 0 && (
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
-              <thead className="bg-slate-50 text-left text-slate-600">
+              <thead className="bg-[#f0eee6] text-left text-[#5e5d59]">
                 <tr>
                   <th className="px-4 py-3">{t("admin.students.name")}</th>
                   <th className="px-4 py-3">{t("admin.students.email")}</th>
@@ -654,17 +654,17 @@ export default function AdminDashboardPage() {
                   const isDeactivating = typeof studentId === "number" && deactivatingStudentIds.has(studentId)
                   const isActive = !!student.active
                   return (
-                    <tr key={studentId ?? student.email ?? `student-${index}`} className="border-t border-slate-100">
-                      <td className="px-4 py-3 font-medium text-slate-900">
+                    <tr key={studentId ?? student.email ?? `student-${index}`} className="border-t border-[#f0eee6]">
+                      <td className="px-4 py-3 font-medium text-[#141413]">
                         {[student.firstName, student.lastName].filter(Boolean).join(" ").trim() || "-"}
                       </td>
-                      <td className="px-4 py-3 text-slate-700">{student.email || "-"}</td>
-                      <td className="px-4 py-3 text-slate-700">{student.phoneNumber || "-"}</td>
-                      <td className="px-4 py-3 text-slate-700">{formatDate(student.createdAt)}</td>
+                      <td className="px-4 py-3 text-[#4d4c48]">{student.email || "-"}</td>
+                      <td className="px-4 py-3 text-[#4d4c48]">{student.phoneNumber || "-"}</td>
+                      <td className="px-4 py-3 text-[#4d4c48]">{formatDate(student.createdAt)}</td>
                       <td className="px-4 py-3">
                         <span
                           className={`rounded-full px-2 py-1 text-xs font-medium ${
-                            isActive ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"
+                            isActive ? "bg-[#e8e6dc] text-[#4d4c48]" : "bg-[#f0eee6] text-[#87867f]"
                           }`}
                         >
                           {isActive ? t("admin.status.active") : t("admin.status.inactive")}
@@ -696,14 +696,14 @@ export default function AdminDashboardPage() {
         )}
       </section>
 
-      <section className="rounded-xl border border-slate-200 bg-white">
-        <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
-          <h2 className="text-lg font-semibold text-slate-900">{t("admin.courses.title")}</h2>
-          <span className="text-sm text-slate-500">{courses.length}</span>
+      <section className="rounded-xl border border-[#f0eee6] bg-[#faf9f5]">
+        <div className="flex items-center justify-between border-b border-[#f0eee6] px-4 py-3">
+          <h2 className="text-lg font-semibold text-[#141413]">{t("admin.courses.title")}</h2>
+          <span className="text-sm text-[#87867f]">{courses.length}</span>
         </div>
 
         {errors.courses && (
-          <div className="flex flex-col gap-3 px-4 py-4 text-sm text-red-600 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-3 px-4 py-4 text-sm text-[#b53333] md:flex-row md:items-center md:justify-between">
             <p>{errors.courses}</p>
             <Button variant="outline" size="sm" onClick={() => void fetchAdminData()}>
               {t("admin.actions.retry")}
@@ -712,13 +712,13 @@ export default function AdminDashboardPage() {
         )}
 
         {!errors.courses && courses.length === 0 && (
-          <div className="px-4 py-6 text-sm text-slate-500">{t("admin.states.noCourses")}</div>
+          <div className="px-4 py-6 text-sm text-[#87867f]">{t("admin.states.noCourses")}</div>
         )}
 
         {!errors.courses && courses.length > 0 && (
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
-              <thead className="bg-slate-50 text-left text-slate-600">
+              <thead className="bg-[#f0eee6] text-left text-[#5e5d59]">
                 <tr>
                   <th className="px-4 py-3">{t("admin.courses.titleCol")}</th>
                   <th className="px-4 py-3">{t("admin.courses.instructor")}</th>
@@ -734,15 +734,15 @@ export default function AdminDashboardPage() {
                   const isDeactivating = typeof courseId === "number" && deactivatingCourseIds.has(courseId)
                   const isActive = !!course.active
                   return (
-                    <tr key={courseId ?? course.title ?? `course-${index}`} className="border-t border-slate-100">
-                      <td className="px-4 py-3 font-medium text-slate-900">{course.title || "-"}</td>
-                      <td className="px-4 py-3 text-slate-700">{course.instructor || "-"}</td>
-                      <td className="px-4 py-3 text-slate-700">{formatPrice(course.price)}</td>
-                      <td className="px-4 py-3 text-slate-700">{formatDate(course.createdAt)}</td>
+                    <tr key={courseId ?? course.title ?? `course-${index}`} className="border-t border-[#f0eee6]">
+                      <td className="px-4 py-3 font-medium text-[#141413]">{course.title || "-"}</td>
+                      <td className="px-4 py-3 text-[#4d4c48]">{course.instructor || "-"}</td>
+                      <td className="px-4 py-3 text-[#4d4c48]">{formatPrice(course.price)}</td>
+                      <td className="px-4 py-3 text-[#4d4c48]">{formatDate(course.createdAt)}</td>
                       <td className="px-4 py-3">
                         <span
                           className={`rounded-full px-2 py-1 text-xs font-medium ${
-                            isActive ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"
+                            isActive ? "bg-[#e8e6dc] text-[#4d4c48]" : "bg-[#f0eee6] text-[#87867f]"
                           }`}
                         >
                           {isActive ? t("admin.status.active") : t("admin.status.inactive")}

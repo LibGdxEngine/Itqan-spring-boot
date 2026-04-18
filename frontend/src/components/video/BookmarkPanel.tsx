@@ -28,7 +28,7 @@ export function BookmarkPanel({
         <h3 className="text-white font-semibold text-lg">Bookmarks</h3>
         <button
           onClick={onCreate}
-          className="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition"
+          className="bg-[#c96442] hover:bg-[#b55836] text-[#faf9f5] px-4 py-2 rounded-lg text-sm font-medium transition"
         >
           Add Bookmark
         </button>
@@ -51,8 +51,8 @@ export function BookmarkPanel({
                   className="flex-1 text-left"
                 >
                   <div className="flex items-center gap-2 mb-2">
-                    <Clock size={16} className="text-sky-400" />
-                    <span className="text-sky-400 font-mono text-sm">
+                    <Clock size={16} className="text-[#d97757]" />
+                    <span className="text-[#d97757] font-mono text-sm">
                       {formatTime(bookmark.timestamp)}
                     </span>
                   </div>

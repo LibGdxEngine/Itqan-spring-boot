@@ -16,9 +16,16 @@ export default function robots(): MetadataRoute.Robots {
                     "/learn",
                     "/instructor",
                     "/api",
+                    "/login",
+                    "/register",
+                    "/forgot-password",
+                    "/reset-password",
+                    "/courses/success",
+                    "/courses/cancel",
                 ],
             },
         ],
         sitemap: `${SITE_URL}/sitemap.xml`,
+        host: SITE_URL,
     };
 }

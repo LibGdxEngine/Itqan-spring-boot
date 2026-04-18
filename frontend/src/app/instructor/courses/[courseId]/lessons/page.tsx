@@ -188,7 +188,7 @@ export default function CourseLessonsPage() {
   if (authLoading || loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-sky-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-[#c96442]" />
       </div>
     )
   }
@@ -205,17 +205,17 @@ export default function CourseLessonsPage() {
           </Link>
         </Button>
 
-        <h1 className="mb-2 text-3xl font-bold text-slate-900">{course.title}</h1>
-        <p className="text-slate-500">
+        <h1 className="mb-2 text-3xl text-[#141413]" style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}>{course.title}</h1>
+        <p className="text-[#87867f]">
           {t("instructor.manageContentDesc") || "Manage modules and lessons for this course."}
         </p>
       </div>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
-          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="rounded-xl border border-[#f0eee6] bg-[#faf9f5] p-6 shadow-[0_0_0_1px_#f0eee6]">
             <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-slate-900">
+              <h2 className="text-xl text-[#141413]" style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}>
                 {t("courses.curriculum") || "Curriculum"}
               </h2>
             </div>
@@ -241,12 +241,12 @@ export default function CourseLessonsPage() {
                 <AccordionItem key={module.id} value={`module-${module.id}`}>
                   <AccordionTrigger className="hover:no-underline">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-slate-900">{module.title}</span>
-                      <span className="text-xs font-normal text-slate-500">
+                      <span className="font-medium text-[#141413]">{module.title}</span>
+                      <span className="text-xs font-normal text-[#87867f]">
                         ({module.lessons?.length || 0} lessons)
                       </span>
                       {reorderingModuleId === module.id && (
-                        <Loader2 className="h-3 w-3 animate-spin text-sky-600" />
+                        <Loader2 className="h-3 w-3 animate-spin text-[#c96442]" />
                       )}
                     </div>
                   </AccordionTrigger>
@@ -260,7 +260,7 @@ export default function CourseLessonsPage() {
                           <div
                             key={lesson.id}
                             className={`group flex items-center justify-between rounded-lg p-3 ${
-                              isDragged ? "bg-sky-100" : "bg-slate-50"
+                              isDragged ? "bg-[#e8e6dc]" : "bg-[#f0eee6]"
                             }`}
                             draggable
                             onDragStart={() => handleLessonDragStart(module.id!, lesson.id!)}
@@ -272,14 +272,14 @@ export default function CourseLessonsPage() {
                             }}
                           >
                             <div className="flex items-center gap-3">
-                              <Video className="h-4 w-4 text-slate-400" />
-                              <span className="text-sm font-medium text-slate-700">{lesson.title}</span>
+                              <Video className="h-4 w-4 text-[#87867f]" />
+                              <span className="text-sm font-medium text-[#4d4c48]">{lesson.title}</span>
                             </div>
                             <div className="flex gap-2 opacity-0 transition-opacity group-hover:opacity-100">
                               <Button
                                 size="icon"
                                 variant="ghost"
-                                className="h-8 w-8 text-red-500 hover:bg-red-50 hover:text-red-600"
+                                className="h-8 w-8 text-[#b53333] hover:bg-[#f4e3e3] hover:text-[#b53333]"
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
@@ -318,7 +318,7 @@ export default function CourseLessonsPage() {
               ))}
 
               {(!course.modules || course.modules.length === 0) && (
-                <div className="py-8 text-center text-slate-500">
+                <div className="py-8 text-center text-[#87867f]">
                   {t("instructor.noModules") || "No modules yet. Add one above."}
                 </div>
               )}
@@ -327,19 +327,19 @@ export default function CourseLessonsPage() {
         </div>
 
         <div className="lg:col-span-1">
-          <div className="sticky top-24 rounded-xl border border-slate-200 bg-slate-50 p-6">
-            <h3 className="mb-2 font-semibold text-slate-900">
+          <div className="sticky top-24 rounded-xl border border-[#f0eee6] bg-[#faf9f5] p-6">
+            <h3 className="mb-2 text-[#141413]" style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}>
               {t("instructor.courseStatus") || "Course Status"}
             </h3>
             <div
               className={`mb-4 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                course.active ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
+                course.active ? "bg-[#e8e6dc] text-[#4d4c48]" : "bg-[#f0eee6] text-[#87867f]"
               }`}
             >
               {course.active ? (t("common.active") || "Active") : (t("common.draft") || "Draft")}
             </div>
 
-            <div className="space-y-3 text-sm text-slate-600">
+            <div className="space-y-3 text-sm text-[#5e5d59]">
               <div className="flex justify-between">
                 <span>{t("common.price") || "Price"}</span>
                 <span className="font-medium">${course.price}</span>

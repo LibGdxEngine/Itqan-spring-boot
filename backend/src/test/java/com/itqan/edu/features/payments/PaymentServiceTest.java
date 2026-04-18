@@ -1,6 +1,7 @@
 package com.itqan.edu.features.payments;
 
 import com.itqan.edu.common.config.StripeProperties;
+import com.itqan.edu.features.audit.AuditLogService;
 import com.itqan.edu.features.courses.Course;
 import com.itqan.edu.features.courses.CourseRepository;
 import com.itqan.edu.features.enrollments.Enrollment;
@@ -42,6 +43,8 @@ class PaymentServiceTest {
     private ProcessedStripeEventRepository processedStripeEventRepository;
     @Mock
     private StripeGateway stripeGateway;
+    @Mock
+    private AuditLogService auditLogService;
 
     private PaymentService paymentService;
 
@@ -64,7 +67,8 @@ class PaymentServiceTest {
                 couponRedemptionRepository,
                 processedStripeEventRepository,
                 stripeGateway,
-                stripeProperties);
+                stripeProperties,
+                auditLogService);
     }
 
     @Test

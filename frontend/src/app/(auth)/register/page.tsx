@@ -112,10 +112,10 @@ export default function RegisterPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="space-y-2 text-center">
-        <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+        <h1 className="text-3xl font-bold tracking-tight text-[#141413]">
           {t("auth.register.title")}
         </h1>
-        <p className="text-slate-500">
+        <p className="text-[#87867f]">
           {t("auth.register.description")}
         </p>
       </div>
@@ -166,7 +166,7 @@ export default function RegisterPage() {
           <Separator />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-slate-50/50 px-3 text-slate-500">
+          <span className="bg-[#f5f4ed] px-3 text-[#87867f]">
             {t("common.orContinueWithEmail")}
           </span>
         </div>
@@ -178,7 +178,7 @@ export default function RegisterPage() {
         <div className="space-y-2">
           <Label htmlFor="name">{t("auth.register.fullName")}</Label>
           <div className="relative">
-            <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
             <Input
               id="name"
               type="text"
@@ -196,7 +196,7 @@ export default function RegisterPage() {
         <div className="space-y-2">
           <Label htmlFor="email">{t("auth.register.email")}</Label>
           <div className="relative">
-            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
             <Input
               id="email"
               type="email"
@@ -214,7 +214,7 @@ export default function RegisterPage() {
         <div className="space-y-2">
           <Label htmlFor="password">{t("auth.register.password")}</Label>
           <div className="relative">
-            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
             <Input
               id="password"
               type={showPassword ? "text" : "password"}
@@ -225,7 +225,7 @@ export default function RegisterPage() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#87867f] hover:text-[#5e5d59] transition-colors"
             >
               {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
@@ -241,7 +241,7 @@ export default function RegisterPage() {
                     key={i}
                     className={cn(
                       "flex items-center gap-1.5 text-xs transition-colors ltr-flex",
-                      isMet ? "text-emerald-600" : "text-slate-400"
+                      isMet ? "text-[#c96442]" : "text-[#87867f]"
                     )}
                   >
                     {isMet ? (
@@ -261,7 +261,7 @@ export default function RegisterPage() {
         <div className="space-y-2">
           <Label htmlFor="confirmPassword">{t("auth.register.confirmPassword")}</Label>
           <div className="relative">
-            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
             <Input
               id="confirmPassword"
               type={showConfirmPassword ? "text" : "password"}
@@ -272,7 +272,7 @@ export default function RegisterPage() {
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#87867f] hover:text-[#5e5d59] transition-colors"
             >
               {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
@@ -299,11 +299,11 @@ export default function RegisterPage() {
             />
             <Label htmlFor="acceptTerms" className="text-sm font-normal cursor-pointer leading-snug">
               {t("auth.register.acceptTerms")}{" "}
-              <Link href="/terms" className="text-sky-600 hover:text-sky-700 underline underline-offset-2">
+              <Link href="/terms" className="text-[#c96442] hover:text-[#b55836] underline underline-offset-2">
                 {t("common.termsOfService")}
               </Link>{" "}
               {t("auth.register.and")}{" "}
-              <Link href="/privacy" className="text-sky-600 hover:text-sky-700 underline underline-offset-2">
+              <Link href="/privacy" className="text-[#c96442] hover:text-[#b55836] underline underline-offset-2">
                 {t("common.privacyPolicy")}
               </Link>
             </Label>
@@ -330,11 +330,11 @@ export default function RegisterPage() {
       </form>
 
       {/* Sign in link */}
-      <p className="text-center text-sm text-slate-500">
+      <p className="text-center text-sm text-[#87867f]">
         {t("common.alreadyHaveAccount")}{" "}
         <Link
           href="/login"
-          className="font-semibold text-sky-600 hover:text-sky-700 transition-colors"
+          className="font-semibold text-[#c96442] hover:text-[#b55836] transition-colors"
         >
           {t("common.signIn")}
         </Link>

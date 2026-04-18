@@ -18,9 +18,9 @@ export function LearningSidebar({ courseTitle, modules }: LearningSidebarProps) 
     const courseId = params.courseId;
 
     return (
-        <div className="h-full flex flex-col bg-slate-900 border-r border-slate-800 text-white w-80 fixed left-0 top-0 overflow-y-auto z-40">
-            <div className="p-5 border-b border-slate-800">
-                <Link href={`/courses/${courseId}`} className="text-xs text-slate-400 hover:text-white mb-2 block">
+        <div className="h-full flex flex-col bg-[#141413] border-r border-[#30302e] text-[#faf9f5] w-80 fixed left-0 top-0 overflow-y-auto z-40">
+            <div className="p-5 border-b border-[#30302e]">
+                <Link href={`/courses/${courseId}`} className="text-xs text-[#87867f] hover:text-[#faf9f5] mb-2 block">
                     ← Back to Course Home
                 </Link>
                 <h1 className="font-bold text-lg leading-snug">{courseTitle}</h1>
@@ -57,31 +57,31 @@ function ModuleSection({
     const [isOpen, setIsOpen] = useState(isActiveModule || index === 0);
 
     return (
-        <div className="border-b border-slate-800">
-            <button 
+        <div className="border-b border-[#30302e]">
+            <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-full p-4 flex items-center justify-between text-left hover:bg-slate-800/50 transition-colors"
+                className="w-full p-4 flex items-center justify-between text-left hover:bg-[#30302e] transition-colors"
             >
                 <div>
-                     <span className="text-xs text-slate-500 font-semibold uppercase tracking-wider block mb-1">Module {index + 1}</span>
-                     <span className="text-sm font-medium text-slate-200">{module.title}</span>
+                     <span className="text-xs text-[#87867f] font-semibold uppercase tracking-wider block mb-1">Module {index + 1}</span>
+                     <span className="text-sm font-medium text-[#b0aea5]">{module.title}</span>
                 </div>
-                <ChevronDown className={cn("h-4 w-4 text-slate-500 transition-transform", isOpen ? "transform rotate-180" : "")} />
+                <ChevronDown className={cn("h-4 w-4 text-[#87867f] transition-transform", isOpen ? "transform rotate-180" : "")} />
             </button>
             
             {isOpen && (
-                <div className="bg-slate-950/50">
+                <div className="bg-[#141413]">
                     {module.lessons?.map((lesson, idx) => {
                         const isActive = lesson.id === currentLessonId;
                         return (
-                            <Link 
-                                key={lesson.id} 
+                            <Link
+                                key={lesson.id}
                                 href={`/learn/${courseId}/${lesson.id}`}
                                 className={cn(
                                     "flex items-center p-3 pl-4 border-l-2 transition-colors text-sm gap-3",
-                                    isActive 
-                                        ? "border-sky-500 bg-sky-500/10 text-sky-400" 
-                                        : "border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/30"
+                                    isActive
+                                        ? "border-[#c96442] bg-[#30302e] text-[#d97757]"
+                                        : "border-transparent text-[#87867f] hover:text-[#b0aea5] hover:bg-[#30302e]"
                                 )}
                             >
                                 {lesson.type === 'VIDEO' ? <PlayCircle className="h-4 w-4 shrink-0" /> : <FileText className="h-4 w-4 shrink-0" />}

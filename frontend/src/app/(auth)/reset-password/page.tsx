@@ -101,16 +101,16 @@ function ResetPasswordContent() {
     return (
       <div className="space-y-8 text-center">
         <div className="flex justify-center">
-          <div className="p-4 bg-gradient-to-r from-red-500 to-rose-500 rounded-full shadow-lg shadow-red-500/25">
-            <X className="w-12 h-12 text-white" />
+          <div className="p-4 bg-red-500 rounded-full shadow-[0_0_0_1px_#d1cfc5]">
+            <X className="w-12 h-12 text-[#faf9f5]" />
           </div>
         </div>
 
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold tracking-tight text-[#141413]">
             Missing email
           </h1>
-          <p className="text-slate-500">
+          <p className="text-[#87867f]">
             Please request a password reset first.
           </p>
         </div>
@@ -130,17 +130,17 @@ function ResetPasswordContent() {
       <div className="space-y-8 text-center">
         {/* Success icon */}
         <div className="flex justify-center">
-          <div className="p-4 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full shadow-lg shadow-emerald-500/25">
-            <CheckCircle2 className="w-12 h-12 text-white" />
+          <div className="p-4 bg-[#c96442] rounded-full shadow-[0_0_0_1px_#d1cfc5]">
+            <CheckCircle2 className="w-12 h-12 text-[#faf9f5]" />
           </div>
         </div>
 
         {/* Header */}
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold tracking-tight text-[#141413]">
             Password reset successful
           </h1>
-          <p className="text-slate-500">
+          <p className="text-[#87867f]">
             Your password has been successfully reset.<br />
             You can now sign in with your new password.
           </p>
@@ -161,11 +161,11 @@ function ResetPasswordContent() {
     <div className="space-y-8">
       {/* Header */}
       <div className="space-y-2 text-center">
-        <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+        <h1 className="text-3xl font-bold tracking-tight text-[#141413]">
           Set new password
         </h1>
-        <p className="text-slate-500">
-          Enter the OTP code sent to <span className="font-medium text-slate-700">{email}</span>
+        <p className="text-[#87867f]">
+          Enter the OTP code sent to <span className="font-medium text-[#4d4c48]">{email}</span>
         </p>
       </div>
 
@@ -175,7 +175,7 @@ function ResetPasswordContent() {
         <div className="space-y-2">
           <Label htmlFor="otp">OTP Code</Label>
           <div className="relative">
-            <KeyRound className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <KeyRound className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
             <Input
               id="otp"
               type="text"
@@ -194,7 +194,7 @@ function ResetPasswordContent() {
         <div className="space-y-2">
           <Label htmlFor="password">New Password</Label>
           <div className="relative">
-            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
             <Input
               id="password"
               type={showPassword ? "text" : "password"}
@@ -205,7 +205,7 @@ function ResetPasswordContent() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#87867f] hover:text-[#5e5d59] transition-colors"
             >
               {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
@@ -221,7 +221,7 @@ function ResetPasswordContent() {
                     key={i}
                     className={cn(
                       "flex items-center gap-1.5 text-xs transition-colors",
-                      isMet ? "text-emerald-600" : "text-slate-400"
+                      isMet ? "text-[#c96442]" : "text-[#87867f]"
                     )}
                   >
                     {isMet ? (
@@ -241,7 +241,7 @@ function ResetPasswordContent() {
         <div className="space-y-2">
           <Label htmlFor="confirmPassword">Confirm New Password</Label>
           <div className="relative">
-            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
             <Input
               id="confirmPassword"
               type={showConfirmPassword ? "text" : "password"}
@@ -252,7 +252,7 @@ function ResetPasswordContent() {
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#87867f] hover:text-[#5e5d59] transition-colors"
             >
               {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
@@ -282,7 +282,7 @@ function ResetPasswordContent() {
       <div className="text-center">
         <Link
           href="/forgot-password"
-          className="text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors"
+          className="text-sm font-medium text-[#87867f] hover:text-[#4d4c48] transition-colors"
         >
           Didn&apos;t receive the code? Request again
         </Link>
@@ -295,19 +295,19 @@ function LoadingFallback() {
   return (
     <div className="space-y-8">
       <div className="space-y-2 text-center">
-        <div className="h-9 w-48 mx-auto bg-slate-200 rounded animate-pulse" />
-        <div className="h-5 w-72 mx-auto bg-slate-100 rounded animate-pulse" />
+        <div className="h-9 w-48 mx-auto bg-[#e8e6dc] rounded animate-pulse" />
+        <div className="h-5 w-72 mx-auto bg-[#f0eee6] rounded animate-pulse" />
       </div>
       <div className="space-y-5">
         <div className="space-y-2">
-          <div className="h-4 w-24 bg-slate-100 rounded animate-pulse" />
-          <div className="h-11 w-full bg-slate-100 rounded-xl animate-pulse" />
+          <div className="h-4 w-24 bg-[#f0eee6] rounded animate-pulse" />
+          <div className="h-11 w-full bg-[#f0eee6] rounded-xl animate-pulse" />
         </div>
         <div className="space-y-2">
-          <div className="h-4 w-32 bg-slate-100 rounded animate-pulse" />
-          <div className="h-11 w-full bg-slate-100 rounded-xl animate-pulse" />
+          <div className="h-4 w-32 bg-[#f0eee6] rounded animate-pulse" />
+          <div className="h-11 w-full bg-[#f0eee6] rounded-xl animate-pulse" />
         </div>
-        <div className="h-12 w-full bg-slate-200 rounded-xl animate-pulse" />
+        <div className="h-12 w-full bg-[#e8e6dc] rounded-xl animate-pulse" />
       </div>
     </div>
   )

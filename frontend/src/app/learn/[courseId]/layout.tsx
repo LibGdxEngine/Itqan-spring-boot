@@ -38,18 +38,18 @@ export default function LearnLayout({
 
     if (loading) {
         return (
-            <div className="h-screen w-full flex items-center justify-center bg-slate-900 text-white">
-                <Loader2 className="h-8 w-8 animate-spin text-sky-500" />
+            <div className="h-screen w-full flex items-center justify-center bg-[#141413] text-[#faf9f5]">
+                <Loader2 className="h-8 w-8 animate-spin text-[#d97757]" />
             </div>
         );
     }
 
     if (!course) {
-        return <div className="text-white p-8">Course not found</div>;
+        return <div className="text-[#faf9f5] p-8">Course not found</div>;
     }
 
     return (
-        <div className="min-h-screen bg-slate-50">
+        <div className="min-h-screen bg-[#f5f4ed]">
             {/* Sidebar */}
             <LearningSidebar courseTitle={course.title || "Course"} modules={course.modules || []} />
             

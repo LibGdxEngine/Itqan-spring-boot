@@ -5,33 +5,30 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 cursor-pointer",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 cursor-pointer",
   {
     variants: {
       variant: {
         default:
-          "bg-gradient-to-r from-emerald-600 to-emerald-700 text-white shadow-lg shadow-emerald-600/20 hover:shadow-xl hover:shadow-emerald-600/25 hover:from-emerald-700 hover:to-emerald-800 active:scale-[0.98]",
-        accent:
-          "bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-500/20 hover:shadow-xl hover:shadow-amber-500/25 hover:from-amber-600 hover:to-amber-700 active:scale-[0.98]",
-        glow:
-          "bg-gradient-to-r from-emerald-600 to-emerald-700 text-white shadow-lg shadow-emerald-600/30 hover:shadow-[0_0_30px_rgba(5,150,105,0.4)] hover:from-emerald-700 hover:to-emerald-800 active:scale-[0.98] animate-glow-pulse",
-        destructive:
-          "bg-gradient-to-r from-red-500 to-rose-500 text-white shadow-lg shadow-red-500/20 hover:shadow-xl hover:shadow-red-500/25 hover:from-red-600 hover:to-rose-600 active:scale-[0.98]",
-        outline:
-          "border-2 border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 hover:shadow-md text-slate-700",
+          "bg-[#c96442] text-[#faf9f5] shadow-[0_0_0_1px_#c96442] hover:bg-[#b55836] hover:shadow-[0_0_0_1px_#b55836] active:scale-[0.99] focus-visible:ring-[#3898ec]",
         secondary:
-          "bg-slate-100 text-slate-900 hover:bg-slate-200 hover:shadow-sm",
+          "bg-[#e8e6dc] text-[#4d4c48] shadow-[0_0_0_1px_#d1cfc5] hover:shadow-[0_0_0_1px_#c2c0b6] active:scale-[0.99] focus-visible:ring-[#3898ec]",
+        outline:
+          "bg-transparent border border-[#e8e6dc] text-[#141413] hover:bg-[#f0eee6] focus-visible:ring-[#3898ec]",
         ghost:
-          "hover:bg-slate-100 hover:text-slate-900 text-slate-600",
-        link: "text-emerald-600 underline-offset-4 hover:underline hover:text-emerald-700",
-        soft:
-          "bg-emerald-100 text-emerald-700 hover:bg-emerald-200",
-        "soft-accent":
-          "bg-amber-100 text-amber-700 hover:bg-amber-200",
+          "bg-transparent text-[#5e5d59] hover:bg-[#e8e6dc] hover:text-[#141413] focus-visible:ring-[#3898ec]",
+        dark:
+          "bg-[#30302e] text-[#faf9f5] shadow-[0_0_0_1px_#30302e] hover:bg-[#141413] active:scale-[0.99] focus-visible:ring-[#3898ec]",
+        white:
+          "bg-[#ffffff] text-[#141413] shadow-[0_0_0_1px_#e8e6dc] hover:bg-[#faf9f5] active:scale-[0.99] focus-visible:ring-[#3898ec]",
+        destructive:
+          "bg-[#b53333] text-[#faf9f5] shadow-[0_0_0_1px_#b53333] hover:bg-[#991c1c] active:scale-[0.99] focus-visible:ring-[#3898ec]",
+        link:
+          "text-[#c96442] underline-offset-4 hover:underline",
       },
       size: {
         default: "h-11 px-6 py-2",
-        sm: "h-9 rounded-lg px-4 text-xs",
+        sm: "h-9 rounded-md px-4 text-xs",
         lg: "h-12 rounded-xl px-8 text-base",
         icon: "h-10 w-10",
       },

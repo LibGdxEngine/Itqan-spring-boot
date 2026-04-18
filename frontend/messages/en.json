@@ -172,17 +172,56 @@
     },
     "cta": {
       "title": "Ready to start your learning journey?",
-      "description": "Join our community of learners and unlock your full potential. Get started with a free account today."
+      "description": "Join our community of learners and unlock your full potential. Get started with a free account today.",
+      "exploreCourses": "Explore courses"
     },
     "badge": "Islamic Learning Platform",
     "heroSubtitle": "Trusted by thousands of students achieving their educational and Islamic knowledge goals with our comprehensive platform.",
+    "hero": {
+      "featuredCaption": "Featured lecture",
+      "featuredTitle": "Introduction to Quranic Sciences",
+      "featuredTeacher": "Sheikh Abdul Rahman Al-Sudais",
+      "featuredDuration": "45 min"
+    },
     "stats": {
       "activeStudents": "Active Students",
       "courses": "Courses",
+      "teachers": "Teachers",
+      "specializations": "Specializations",
       "successRate": "Success Rate",
-      "studentsCount": "10,000+",
-      "coursesCount": "200+",
+      "studentsCount": "8,500+",
+      "coursesCount": "250+",
+      "teachersCount": "120+",
+      "specializationsCount": "9",
       "successRateValue": "95%"
+    },
+    "categories": {
+      "title": "Specializations",
+      "subtitle": "Choose the field of study that matches your interest",
+      "all": "All",
+      "tafsir": "Tafsir",
+      "hadith": "Hadith",
+      "fiqh": "Fiqh",
+      "aqeedah": "Aqeedah",
+      "seerah": "Seerah",
+      "arabic": "Arabic Language",
+      "tajweed": "Tajweed",
+      "usool": "Usool al-Fiqh"
+    },
+    "teachers": {
+      "title": "Featured Teachers",
+      "subtitle": "Learn from a select circle of trusted scholars",
+      "coursesLabel": "courses",
+      "studentsLabel": "students",
+      "viewAll": "View all"
+    },
+    "courses": {
+      "title": "Selected Courses",
+      "subtitle": "Lectures and lessons curated with care",
+      "mostEnrolled": "Most enrolled",
+      "new": "New",
+      "free": "Free",
+      "browseAll": "Browse all courses"
     }
   },
   "auth": {
@@ -252,5 +291,32 @@
     "english": "English",
     "arabic": "العربية",
     "switchLanguage": "Switch language"
+  },
+  "seo": {
+    "home": {
+      "title": "Itqan — Authentic Islamic Studies & Quran Learning Platform",
+      "description": "Itqan is an authentic Islamic education platform offering courses in Tafsir, Hadith, Fiqh, Aqeedah, Seerah, Tajweed, Usool al-Fiqh, and Arabic language — taught by leading scholars and sheikhs.",
+      "keywords": "Islamic education|Quran sciences|Tafsir|Hadith|Fiqh|Aqeedah|Seerah|Tajweed|Usool al-Fiqh|learn Quran online|Islamic courses|Itqan"
+    },
+    "courses": {
+      "title": "Islamic Courses — Itqan",
+      "description": "Browse Itqan's catalog of Islamic courses in Tafsir, Hadith, Fiqh, Aqeedah, Seerah, Tajweed, and Arabic language, taught by leading scholars.",
+      "keywords": "Islamic courses|online Quran courses|Tafsir courses|Hadith courses|Fiqh courses|Aqeedah courses|Tajweed courses|online Islamic learning"
+    },
+    "instructors": {
+      "title": "Sheikhs & Instructors — Itqan",
+      "description": "Meet the sheikhs and instructors of the Itqan platform, specialized in Islamic sciences, Arabic language, and the Holy Quran.",
+      "keywords": "sheikhs|Islamic scholars|Quran teachers|Hadith teachers|Fiqh teachers|Itqan instructors"
+    },
+    "courseFallback": {
+      "notFound": "Course Not Found | Itqan",
+      "description": "Learn with Itqan — an authentic Islamic education platform."
+    },
+    "auth": {
+      "loginTitle": "Sign in | Itqan",
+      "registerTitle": "Create account | Itqan",
+      "forgotTitle": "Forgot password | Itqan",
+      "resetTitle": "Reset password | Itqan"
+    }
   }
 }

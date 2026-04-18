@@ -103,7 +103,7 @@ export function CourseCreatorForm() {
         <div className="space-y-2">
           <label className="text-sm font-medium">{t("courses.level") || "Level"}</label>
           <select
-            className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm"
+            className="flex h-10 w-full rounded-md border border-[#e8e6dc] bg-[#faf9f5] px-3 py-2 text-sm"
             value={formData.level}
             onChange={(e) => setFormData((prev) => ({ ...prev, level: e.target.value }))}
           >

@@ -162,6 +162,13 @@
             <artifactId>meilisearch-java</artifactId>
             <version>0.14.2</version>
         </dependency>
+        <!-- meilisearch-java uses OkHttp at runtime but declares it only as a transitive
+             under gson. Pin an explicit version so Spring Boot's fat jar packages it. -->
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>4.12.0</version>
+        </dependency>
 
         <!-- Redis Cache -->
         <dependency>

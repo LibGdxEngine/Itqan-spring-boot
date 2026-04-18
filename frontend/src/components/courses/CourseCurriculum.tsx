@@ -16,7 +16,7 @@ export function CourseCurriculum({ modules }: CourseCurriculumProps) {
     return (
         <div className="space-y-4">
             <h2 className="text-2xl font-bold text-gray-900">Course Curriculum</h2>
-            <div className="border rounded-lg divide-y bg-white text-gray-400 border-gray-100">
+            <div className="border rounded-lg divide-y bg-[#faf9f5] text-gray-400 border-gray-100">
                 {modules.map((module) => (
                     <ModuleItem key={module.id} module={module} />
                 ))}
@@ -32,7 +32,7 @@ function ModuleItem({ module }: { module: ModuleResponse }) {
     const lessons = module.lessons || [];
 
     return (
-        <div className="bg-white">
+        <div className="bg-[#faf9f5]">
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors text-left focus:outline-none"
@@ -67,19 +67,19 @@ function ModuleItem({ module }: { module: ModuleResponse }) {
 
 function LessonItem({ lesson }: { lesson: LessonResponse }) {
     return (
-        <div className="flex items-center justify-between p-3 pl-12 border-b border-gray-100 last:border-0 hover:bg-sky-50 transition-colors cursor-default">
+        <div className="flex items-center justify-between p-3 pl-12 border-b border-gray-100 last:border-0 hover:bg-[#f0eee6] transition-colors cursor-default">
             <div className="flex items-center space-x-3">
                 {lesson.type === 'VIDEO' ? (
-                    <PlayCircle className="h-4 w-4 text-sky-600" />
+                    <PlayCircle className="h-4 w-4 text-[#c96442]" />
                 ) : (
-                    <FileText className="h-4 w-4 text-emerald-600" />
+                    <FileText className="h-4 w-4 text-[#c96442]" />
                 )}
                 <span className="text-sm text-gray-700 font-medium">{lesson.title}</span>
             </div>
             <div className="flex items-center space-x-3">
                 <span className="text-xs text-gray-400">{lesson.duration} min</span>
                 {lesson.isFree ? (
-                    <span className="text-xs font-semibold text-sky-600 border border-sky-200 px-2 py-0.5 rounded-full">Preview</span>
+                    <span className="text-xs font-semibold text-[#c96442] border border-[#e8e6dc] px-2 py-0.5 rounded-full">Preview</span>
                 ) : (
                     <Lock className="h-3 w-3 text-gray-400" />
                 )}

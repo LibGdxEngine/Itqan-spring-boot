@@ -191,7 +191,7 @@ export function EnrollButton({ courseId, coursePrice }: EnrollButtonProps) {
         return (
             <Button 
                 variant="outline" 
-                className="w-full border-green-500 text-green-600 hover:bg-green-50"
+                className="w-full border-[#c96442] text-[#c96442] hover:bg-[#f0eee6]"
                 onClick={() => router.push(`/learn/${courseId}`)}
             >
                 <CheckCircle className="mr-2 h-4 w-4" />
@@ -218,7 +218,7 @@ export function EnrollButton({ courseId, coursePrice }: EnrollButtonProps) {
                 </Button>
             </div>
 
-            <div className="rounded-lg border border-slate-200 p-3 text-sm text-slate-700">
+            <div className="rounded-lg border border-[#e8e6dc] p-3 text-sm text-[#4d4c48]">
                 <div className="flex items-center justify-between">
                     <span>Original</span>
                     <span>${pricing.originalAmount.toFixed(2)}</span>
@@ -227,14 +227,14 @@ export function EnrollButton({ courseId, coursePrice }: EnrollButtonProps) {
                     <span>Discount</span>
                     <span>- ${pricing.discountAmount.toFixed(2)}</span>
                 </div>
-                <div className="mt-2 flex items-center justify-between font-semibold text-slate-900">
+                <div className="mt-2 flex items-center justify-between font-semibold text-[#141413]">
                     <span>Total</span>
                     <span>${pricing.finalAmount.toFixed(2)}</span>
                 </div>
             </div>
 
             <Button
-                className="w-full bg-sky-600 hover:bg-sky-700 text-white"
+                className="w-full bg-[#c96442] hover:bg-[#b55836] text-[#faf9f5]"
                 onClick={handleCheckout}
                 disabled={loading}
             >

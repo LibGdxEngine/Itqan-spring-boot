@@ -48,29 +48,29 @@ export default function MyCoursesPage() {
     }, [isAuthenticated, router, authLoading]);
 
     return (
-        <div className="min-h-screen bg-slate-50">
+        <div className="min-h-screen bg-[#f5f4ed]">
             <Navbar />
-            
+
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-slate-900">
+                    <h1 className="text-3xl font-bold text-[#141413]">
                         My Learning
                     </h1>
-                    <p className="mt-2 text-slate-600">
+                    <p className="mt-2 text-[#5e5d59]">
                         Continue learning where you left off.
                     </p>
                 </div>
 
                 {loading ? (
                     <div className="flex justify-center items-center h-64">
-                        <Loader2 className="h-10 w-10 text-sky-600 animate-spin" />
+                        <Loader2 className="h-10 w-10 text-[#c96442] animate-spin" />
                     </div>
                 ) : error ? (
                     <div className="text-center text-red-500 py-12">
                         {error}
                     </div>
                 ) : enrollments.length === 0 ? (
-                    <div className="text-center text-slate-500 py-12">
+                    <div className="text-center text-[#87867f] py-12">
                         You are not enrolled in any courses yet.
                     </div>
                 ) : (
@@ -80,7 +80,7 @@ export default function MyCoursesPage() {
                                 <div key={enrollment.id} className="h-full">
                                     <CourseCard course={enrollment.course} />
                                     <div className="mt-2 text-sm text-gray-500 text-right">
-                                        Status: <span className="font-semibold text-sky-600">{enrollment.status}</span>
+                                        Status: <span className="font-semibold text-[#c96442]">{enrollment.status}</span>
                                     </div>
                                 </div>
                             ) : null

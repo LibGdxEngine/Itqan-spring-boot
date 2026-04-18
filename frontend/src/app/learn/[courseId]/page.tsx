@@ -31,8 +31,8 @@ export default function LearnPage() {
 
     return (
         <div className="flex items-center justify-center h-full">
-            <Loader2 className="h-8 w-8 animate-spin text-sky-600" />
-            <span className="ml-2 text-slate-600">Loading your course...</span>
+            <Loader2 className="h-8 w-8 animate-spin text-[#c96442]" />
+            <span className="ml-2 text-[#5e5d59]">Loading your course...</span>
         </div>
     );
 }

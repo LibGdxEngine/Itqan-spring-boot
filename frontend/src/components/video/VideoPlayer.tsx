@@ -251,7 +251,7 @@ export function VideoPlayer({
             return (
               <div
                 key={bookmark.id}
-                className="absolute w-2 h-4 -mt-1 bg-yellow-400 rounded-sm"
+                className="absolute w-2 h-4 -mt-1 bg-[#c96442] rounded-sm"
                 style={{ left: `${position}%` }}
                 title={bookmark.note}
               />
@@ -268,7 +268,7 @@ export function VideoPlayer({
           onClick={handleProgressClick}
         >
           <div 
-            className="h-full bg-sky-500 rounded-full transition-all group-hover:bg-sky-400"
+            className="h-full bg-[#c96442] rounded-full transition-all group-hover:bg-[#d97757]"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -328,7 +328,7 @@ export function VideoPlayer({
             <button
               onClick={() => setShowBookmarks(!showBookmarks)}
               className={`px-3 py-1 rounded text-sm transition ${
-                showBookmarks ? 'bg-sky-600' : 'bg-gray-700 hover:bg-gray-600'
+                showBookmarks ? 'bg-[#c96442]' : 'bg-gray-700 hover:bg-gray-600'
               }`}
             >
               Bookmarks ({bookmarks.length})
@@ -338,7 +338,7 @@ export function VideoPlayer({
               <button
                 onClick={() => setShowTranscript(!showTranscript)}
                 className={`px-3 py-1 rounded text-sm transition ${
-                  showTranscript ? 'bg-sky-600' : 'bg-gray-700 hover:bg-gray-600'
+                  showTranscript ? 'bg-[#c96442]' : 'bg-gray-700 hover:bg-gray-600'
                 }`}
               >
                 Transcript

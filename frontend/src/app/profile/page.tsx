@@ -35,20 +35,20 @@ function InfoRow({
   value?: string | null
 }) {
   return (
-    <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100">
-      <Icon className="w-4 h-4 text-slate-400 shrink-0" />
+    <div className="flex items-center gap-3 p-3 rounded-xl bg-[#f0eee6] border border-[#f0eee6]">
+      <Icon className="w-4 h-4 text-[#87867f] shrink-0" />
       <div className="min-w-0">
-        <p className="text-xs text-slate-500 font-medium">{label}</p>
-        <p className="text-sm font-medium text-slate-900 truncate">{value || "—"}</p>
+        <p className="text-xs text-[#87867f] font-medium">{label}</p>
+        <p className="text-sm font-medium text-[#141413] truncate">{value || "—"}</p>
       </div>
     </div>
   )
 }
 
 const ROLE_BADGE: Record<string, { label: string; className: string; icon: React.ComponentType<{ className?: string }> }> = {
-  STUDENT: { label: "Student", className: "bg-sky-100 text-sky-700", icon: GraduationCap },
-  INSTRUCTOR: { label: "Instructor", className: "bg-emerald-100 text-emerald-700", icon: GraduationCap },
-  ADMIN: { label: "Admin", className: "bg-amber-100 text-amber-700", icon: ShieldCheck },
+  STUDENT: { label: "Student", className: "bg-[#f0eee6] text-[#c96442]", icon: GraduationCap },
+  INSTRUCTOR: { label: "Instructor", className: "bg-[#f0eee6] text-[#c96442]", icon: GraduationCap },
+  ADMIN: { label: "Admin", className: "bg-[#e8e6dc] text-[#c96442]", icon: ShieldCheck },
 }
 
 export default function ProfilePage() {
@@ -155,10 +155,10 @@ export default function ProfilePage() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-[#f5f4ed]">
         <Navbar />
         <div className="flex items-center justify-center min-h-[60vh]">
-          <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
+          <Loader2 className="w-8 h-8 animate-spin text-[#c96442]" />
         </div>
       </div>
     )
@@ -169,28 +169,28 @@ export default function ProfilePage() {
   const BadgeIcon = badge.icon
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-[#f5f4ed]">
       <Navbar />
       <main className="max-w-3xl mx-auto px-4 pt-24 pb-12">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900">My Profile</h1>
-          <p className="text-slate-600 mt-1">View and manage your personal information</p>
+          <h1 className="text-3xl font-bold text-[#141413]">My Profile</h1>
+          <p className="text-[#5e5d59] mt-1">View and manage your personal information</p>
         </div>
 
         {/* Profile Card */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="bg-[#faf9f5] rounded-2xl border border-[#e8e6dc] shadow-sm overflow-hidden">
           {/* Header banner */}
-          <div className="bg-gradient-to-r from-emerald-600 to-emerald-700 px-6 py-8">
+          <div className="bg-[#c96442] px-6 py-8">
             <div className="flex items-center gap-5">
-              <div className="w-16 h-16 rounded-full bg-white/20 border-2 border-white/40 flex items-center justify-center text-white text-2xl font-bold shrink-0 select-none">
+              <div className="w-16 h-16 rounded-full bg-[#30302e] border-2 border-[#30302e] flex items-center justify-center text-[#faf9f5] text-2xl font-bold shrink-0 select-none">
                 {user?.firstName?.[0]?.toUpperCase()}
                 {user?.lastName?.[0]?.toUpperCase()}
               </div>
               <div>
-                <h2 className="text-xl font-semibold text-white">
+                <h2 className="text-xl font-semibold text-[#faf9f5]">
                   {user?.firstName} {user?.lastName}
                 </h2>
-                <p className="text-emerald-100 text-sm mt-0.5">{user?.email}</p>
+                <p className="text-[#faf9f5] text-sm mt-0.5">{user?.email}</p>
                 <span
                   className={`inline-flex items-center gap-1 mt-2 px-2.5 py-0.5 rounded-full text-xs font-medium ${badge.className}`}
                 >

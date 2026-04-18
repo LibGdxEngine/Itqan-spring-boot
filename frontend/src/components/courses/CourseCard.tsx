@@ -14,14 +14,14 @@ export function CourseCard({ course }: CourseCardProps) {
   return (
     <Card className="flex flex-col h-full hover:shadow-lg transition-shadow duration-300">
       <CardHeader className="p-0">
-        <div className="h-48 bg-gradient-to-r from-sky-400 to-indigo-500 w-full rounded-t-lg flex items-center justify-center">
+        <div className="h-48 bg-[#c96442] w-full rounded-t-lg flex items-center justify-center">
              {/* Placeholder for course image */}
-             <BookOpen className="h-16 w-16 text-white opacity-80" />
+             <BookOpen className="h-16 w-16 text-[#faf9f5] opacity-80" />
         </div>
       </CardHeader>
       <CardContent className="flex-grow p-6">
         <div className="flex justify-between items-start mb-2">
-            <span className="bg-sky-100 text-sky-800 text-xs px-2 py-1 rounded-full font-semibold">
+            <span className="bg-[#f0eee6] text-[#c96442] text-xs px-2 py-1 rounded-full font-semibold">
               {course.level}
             </span>
             <span className="text-xl font-bold text-gray-900">
@@ -47,7 +47,7 @@ export function CourseCard({ course }: CourseCardProps) {
       </CardContent>
       <CardFooter className="p-6 pt-0 mt-auto">
         <Link href={`/courses/${course.id}`} className="w-full">
-            <Button className="w-full bg-sky-600 hover:bg-sky-700 text-white">
+            <Button className="w-full bg-[#c96442] hover:bg-[#b55836] text-[#faf9f5]">
                 View Course
             </Button>
         </Link>

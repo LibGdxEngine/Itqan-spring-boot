@@ -16,11 +16,11 @@ export function EnrolledCourseCard({ enrollment }: EnrolledCourseCardProps) {
   const enrolledAt = enrollment.enrolledAt ? new Date(enrollment.enrolledAt).toLocaleDateString() : "-"
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+    <div className="bg-[#faf9f5] rounded-xl border border-[#e8e6dc] shadow-sm overflow-hidden hover:shadow-md transition-shadow">
       {/* Course Image */}
-      <div className="aspect-video relative bg-slate-100">
+      <div className="aspect-video relative bg-[#f0eee6]">
         {/* Placeholder for course image if available in backend, currently CourseResponse might not have image */}
-        <div className="absolute inset-0 flex items-center justify-center text-slate-400">
+        <div className="absolute inset-0 flex items-center justify-center text-[#87867f]">
            <PlayCircle className="w-12 h-12 opacity-50" />
         </div>
       </div>
@@ -30,7 +30,7 @@ export function EnrolledCourseCard({ enrollment }: EnrolledCourseCardProps) {
           {enrollment.course?.title || "Untitled Course"}
         </h3>
         
-        <div className="flex items-center gap-4 text-sm text-slate-500 mb-4">
+        <div className="flex items-center gap-4 text-sm text-[#87867f] mb-4">
             {/* If enrolledAt or other metadata exists */}
            <span className="flex items-center gap-1">
              <Clock className="w-4 h-4" />
@@ -41,7 +41,7 @@ export function EnrolledCourseCard({ enrollment }: EnrolledCourseCardProps) {
 
         <div className="space-y-2 mb-4">
           <div className="flex justify-between text-sm">
-            <span className="text-slate-600 font-medium">
+            <span className="text-[#5e5d59] font-medium">
                 {enrollment.progress}% {t("common.completed") || "Completed"}
             </span>
           </div>

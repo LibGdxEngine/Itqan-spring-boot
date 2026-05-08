@@ -3,8 +3,18 @@
 import Link from "next/link"
 import { ArrowRight, Play, Star, Clock, Mail, ChevronRight } from "lucide-react"
 import { Navbar } from "@/components/Navbar"
-import { useTranslations } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
 import { Button } from "@/components/ui/button"
+import {
+  motion,
+  useReducedMotion,
+  useMotionValue,
+  useTransform,
+  animate,
+  useInView,
+  type Variants,
+} from "framer-motion"
+import { useEffect, useRef, useState } from "react"
 
 const CATEGORY_KEYS = [
   "all",
@@ -52,8 +62,21 @@ const COURSES: CourseData[] = [
   { title: "العقيدة الواسطية", teacher: "د. عثمان الخميس", category: "العقيدة", duration: "٩ ساعات", rating: "٤٫٩", price: "١٣٩ ر.س" },
 ]
 
+const EASE = [0.22, 1, 0.36, 1] as const
+
+const fadeUp: Variants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE } },
+}
+
+const staggerParent: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
+}
+
 export default function HomeClient() {
   const t = useTranslations()
+  const locale = useLocale()
 
   return (
     <div className="min-h-screen bg-[#f5f4ed] text-[#141413]">
@@ -66,23 +89,42 @@ export default function HomeClient() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-[1.1fr_1fr] gap-12 lg:gap-16 items-center">
             {/* Text column */}
-            <div className="space-y-8">
-              <span className="inline-block text-xs tracking-[0.12px] uppercase text-[#87867f]">
+            <motion.div
+              className="space-y-8"
+              initial="hidden"
+              animate="visible"
+              variants={staggerParent}
+            >
+              <motion.span
+                variants={fadeUp}
+                className="inline-flex items-center gap-2 text-xs tracking-[0.12px] uppercase text-[#87867f]"
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#c96442] opacity-60" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-[#c96442]" />
+                </span>
                 {t("home.badge")}
-              </span>
+              </motion.span>
 
-              <h1
+              <motion.h1
+                variants={fadeUp}
                 className="text-display font-serif-ar text-[#141413]"
                 style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
               >
                 {t("home.heroTitle1")} {t("home.heroTitle2")}
-              </h1>
+              </motion.h1>
 
-              <p className="text-[20px] leading-[1.6] text-[#5e5d59] max-w-xl">
+              <motion.p
+                variants={fadeUp}
+                className="text-[20px] leading-[1.6] text-[#5e5d59] max-w-xl"
+              >
                 {t("home.heroSubtitle")}
-              </p>
+              </motion.p>
 
-              <div className="flex flex-col sm:flex-row items-start gap-3 ltr-flex">
+              <motion.div
+                variants={fadeUp}
+                className="flex flex-col sm:flex-row items-start gap-3 ltr-flex"
+              >
                 <Link href="/register">
                   <Button size="lg" className="text-base px-7">
                     {t("common.startLearning")}
@@ -95,11 +137,25 @@ export default function HomeClient() {
                     <ChevronRight className="w-4 h-4 rtl:rotate-180" />
                   </Button>
                 </Link>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
 
             {/* Featured video card */}
-            <div className="relative">
+            <motion.div
+              className="relative"
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.7, delay: 0.25, ease: EASE }}
+            >
+              {/* Ambient warm glow */}
+              <div
+                aria-hidden
+                className="pointer-events-none absolute -inset-10 -z-10 opacity-25 blur-3xl"
+                style={{
+                  background:
+                    "radial-gradient(circle at 50% 50%, #d97757 0%, transparent 60%)",
+                }}
+              />
               <div className="bg-[#faf9f5] border border-[#f0eee6] rounded-[32px] p-5 shadow-whisper">
                 <div className="relative aspect-video rounded-[20px] overflow-hidden bg-[#30302e]">
                   <div className="absolute inset-0 pattern-islamic opacity-40" />
@@ -129,7 +185,7 @@ export default function HomeClient() {
                   <p className="text-sm text-[#5e5d59]">{t("home.hero.featuredTeacher")}</p>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -138,10 +194,10 @@ export default function HomeClient() {
       <section className="bg-[#141413] py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-10 text-center">
-            <StatItem value={t("home.stats.coursesCount")} label={t("home.stats.courses")} />
-            <StatItem value={t("home.stats.teachersCount")} label={t("home.stats.teachers")} />
-            <StatItem value={t("home.stats.studentsCount")} label={t("home.stats.activeStudents")} />
-            <StatItem value={t("home.stats.specializationsCount")} label={t("home.stats.specializations")} />
+            <StatItem rawValue={t("home.stats.coursesCount")} label={t("home.stats.courses")} locale={locale} />
+            <StatItem rawValue={t("home.stats.teachersCount")} label={t("home.stats.teachers")} locale={locale} />
+            <StatItem rawValue={t("home.stats.studentsCount")} label={t("home.stats.activeStudents")} locale={locale} />
+            <StatItem rawValue={t("home.stats.specializationsCount")} label={t("home.stats.specializations")} locale={locale} />
           </div>
         </div>
       </section>
@@ -149,22 +205,36 @@ export default function HomeClient() {
       {/* ===== 3. CATEGORY PILLS ===== */}
       <section aria-labelledby="categories-heading" className="py-20 bg-[#f5f4ed]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10 space-y-3">
-            <h2
+          <motion.div
+            className="text-center mb-10 space-y-3"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.4 }}
+            variants={staggerParent}
+          >
+            <motion.h2
+              variants={fadeUp}
               id="categories-heading"
               className="text-subhead-lg text-[#141413]"
               style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
             >
               {t("home.categories.title")}
-            </h2>
-            <p className="text-[#5e5d59] text-[17px] leading-[1.6]">
+            </motion.h2>
+            <motion.p variants={fadeUp} className="text-[#5e5d59] text-[17px] leading-[1.6]">
               {t("home.categories.subtitle")}
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center justify-center gap-3">
+            </motion.p>
+          </motion.div>
+          <motion.div
+            className="flex flex-wrap items-center justify-center gap-3"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+            variants={staggerParent}
+          >
             {CATEGORY_KEYS.map((key, idx) => (
-              <button
+              <motion.button
                 key={key}
+                variants={fadeUp}
                 className={
                   idx === 0
                     ? "px-5 py-2.5 rounded-full bg-[#c96442] text-[#faf9f5] text-sm font-medium shadow-[0_0_0_1px_#c96442] hover:bg-[#b55836] transition-colors"
@@ -172,17 +242,23 @@ export default function HomeClient() {
                 }
               >
                 {t(`home.categories.${key}`)}
-              </button>
+              </motion.button>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* ===== 4. TEACHER CARDS ===== */}
       <section aria-labelledby="teachers-heading" className="py-20 bg-[#faf9f5] border-y border-[#f0eee6]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10 ltr-flex">
-            <div className="space-y-3">
+          <motion.div
+            className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10 ltr-flex"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.4 }}
+            variants={staggerParent}
+          >
+            <motion.div variants={fadeUp} className="space-y-3">
               <h2
                 id="teachers-heading"
                 className="text-subhead-lg text-[#141413]"
@@ -193,17 +269,25 @@ export default function HomeClient() {
               <p className="text-[#5e5d59] text-[17px] leading-[1.6]">
                 {t("home.teachers.subtitle")}
               </p>
-            </div>
-            <Link
-              href="/instructors"
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-[#c96442] hover:text-[#b55836] transition-colors ltr-flex"
-            >
-              {t("home.teachers.viewAll")}
-              <ChevronRight className="w-4 h-4 rtl:rotate-180" />
-            </Link>
-          </div>
+            </motion.div>
+            <motion.div variants={fadeUp}>
+              <Link
+                href="/instructors"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-[#c96442] hover:text-[#b55836] transition-colors ltr-flex"
+              >
+                {t("home.teachers.viewAll")}
+                <ChevronRight className="w-4 h-4 rtl:rotate-180" />
+              </Link>
+            </motion.div>
+          </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <motion.div
+            className="grid md:grid-cols-3 gap-6"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+            variants={staggerParent}
+          >
             {TEACHERS.map((teacher) => (
               <TeacherCard
                 key={teacher.name}
@@ -212,15 +296,21 @@ export default function HomeClient() {
                 studentsLabel={t("home.teachers.studentsLabel")}
               />
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* ===== 5. COURSE GRID ===== */}
       <section aria-labelledby="courses-heading" className="py-20 bg-[#f5f4ed]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10 ltr-flex">
-            <div className="space-y-3">
+          <motion.div
+            className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10 ltr-flex"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.4 }}
+            variants={staggerParent}
+          >
+            <motion.div variants={fadeUp} className="space-y-3">
               <h2
                 id="courses-heading"
                 className="text-subhead-lg text-[#141413]"
@@ -231,17 +321,25 @@ export default function HomeClient() {
               <p className="text-[#5e5d59] text-[17px] leading-[1.6]">
                 {t("home.courses.subtitle")}
               </p>
-            </div>
-            <Link
-              href="/courses"
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-[#c96442] hover:text-[#b55836] transition-colors ltr-flex"
-            >
-              {t("home.courses.browseAll")}
-              <ChevronRight className="w-4 h-4 rtl:rotate-180" />
-            </Link>
-          </div>
+            </motion.div>
+            <motion.div variants={fadeUp}>
+              <Link
+                href="/courses"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-[#c96442] hover:text-[#b55836] transition-colors ltr-flex"
+              >
+                {t("home.courses.browseAll")}
+                <ChevronRight className="w-4 h-4 rtl:rotate-180" />
+              </Link>
+            </motion.div>
+          </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <motion.div
+            className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.15 }}
+            variants={staggerParent}
+          >
             {COURSES.map((course) => (
               <CourseCard
                 key={course.title}
@@ -251,24 +349,37 @@ export default function HomeClient() {
                 freeLabel={t("home.courses.free")}
               />
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* ===== 6. CTA (dark chapter) ===== */}
       <section aria-labelledby="cta-heading" className="py-24 bg-[#141413]">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
-          <h2
+        <motion.div
+          className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.3 }}
+          variants={staggerParent}
+        >
+          <motion.h2
+            variants={fadeUp}
             id="cta-heading"
             className="text-section text-[#faf9f5]"
             style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
           >
             {t("home.cta.title")}
-          </h2>
-          <p className="text-[18px] leading-[1.6] text-[#b0aea5] max-w-2xl mx-auto">
+          </motion.h2>
+          <motion.p
+            variants={fadeUp}
+            className="text-[18px] leading-[1.6] text-[#b0aea5] max-w-2xl mx-auto"
+          >
             {t("home.cta.description")}
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2 ltr-flex">
+          </motion.p>
+          <motion.div
+            variants={fadeUp}
+            className="flex flex-col sm:flex-row gap-3 justify-center pt-2 ltr-flex"
+          >
             <Link href="/register">
               <Button size="lg" className="text-base px-7">
                 {t("common.createFreeAccount")}
@@ -280,8 +391,8 @@ export default function HomeClient() {
                 {t("home.cta.exploreCourses")}
               </Button>
             </Link>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </section>
 
       {/* ===== 7. FOOTER ===== */}
@@ -355,14 +466,68 @@ export default function HomeClient() {
 
 /* ===== Sub-components ===== */
 
-function StatItem({ value, label }: { value: string; label: string }) {
+const ARABIC_DIGITS = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"]
+
+function toArabicDigits(n: number): string {
+  return n
+    .toString()
+    .split("")
+    .map((c) => (c >= "0" && c <= "9" ? ARABIC_DIGITS[Number(c)] : c))
+    .join("")
+}
+
+function parseStatValue(raw: string): { number: number; prefix: string; suffix: string } {
+  // Strip thousands separators and arabic digits, find leading numeric run.
+  const normalized = raw
+    .replace(/[٠-٩]/g, (c) => String(ARABIC_DIGITS.indexOf(c)))
+    .replace(/[,٬،]/g, "")
+
+  const match = normalized.match(/^(\D*)(\d+)(.*)$/)
+  if (!match) return { number: 0, prefix: "", suffix: raw }
+  const [, prefix, digits, suffix] = match
+  return { number: parseInt(digits, 10), prefix, suffix }
+}
+
+function formatStatNumber(n: number, locale: string): string {
+  const rounded = Math.round(n)
+  if (locale === "ar") return toArabicDigits(rounded)
+  return rounded.toLocaleString("en-US")
+}
+
+function StatItem({
+  rawValue,
+  label,
+  locale,
+}: {
+  rawValue: string
+  label: string
+  locale: string
+}) {
+  const reduced = useReducedMotion()
+  const ref = useRef<HTMLDivElement>(null)
+  const inView = useInView(ref, { once: true, amount: 0.4 })
+  const { number: target, prefix, suffix } = parseStatValue(rawValue)
+  const motionValue = useMotionValue(0)
+  const display = useTransform(motionValue, (v) => `${prefix}${formatStatNumber(v, locale)}${suffix}`)
+  const [staticValue] = useState(rawValue)
+
+  useEffect(() => {
+    if (reduced || !inView) return
+    const controls = animate(motionValue, target, { duration: 1.4, ease: EASE })
+    return controls.stop
+  }, [inView, reduced, target, motionValue])
+
   return (
-    <div className="space-y-2">
+    <div ref={ref} className="space-y-2">
       <div
         className="text-[44px] md:text-[52px] text-[#faf9f5] leading-none"
         style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
       >
-        {value}
+        {reduced ? (
+          staticValue
+        ) : (
+          <motion.span>{display}</motion.span>
+        )}
       </div>
       <div className="text-sm font-medium text-[#b0aea5]">{label}</div>
     </div>
@@ -379,10 +544,13 @@ function TeacherCard({
   studentsLabel: string
 }) {
   return (
-    <div className="bg-[#faf9f5] border border-[#f0eee6] rounded-2xl p-6 hover-lift transition-smooth">
+    <motion.div
+      variants={fadeUp}
+      className="group bg-[#faf9f5] border border-[#f0eee6] rounded-2xl p-6 hover-lift transition-smooth"
+    >
       <div className="flex items-center gap-4 mb-4 ltr-flex">
         <div
-          className="w-12 h-12 rounded-full bg-[#e8e6dc] flex items-center justify-center text-[#4d4c48] text-[15px]"
+          className="w-12 h-12 rounded-full bg-[#e8e6dc] flex items-center justify-center text-[#4d4c48] text-[15px] ring-0 ring-[#c96442]/30 transition-all duration-300 group-hover:ring-2 group-hover:rotate-3"
           style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
         >
           {teacher.initials}
@@ -408,7 +576,7 @@ function TeacherCard({
           <span>{studentsLabel}</span>
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }
 
@@ -424,16 +592,22 @@ function CourseCard({
   freeLabel: string
 }) {
   return (
-    <div className="bg-[#faf9f5] border border-[#f0eee6] rounded-2xl overflow-hidden hover-lift transition-smooth flex flex-col">
-      <div className="relative aspect-video bg-[#30302e]">
-        <div className="absolute inset-0 pattern-islamic opacity-40" />
+    <motion.div
+      variants={fadeUp}
+      className="group bg-[#faf9f5] border border-[#f0eee6] rounded-2xl overflow-hidden hover-lift transition-smooth flex flex-col"
+    >
+      <div className="relative aspect-video bg-[#30302e] overflow-hidden">
+        <div className="absolute inset-0 pattern-islamic opacity-40 transition-transform duration-500 ease-out group-hover:scale-105" />
         <div className="absolute inset-0 flex items-center justify-center">
-          <button
-            aria-label={`Play ${course.title}`}
-            className="w-12 h-12 rounded-full bg-[#c96442] text-[#faf9f5] flex items-center justify-center shadow-[0_0_0_5px_rgba(250,249,245,0.15)] hover:bg-[#b55836] transition-colors"
-          >
-            <Play className="w-5 h-5 ml-0.5" fill="currentColor" />
-          </button>
+          <span className="relative flex">
+            <span className="absolute inset-0 rounded-full bg-[#c96442] opacity-0 group-hover:opacity-60 group-hover:animate-ping" />
+            <button
+              aria-label={`Play ${course.title}`}
+              className="relative w-12 h-12 rounded-full bg-[#c96442] text-[#faf9f5] flex items-center justify-center shadow-[0_0_0_5px_rgba(250,249,245,0.15)] hover:bg-[#b55836] transition-colors"
+            >
+              <Play className="w-5 h-5 ml-0.5" fill="currentColor" />
+            </button>
+          </span>
         </div>
         <div className="absolute top-3 left-3 bg-[#faf9f5]/95 text-[#4d4c48] text-xs font-medium px-2.5 py-1 rounded-md">
           {course.category}
@@ -470,6 +644,6 @@ function CourseCard({
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }

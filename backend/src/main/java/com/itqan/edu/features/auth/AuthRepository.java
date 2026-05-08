@@ -22,6 +22,8 @@ public interface AuthRepository extends JpaRepository<User, Long> {
     long countBySuperAdminTrue();
     long countBySuperAdminTrueAndEnabledTrue();
 
+    long countByRole(User.Role role);
+
     long countByCreatedAtBetween(LocalDateTime from, LocalDateTime to);
 
     @Query("SELECT u.role, COUNT(u) FROM User u GROUP BY u.role")

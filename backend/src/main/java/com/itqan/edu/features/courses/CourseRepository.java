@@ -9,6 +9,8 @@ import java.util.List;
 
 @Repository
 public interface CourseRepository extends JpaRepository<Course, Long> {
+    long countByActiveTrue();
+
     List<Course> findByActiveTrue();
 
     Page<Course> findByActiveTrue(Pageable pageable);

@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 1, "column": 0}, "map": {"version":3,"sources":["turbopack:///[next]/internal/font/google/noto_sans_arabic_e36d9751.module.css"],"sourcesContent":["@font-face {\n    font-family: 'Noto Sans Arabic Fallback';\n    src: local(\"Arial\");\n    ascent-override: 113.22%;\ndescent-override: 60.81%;\nline-gap-override: 0.00%;\nsize-adjust: 121.35%;\n\n}\n.className {\n    font-family: 'Noto Sans Arabic', 'Noto Sans Arabic Fallback';\n    font-style: normal;\n\n}\n.variable {\n    --font-noto-arabic: 'Noto Sans Arabic', 'Noto Sans Arabic Fallback';\n}\n"],"names":[],"mappings":"AAAA;;;;;;;;;AASA;;;;;AAKA","ignoreList":[0]}}]
-}

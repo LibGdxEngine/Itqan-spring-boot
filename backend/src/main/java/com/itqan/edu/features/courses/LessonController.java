@@ -100,6 +100,7 @@ public class LessonController {
     }
 
     @GetMapping("/{id}/video/playback-url")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Get lesson video playback URL", description = "Get a short-lived pre-signed video playback URL")
     public ResponseEntity<LessonVideoPlaybackResponse> getPlaybackUrl(@PathVariable Long id) {
         LessonVideoPlaybackResponse response = lessonVideoService.getPlaybackUrl(id);

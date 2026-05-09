@@ -1,14 +1,17 @@
 "use client";
 
 import { useCallback, useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { LessonsService, LessonResponse, OpenAPI } from '@/lib/api';
-import { Loader2, ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
+import { Loader2, ChevronLeft, ChevronRight, CheckCircle, ClipboardCheck, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { VideoPlayer } from '@/components/video';
-import { Transcript } from '@/types/video';
 import { getLessonVideoPlaybackUrl } from '@/lib/lessonVideoUploadService';
+
+type LessonWithQuiz = LessonResponse & { quizId?: number };
 
 OpenAPI.BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
@@ -17,34 +20,44 @@ export default function LessonPage() {
     const lessonId = Number(params.lessonId);
     const courseId = params.courseId;
     const router = useRouter();
+    const t = useTranslations();
 
-    const [lesson, setLesson] = useState<LessonResponse | null>(null);
+    const [lesson, setLesson] = useState<LessonWithQuiz | null>(null);
     const [loading, setLoading] = useState(true);
     const [videoUrl, setVideoUrl] = useState<string | null>(null);
     const [playbackRetryUsed, setPlaybackRetryUsed] = useState(false);
+    const [playbackError, setPlaybackError] = useState(false);
 
     const resolveVideoUrl = useCallback(async (lessonData: LessonResponse) => {
         if (lessonData.type !== 'VIDEO') {
             setVideoUrl(null);
+            setPlaybackError(false);
             return;
         }
 
         try {
             const playback = await getLessonVideoPlaybackUrl(lessonData.id!);
             setVideoUrl(playback.url);
+            setPlaybackError(false);
             return;
         } catch (error) {
-            console.warn('Falling back to lesson videoUrl:', error);
+            console.warn('Playback URL unavailable:', error);
         }
 
-        setVideoUrl(lessonData.videoUrl || null);
+        if (lessonData.videoUrl) {
+            setVideoUrl(lessonData.videoUrl);
+            setPlaybackError(false);
+        } else {
+            setVideoUrl(null);
+            setPlaybackError(true);
+        }
     }, []);
 
     useEffect(() => {
         const fetchLesson = async () => {
             setLoading(true);
             try {
-                const data = await LessonsService.getLessonById(lessonId);
+                const data = (await LessonsService.getLessonById(lessonId)) as LessonWithQuiz;
                 setLesson(data);
                 setPlaybackRetryUsed(false);
                 await resolveVideoUrl(data);
@@ -72,63 +85,90 @@ export default function LessonPage() {
         return <div className="p-10">Lesson not found.</div>;
     }
 
-    // Sample transcript - TODO: fetch from backend or generate
-    const sampleTranscript: Transcript | undefined = videoUrl
-        ? {
-              lessonId: lessonId,
-              language: 'en',
-              segments: [
-                  {
-                      id: 1,
-                      startTime: 0,
-                      endTime: 10,
-                      text: `Welcome to ${lesson.title}. In this lesson, we'll cover important concepts.`,
-                  },
-                  // Add more segments as needed
-              ],
-          }
-        : undefined;
+    const isVideoLesson = lesson.type === 'VIDEO';
+    const status = lesson.videoStatus;
+    const showProcessing = isVideoLesson && !videoUrl && (status === 'PENDING' || status === 'UPLOADING');
+    const showFailed = isVideoLesson && !videoUrl && (status === 'FAILED' || (playbackError && status !== 'READY'));
+
+    const retryPlayback = async () => {
+        if (!lesson.id) return;
+        setPlaybackRetryUsed(true);
+        try {
+            const playback = await getLessonVideoPlaybackUrl(lesson.id);
+            setVideoUrl(playback.url);
+            setPlaybackError(false);
+        } catch (error) {
+            console.error('Failed to refresh playback URL', error);
+            setPlaybackError(true);
+        }
+    };
 
     return (
         <div className="max-w-7xl mx-auto p-8">
             {/* Video Player Area - Using Advanced Video Player */}
-            {lesson.type === 'VIDEO' && videoUrl && (
+            {isVideoLesson && videoUrl && (
                 <div className="mb-8">
                     <VideoPlayer
                         videoUrl={videoUrl}
                         lessonId={lessonId}
-                        transcript={sampleTranscript}
                         autoPlay={false}
                         onPlaybackError={async () => {
                             if (!lesson.id || playbackRetryUsed) return;
-                            setPlaybackRetryUsed(true);
-                            try {
-                                const playback = await getLessonVideoPlaybackUrl(lesson.id);
-                                setVideoUrl(playback.url);
-                            } catch (error) {
-                                console.error('Failed to refresh playback URL', error);
-                            }
+                            await retryPlayback();
                         }}
                         onTimeUpdate={(time) => {
-                            // Track video progress for analytics
                             console.log(`Watching at ${time}s`);
                         }}
                         onEnded={() => {
-                            // Auto-mark as complete or suggest next lesson
                             console.log('Video completed');
                         }}
                     />
                 </div>
             )}
 
+            {showProcessing && (
+                <div className="mb-8 flex items-center gap-3 rounded-xl border border-[#e8e6dc] bg-[#faf9f5] p-6 text-[#4d4c48]">
+                    <Loader2 className="h-5 w-5 animate-spin text-[#c96442]" />
+                    <span>{t('lesson.videoProcessing')}</span>
+                </div>
+            )}
+
+            {showFailed && (
+                <div className="mb-8 flex flex-col gap-3 rounded-xl border border-[#f3c9be] bg-[#fdf3ef] p-6 text-[#b53333] sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-3">
+                        <AlertTriangle className="h-5 w-5" />
+                        <span>{t('lesson.videoFailed')}</span>
+                    </div>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="border-[#f3c9be] text-[#b53333] hover:bg-[#f9e2da]"
+                        onClick={() => void retryPlayback()}
+                    >
+                        {t('lesson.videoTryAgain')}
+                    </Button>
+                </div>
+            )}
+
             {/* Header */}
             <div className="mb-6">
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
                     <h1 className="text-2xl font-bold text-gray-900">{lesson.title}</h1>
-                    <Button variant="outline" className="text-[#c96442] border-[#e8e6dc] hover:bg-[#f0eee6]">
-                        <CheckCircle className="mr-2 h-4 w-4" />
-                        Mark as Complete
-                    </Button>
+                    <div className="flex flex-wrap items-center gap-2">
+                        {lesson.quizId && (
+                            <Link
+                                href={`/learn/${courseId}/${lessonId}/quiz`}
+                                className="inline-flex h-11 items-center gap-2 rounded-lg bg-[#c96442] px-4 text-sm font-medium text-white transition hover:bg-[#b3573a]"
+                            >
+                                <ClipboardCheck className="h-4 w-4" />
+                                {t("quiz.lesson.startQuiz")}
+                            </Link>
+                        )}
+                        <Button variant="outline" className="text-[#c96442] border-[#e8e6dc] hover:bg-[#f0eee6]">
+                            <CheckCircle className="mr-2 h-4 w-4" />
+                            Mark as Complete
+                        </Button>
+                    </div>
                 </div>
                 <Separator />
             </div>
@@ -148,7 +188,7 @@ export default function LessonPage() {
                 </div>
             )}
 
-            {!lesson.content && !videoUrl && (
+            {!lesson.content && !videoUrl && !showProcessing && !showFailed && (
                 <p className="italic text-gray-500 text-center py-8">
                     No content available for this lesson.
                 </p>

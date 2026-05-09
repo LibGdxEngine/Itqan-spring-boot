@@ -14,6 +14,8 @@ public interface ModuleMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "course.id", source = "courseId")
     @Mapping(target = "lessons", ignore = true)
+    @Mapping(target = "quiz", ignore = true)
+    @Mapping(target = "active", source = "active", defaultValue = "true")
     Module toEntity(ModuleRequest request);
 
     @Mapping(target = "courseId", source = "course.id")

@@ -43,7 +43,7 @@ docker compose --env-file .env.production --profile prod up -d --remove-orphans
 echo "==> Waiting for backend health (up to 3 min)"
 for i in $(seq 1 36); do
     if docker compose --env-file .env.production --profile prod exec -T backend-prod \
-         curl -fsS http://localhost:8080/actuator/health >/dev/null 2>&1; then
+         curl -fsS http://localhost:8080/actuator/health/readiness >/dev/null 2>&1; then
         echo "   backend healthy"
         break
     fi

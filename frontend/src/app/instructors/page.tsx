@@ -55,8 +55,8 @@ export default function InstructorsPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const courses = await CoursesService.getActiveCourses()
-        setInstructors(deriveInstructors(courses))
+        const page = await CoursesService.getActiveCourses({})
+        setInstructors(deriveInstructors(page.content ?? []))
       } catch (err) {
         console.error("Failed to fetch instructors", err)
         setError("Failed to load instructors. Please try again later.")

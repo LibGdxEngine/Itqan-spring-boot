@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { useAuth } from "@/components/auth-context"
 import { EnrollmentsService, EnrollmentResponse, StudentsService } from "@/lib/api"
 import { EnrolledCourseCard } from "@/components/courses/EnrolledCourseCard"
@@ -13,6 +14,7 @@ import { paymentsBillingApi, PaymentResponse } from "@/lib/payments-billing"
 
 export default function DashboardPage() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth()
+  const router = useRouter()
   const [enrollments, setEnrollments] = useState<EnrollmentResponse[]>([])
   const [payments, setPayments] = useState<PaymentResponse[]>([])
   const [loading, setLoading] = useState(true)
@@ -27,16 +29,18 @@ export default function DashboardPage() {
     const fetchEnrollments = async () => {
       try {
         setLoading(true)
-        const student = await StudentsService.getProfile()
-        if (!student.id) {
-          setEnrollments([])
+        const student = await StudentsService.getProfile().catch(() => null)
+        if (!student?.id) {
+          if (user.role === "INSTRUCTOR") router.replace("/instructor")
+          else if (user.role === "ADMIN") router.replace("/admin")
+          else router.replace("/")
           return
         }
         const [enrollmentData, paymentData] = await Promise.all([
-          EnrollmentsService.getStudentEnrollments(student.id),
+          EnrollmentsService.getStudentEnrollments(student.id, {}),
           paymentsBillingApi.getMyPayments(),
         ])
-        setEnrollments(enrollmentData)
+        setEnrollments(enrollmentData.content ?? [])
         setPayments(paymentData)
       } catch (error) {
         console.error("Failed to load dashboard enrollments", error)
@@ -46,7 +50,7 @@ export default function DashboardPage() {
     }
 
     fetchEnrollments()
-  }, [isAuthenticated, user])
+  }, [isAuthenticated, user, router])
   
   if (authLoading || loading) {
     return (

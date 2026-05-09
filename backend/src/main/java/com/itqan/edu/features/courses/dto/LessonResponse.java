@@ -31,6 +31,7 @@ public class LessonResponse {
     private Boolean isFree;
     private Boolean active;
     private Long moduleId;
+    private Long quizId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

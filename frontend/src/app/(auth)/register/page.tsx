@@ -14,7 +14,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Separator } from "@/components/ui/separator"
-import { GoogleIcon, GitHubIcon, AppleIcon } from "@/components/icons/social-icons"
+import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton"
+
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
 import { cn } from "@/lib/utils"
 import { useToast } from "@/components/ui/toast"
 import { useAuth } from "@/components/auth-context"
@@ -28,7 +30,6 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = React.useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false)
   const [isLoading, setIsLoading] = React.useState(false)
-  const [socialLoading, setSocialLoading] = React.useState<string | null>(null)
 
   const registerSchema = z.object({
     name: z.string().min(2, t("auth.validation.nameMinLength")),
@@ -96,18 +97,6 @@ export default function RegisterPage() {
     }
   }
 
-  const handleSocialLogin = async (provider: string) => {
-    setSocialLoading(provider)
-    try {
-      // Social login requires OAuth setup - show coming soon message for now
-      showToast('info', `${provider} signup coming soon!`)
-    } catch (error) {
-      console.error(`${provider} signup error:`, error)
-    } finally {
-      setSocialLoading(null)
-    }
-  }
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -120,57 +109,22 @@ export default function RegisterPage() {
         </p>
       </div>
 
-      {/* Social login buttons */}
-      <div className="grid grid-cols-3 gap-3">
-        <Button
-          variant="outline"
-          className="h-12"
-          onClick={() => handleSocialLogin("google")}
-          disabled={!!socialLoading}
-        >
-          {socialLoading === "google" ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
-          ) : (
-            <GoogleIcon className="w-5 h-5" />
-          )}
-        </Button>
-        <Button
-          variant="outline"
-          className="h-12"
-          onClick={() => handleSocialLogin("github")}
-          disabled={!!socialLoading}
-        >
-          {socialLoading === "github" ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
-          ) : (
-            <GitHubIcon className="w-5 h-5" />
-          )}
-        </Button>
-        <Button
-          variant="outline"
-          className="h-12"
-          onClick={() => handleSocialLogin("apple")}
-          disabled={!!socialLoading}
-        >
-          {socialLoading === "apple" ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
-          ) : (
-            <AppleIcon className="w-5 h-5" />
-          )}
-        </Button>
-      </div>
+      {GOOGLE_CLIENT_ID && (
+        <>
+          <GoogleAuthButton text="signup_with" />
 
-      {/* Divider */}
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <Separator />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-[#f5f4ed] px-3 text-[#87867f]">
-            {t("common.orContinueWithEmail")}
-          </span>
-        </div>
-      </div>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <Separator />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-[#f5f4ed] px-3 text-[#87867f]">
+                {t("common.orContinueWithEmail")}
+              </span>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Register form */}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

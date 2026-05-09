@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/components/auth-context"
 import { Navbar } from "@/components/Navbar"
+import { useTranslations } from "next-intl"
 import { StudentsService } from "@/lib/api"
 import type { StudentResponse } from "@/lib/api"
 import { getErrorMessage } from "@/lib/api-axios"
@@ -45,16 +46,17 @@ function InfoRow({
   )
 }
 
-const ROLE_BADGE: Record<string, { label: string; className: string; icon: React.ComponentType<{ className?: string }> }> = {
-  STUDENT: { label: "Student", className: "bg-[#f0eee6] text-[#c96442]", icon: GraduationCap },
-  INSTRUCTOR: { label: "Instructor", className: "bg-[#f0eee6] text-[#c96442]", icon: GraduationCap },
-  ADMIN: { label: "Admin", className: "bg-[#e8e6dc] text-[#c96442]", icon: ShieldCheck },
+const ROLE_BADGE: Record<string, { labelKey: string; className: string; icon: React.ComponentType<{ className?: string }> }> = {
+  STUDENT: { labelKey: "profile.roles.student", className: "bg-[#f0eee6] text-[#c96442]", icon: GraduationCap },
+  INSTRUCTOR: { labelKey: "profile.roles.instructor", className: "bg-[#f0eee6] text-[#c96442]", icon: GraduationCap },
+  ADMIN: { labelKey: "profile.roles.admin", className: "bg-[#e8e6dc] text-[#c96442]", icon: ShieldCheck },
 }
 
 export default function ProfilePage() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth()
   const router = useRouter()
   const { toast } = useToast()
+  const t = useTranslations()
 
   const [studentProfile, setStudentProfile] = useState<StudentResponse | null>(null)
   const [loading, setLoading] = useState(true)
@@ -78,22 +80,30 @@ export default function ProfilePage() {
 
     const loadProfile = async () => {
       try {
-        if (user?.role === "STUDENT") {
-          const profile = await StudentsService.getProfile()
-          setStudentProfile(profile)
-          setForm({
-            firstName: profile.firstName || "",
-            lastName: profile.lastName || "",
-            email: profile.email || "",
-            phoneNumber: profile.phoneNumber || "",
-            dateOfBirth: profile.dateOfBirth || "",
-            address: profile.address || "",
-          })
+        if (user?.role !== "STUDENT") {
+          if (user?.role === "INSTRUCTOR") router.replace("/instructor")
+          else if (user?.role === "ADMIN") router.replace("/admin")
+          else router.replace("/")
+          return
         }
+        const profile = await StudentsService.getProfile()
+        if (!profile?.id) {
+          router.replace("/")
+          return
+        }
+        setStudentProfile(profile)
+        setForm({
+          firstName: profile.firstName || "",
+          lastName: profile.lastName || "",
+          email: profile.email || "",
+          phoneNumber: profile.phoneNumber || "",
+          dateOfBirth: profile.dateOfBirth || "",
+          address: profile.address || "",
+        })
       } catch (err) {
         console.error("Failed to load profile", err)
         toast({
-          title: "Failed to load profile",
+          title: t("profile.loadFailed"),
           description: getErrorMessage(err),
           variant: "destructive",
         })
@@ -103,7 +113,8 @@ export default function ProfilePage() {
     }
 
     loadProfile()
-  }, [authLoading, isAuthenticated, user, router, toast])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authLoading, isAuthenticated, user?.role, user?.id])
 
   const handleSave = async () => {
     if (!studentProfile?.id) return
@@ -127,10 +138,10 @@ export default function ProfilePage() {
         address: updated.address || "",
       })
       setEditing(false)
-      toast({ title: "Profile updated successfully" })
+      toast({ title: t("profile.updated") })
     } catch (err) {
       toast({
-        title: "Failed to update profile",
+        title: t("profile.updateFailed"),
         description: getErrorMessage(err),
         variant: "destructive",
       })
@@ -173,8 +184,8 @@ export default function ProfilePage() {
       <Navbar />
       <main className="max-w-3xl mx-auto px-4 pt-24 pb-12">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[#141413]">My Profile</h1>
-          <p className="text-[#5e5d59] mt-1">View and manage your personal information</p>
+          <h1 className="text-3xl font-bold text-[#141413]">{t("profile.title")}</h1>
+          <p className="text-[#5e5d59] mt-1">{t("profile.subtitle")}</p>
         </div>
 
         {/* Profile Card */}
@@ -195,7 +206,7 @@ export default function ProfilePage() {
                   className={`inline-flex items-center gap-1 mt-2 px-2.5 py-0.5 rounded-full text-xs font-medium ${badge.className}`}
                 >
                   <BadgeIcon className="w-3 h-3" />
-                  {badge.label}
+                  {t(badge.labelKey)}
                 </span>
               </div>
             </div>
@@ -208,7 +219,7 @@ export default function ProfilePage() {
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <Label htmlFor="firstName">First Name</Label>
+                      <Label htmlFor="firstName">{t("profile.firstName")}</Label>
                       <Input
                         id="firstName"
                         value={form.firstName}
@@ -216,7 +227,7 @@ export default function ProfilePage() {
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label htmlFor="lastName">Last Name</Label>
+                      <Label htmlFor="lastName">{t("profile.lastName")}</Label>
                       <Input
                         id="lastName"
                         value={form.lastName}
@@ -226,7 +237,7 @@ export default function ProfilePage() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email">{t("profile.email")}</Label>
                     <Input
                       id="email"
                       type="email"
@@ -236,32 +247,33 @@ export default function ProfilePage() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="phone">Phone Number</Label>
+                    <Label htmlFor="phone">{t("profile.phone")}</Label>
                     <Input
                       id="phone"
                       value={form.phoneNumber}
                       onChange={(e) => setForm((f) => ({ ...f, phoneNumber: e.target.value }))}
-                      placeholder="+1 234 567 8900"
+                      placeholder={t("profile.phonePlaceholder")}
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="dob">Date of Birth</Label>
+                    <Label htmlFor="dob">{t("profile.dateOfBirth")}</Label>
                     <Input
                       id="dob"
                       type="date"
+                      max={new Date(Date.now() - 86400000).toISOString().split("T")[0]}
                       value={form.dateOfBirth}
                       onChange={(e) => setForm((f) => ({ ...f, dateOfBirth: e.target.value }))}
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="address">Address</Label>
+                    <Label htmlFor="address">{t("profile.address")}</Label>
                     <Input
                       id="address"
                       value={form.address}
                       onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
-                      placeholder="Your address"
+                      placeholder={t("profile.addressPlaceholder")}
                     />
                   </div>
 
@@ -272,24 +284,24 @@ export default function ProfilePage() {
                       ) : (
                         <Save className="w-4 h-4" />
                       )}
-                      Save Changes
+                      {t("profile.saveChanges")}
                     </Button>
                     <Button variant="outline" onClick={handleCancelEdit} disabled={saving} className="gap-2">
                       <X className="w-4 h-4" />
-                      Cancel
+                      {t("profile.cancel")}
                     </Button>
                   </div>
                 </div>
               ) : (
                 <div className="space-y-3">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <InfoRow icon={User} label="First Name" value={studentProfile.firstName} />
-                    <InfoRow icon={User} label="Last Name" value={studentProfile.lastName} />
+                    <InfoRow icon={User} label={t("profile.firstName")} value={studentProfile.firstName} />
+                    <InfoRow icon={User} label={t("profile.lastName")} value={studentProfile.lastName} />
                   </div>
-                  <InfoRow icon={Mail} label="Email" value={studentProfile.email} />
-                  <InfoRow icon={Phone} label="Phone Number" value={studentProfile.phoneNumber} />
-                  <InfoRow icon={Calendar} label="Date of Birth" value={studentProfile.dateOfBirth} />
-                  <InfoRow icon={MapPin} label="Address" value={studentProfile.address} />
+                  <InfoRow icon={Mail} label={t("profile.email")} value={studentProfile.email} />
+                  <InfoRow icon={Phone} label={t("profile.phone")} value={studentProfile.phoneNumber} />
+                  <InfoRow icon={Calendar} label={t("profile.dateOfBirth")} value={studentProfile.dateOfBirth} />
+                  <InfoRow icon={MapPin} label={t("profile.address")} value={studentProfile.address} />
 
                   <div className="pt-2">
                     <Button
@@ -298,7 +310,7 @@ export default function ProfilePage() {
                       className="gap-2"
                     >
                       <Pencil className="w-4 h-4" />
-                      Edit Profile
+                      {t("profile.editProfile")}
                     </Button>
                   </div>
                 </div>
@@ -306,11 +318,11 @@ export default function ProfilePage() {
             ) : (
               <div className="space-y-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <InfoRow icon={User} label="First Name" value={user?.firstName} />
-                  <InfoRow icon={User} label="Last Name" value={user?.lastName} />
+                  <InfoRow icon={User} label={t("profile.firstName")} value={user?.firstName} />
+                  <InfoRow icon={User} label={t("profile.lastName")} value={user?.lastName} />
                 </div>
-                <InfoRow icon={Mail} label="Email" value={user?.email} />
-                <InfoRow icon={BadgeIcon} label="Role" value={badge.label} />
+                <InfoRow icon={Mail} label={t("profile.email")} value={user?.email} />
+                <InfoRow icon={BadgeIcon} label={t("profile.role")} value={t(badge.labelKey)} />
               </div>
             )}
           </div>

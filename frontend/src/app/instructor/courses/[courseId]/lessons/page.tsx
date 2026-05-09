@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, Loader2, Plus, Trash2, Video } from "lucide-react"
+import { AlertTriangle, ArrowLeft, CheckCircle2, Clock, Loader2, Plus, Trash2, Upload, Video } from "lucide-react"
 import { useTranslations } from "next-intl"
 
 import { useAuth } from "@/components/auth-context"
@@ -11,6 +11,7 @@ import { LessonResponse, CourseResponse, CoursesService, ModulesService } from "
 import { reorderModuleLessons } from "@/lib/lessonVideoUploadService"
 import { Button } from "@/components/ui/button"
 import { LessonCreatorForm } from "@/components/instructor/LessonCreatorForm"
+import { VideoUploader } from "@/components/instructor/VideoUploader"
 import { useToast } from "@/components/ui/use-toast"
 import { Input } from "@/components/ui/input"
 import {
@@ -274,8 +275,59 @@ export default function CourseLessonsPage() {
                             <div className="flex items-center gap-3">
                               <Video className="h-4 w-4 text-[#87867f]" />
                               <span className="text-sm font-medium text-[#4d4c48]">{lesson.title}</span>
+                              {lesson.type === "VIDEO" && lesson.videoStatus === "READY" && (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-[#e3f1e6] px-2 py-0.5 text-[11px] text-[#1f7a3a]">
+                                  <CheckCircle2 className="h-3 w-3" />
+                                  {t("instructor.videoUploader.statusReady")}
+                                </span>
+                              )}
+                              {lesson.type === "VIDEO" && lesson.videoStatus === "FAILED" && (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-[#fdf3ef] px-2 py-0.5 text-[11px] text-[#b53333]">
+                                  <AlertTriangle className="h-3 w-3" />
+                                  {t("instructor.videoUploader.statusFailed")}
+                                </span>
+                              )}
+                              {lesson.type === "VIDEO" && lesson.videoStatus === "UPLOADING" && (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-[#fff4e0] px-2 py-0.5 text-[11px] text-[#a86a00]">
+                                  <Loader2 className="h-3 w-3 animate-spin" />
+                                  {t("instructor.videoUploader.statusUploading")}
+                                </span>
+                              )}
+                              {lesson.type === "VIDEO" && lesson.videoStatus === "PENDING" && (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-[#f0eee6] px-2 py-0.5 text-[11px] text-[#5e5d59]">
+                                  <Clock className="h-3 w-3" />
+                                  {t("instructor.videoUploader.statusPending")}
+                                </span>
+                              )}
                             </div>
-                            <div className="flex gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+                            <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="h-8 w-8 text-[#c96442] hover:bg-[#fdf3ef] hover:text-[#c96442]"
+                                    title={t("instructor.videoUploader.uploadButton")}
+                                  >
+                                    <Upload className="h-4 w-4" />
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                  <DialogHeader>
+                                    <DialogTitle>
+                                      {t("instructor.videoUploader.dialogTitle")}: {lesson.title}
+                                    </DialogTitle>
+                                  </DialogHeader>
+                                  {lesson.id != null && (
+                                    <VideoUploader
+                                      lessonId={lesson.id}
+                                      onUploaded={() => {
+                                        void fetchCourse()
+                                      }}
+                                    />
+                                  )}
+                                </DialogContent>
+                              </Dialog>
                               <Button
                                 size="icon"
                                 variant="ghost"

@@ -10,7 +10,7 @@ interface AccordionProps extends React.HTMLAttributes<HTMLDivElement> {
   collapsible?: boolean;
 }
 
-export function Accordion({ className, children, ...props }: AccordionProps) {
+export function Accordion({ className, children, type: _type, collapsible: _collapsible, ...props }: AccordionProps) {
   return (
     <div className={cn("space-y-2", className)} {...props}>
       {children}

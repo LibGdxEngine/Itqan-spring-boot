@@ -52,10 +52,11 @@ export function CouponManager() {
     const loadCourses = async () => {
       setLoadingCourses(true);
       try {
-        const response = await api.get<CourseResponse[]>("/api/courses/mine");
-        setCourses(response.data);
-        if (response.data.length > 0 && response.data[0].id) {
-          setSelectedCourseId(response.data[0].id);
+        const response = await api.get<{ content: CourseResponse[] } | CourseResponse[]>("/api/courses/mine");
+        const list = Array.isArray(response.data) ? response.data : response.data?.content ?? [];
+        setCourses(list);
+        if (list.length > 0 && list[0].id) {
+          setSelectedCourseId(list[0].id);
         }
       } catch (error) {
         console.error("Failed to fetch owned courses", error);

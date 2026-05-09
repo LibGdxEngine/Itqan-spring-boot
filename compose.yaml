@@ -36,6 +36,7 @@ x-backend-base: &backend-base
     SPRING_WEB_CORS_ALLOW_CREDENTIALS: "true"
     SPRING_DOCKER_COMPOSE_ENABLED: "false"
     APP_STORAGE_S3_ENDPOINT: ${APP_STORAGE_S3_ENDPOINT:-http://minio:9000}
+    APP_STORAGE_S3_PUBLIC_ENDPOINT: ${APP_STORAGE_S3_PUBLIC_ENDPOINT:-http://localhost:9000}
     APP_STORAGE_S3_REGION: ${APP_STORAGE_S3_REGION:-us-east-1}
     APP_STORAGE_S3_ACCESS_KEY: ${APP_STORAGE_S3_ACCESS_KEY:-minioadmin}
     APP_STORAGE_S3_SECRET_KEY: ${APP_STORAGE_S3_SECRET_KEY:-minioadmin}
@@ -50,8 +51,6 @@ x-backend-base: &backend-base
     REDIS_HOST: ${REDIS_HOST:-redis}
     REDIS_PORT: ${REDIS_PORT:-6379}
     REDIS_PASSWORD: ${REDIS_PASSWORD:-redispassword}
-    RATE_LIMIT_GENERAL: ${RATE_LIMIT_GENERAL:-60}
-    RATE_LIMIT_AUTH: ${RATE_LIMIT_AUTH:-10}
     ACCOUNT_LOCKOUT_MAX_ATTEMPTS: ${ACCOUNT_LOCKOUT_MAX_ATTEMPTS:-5}
     ACCOUNT_LOCKOUT_DURATION_MINUTES: ${ACCOUNT_LOCKOUT_DURATION_MINUTES:-15}
     SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-default}
@@ -75,6 +74,7 @@ x-frontend-base: &frontend-base
   environment: &frontend-env
     NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8080}
     NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+    BACKEND_INTERNAL_URL: ${BACKEND_INTERNAL_URL:-http://backend:8080}
 
 services:
   minio:
@@ -125,6 +125,10 @@ services:
         sleep 2;
       done;
       mc mb --ignore-existing local/${APP_STORAGE_S3_BUCKET:-itqan-videos};
+      cat >/tmp/thumbnails-policy.json <<EOF
+      {\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"AWS\":[\"*\"]},\"Action\":[\"s3:GetObject\"],\"Resource\":[\"arn:aws:s3:::${APP_STORAGE_S3_BUCKET:-itqan-videos}/courses/thumbnails/*\"]}]}
+      EOF
+      mc anonymous set-json /tmp/thumbnails-policy.json local/${APP_STORAGE_S3_BUCKET:-itqan-videos};
       "
     networks:
       - itqan-network
@@ -194,7 +198,7 @@ services:
       - ./backend/pom.xml:/app/pom.xml
       - maven_cache:/root/.m2
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health/readiness"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -240,7 +244,7 @@ services:
       <<: *backend-env
       SPRING_PROFILES_ACTIVE: prod
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health/readiness"]
       interval: 30s
       timeout: 10s
       retries: 5

@@ -15,52 +15,11 @@ import {
   type Variants,
 } from "framer-motion"
 import { useEffect, useRef, useState } from "react"
-
-const CATEGORY_KEYS = [
-  "all",
-  "tafsir",
-  "hadith",
-  "fiqh",
-  "aqeedah",
-  "seerah",
-  "arabic",
-  "tajweed",
-  "usool",
-] as const
-
-type TeacherData = {
-  initials: string
-  name: string
-  specialty: string
-  courses: string
-  students: string
-}
-
-const TEACHERS: TeacherData[] = [
-  { initials: "عس", name: "الشيخ عبد الرحمن السديس", specialty: "التفسير وعلوم القرآن", courses: "١٢", students: "٢٤٠٠" },
-  { initials: "مج", name: "د. محمد الجزائري", specialty: "الفقه وأصوله", courses: "٨", students: "١٦٥٠" },
-  { initials: "فع", name: "د. فاطمة العتيبي", specialty: "اللغة العربية", courses: "١٥", students: "٣١٠٠" },
-]
-
-type CourseData = {
-  title: string
-  teacher: string
-  category: string
-  duration: string
-  rating: string
-  price: string
-  badge?: "mostEnrolled" | "new"
-  free?: boolean
-}
-
-const COURSES: CourseData[] = [
-  { title: "أصول التفسير ومناهج المفسرين", teacher: "الشيخ عبد الرحمن السديس", category: "التفسير", duration: "٨ ساعات", rating: "٤٫٩", price: "١٤٩ ر.س", badge: "mostEnrolled" },
-  { title: "فقه العبادات: الطهارة والصلاة", teacher: "د. محمد الجزائري", category: "الفقه", duration: "١٢ ساعة", rating: "٤٫٨", price: "", free: true },
-  { title: "أحكام التجويد برواية حفص", teacher: "الشيخ ياسر الدوسري", category: "التجويد", duration: "٦ ساعات", rating: "٤٫٩", price: "٩٩ ر.س", badge: "new" },
-  { title: "السيرة النبوية في العهد المكي", teacher: "د. راغب السرجاني", category: "السيرة", duration: "١٠ ساعات", rating: "٤٫٧", price: "١٢٩ ر.س" },
-  { title: "شرح الأربعين النووية", teacher: "الشيخ صالح المغامسي", category: "الحديث", duration: "٧ ساعات", rating: "٤٫٨", price: "", free: true },
-  { title: "العقيدة الواسطية", teacher: "د. عثمان الخميس", category: "العقيدة", duration: "٩ ساعات", rating: "٤٫٩", price: "١٣٩ ر.س" },
-]
+import type {
+  LandingCourse,
+  LandingPageData,
+  LandingTeacher,
+} from "@/lib/landingPage"
 
 const EASE = [0.22, 1, 0.36, 1] as const
 
@@ -74,9 +33,24 @@ const staggerParent: Variants = {
   visible: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
 }
 
-export default function HomeClient() {
+interface HomeClientProps {
+  data: LandingPageData | null
+}
+
+export default function HomeClient({ data }: HomeClientProps) {
   const t = useTranslations()
   const locale = useLocale()
+  const isAr = locale === "ar"
+
+  const heroVideoUrl = data?.hero.videoUrl ?? null
+  const heroTitle = (isAr ? data?.hero.titleAr : data?.hero.titleEn) ?? t("home.hero.featuredTitle")
+  const heroTeacher = (isAr ? data?.hero.teacherNameAr : data?.hero.teacherNameEn) ?? t("home.hero.featuredTeacher")
+  const heroDuration = (isAr ? data?.hero.durationLabelAr : data?.hero.durationLabelEn) ?? t("home.hero.featuredDuration")
+
+  const stats = data?.stats
+  const specializations = data?.specializations ?? []
+  const featuredCourses = data?.featuredCourses ?? []
+  const featuredInstructors = data?.featuredInstructors ?? []
 
   return (
     <div className="min-h-screen bg-[#f5f4ed] text-[#141413]">
@@ -158,19 +132,32 @@ export default function HomeClient() {
               />
               <div className="bg-[#faf9f5] border border-[#f0eee6] rounded-[32px] p-5 shadow-whisper">
                 <div className="relative aspect-video rounded-[20px] overflow-hidden bg-[#30302e]">
-                  <div className="absolute inset-0 pattern-islamic opacity-40" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <button
-                      aria-label="Play featured lecture"
-                      className="w-16 h-16 rounded-full bg-[#c96442] text-[#faf9f5] flex items-center justify-center shadow-[0_0_0_6px_rgba(250,249,245,0.15)] hover:bg-[#b55836] transition-colors"
-                    >
-                      <Play className="w-6 h-6 ml-0.5" fill="currentColor" />
-                    </button>
-                  </div>
-                  <div className="absolute bottom-3 left-3 bg-[#141413]/80 text-[#faf9f5] text-xs px-2.5 py-1 rounded-md flex items-center gap-1.5 ltr-flex">
-                    <Clock className="w-3 h-3" />
-                    {t("home.hero.featuredDuration")}
-                  </div>
+                  {heroVideoUrl ? (
+                    <video
+                      src={heroVideoUrl}
+                      controls
+                      preload="metadata"
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                  ) : (
+                    <>
+                      <div className="absolute inset-0 pattern-islamic opacity-40" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <button
+                          aria-label="Play featured lecture"
+                          className="w-16 h-16 rounded-full bg-[#c96442] text-[#faf9f5] flex items-center justify-center shadow-[0_0_0_6px_rgba(250,249,245,0.15)] hover:bg-[#b55836] transition-colors"
+                        >
+                          <Play className="w-6 h-6 ml-0.5" fill="currentColor" />
+                        </button>
+                      </div>
+                    </>
+                  )}
+                  {heroDuration ? (
+                    <div className="absolute bottom-3 left-3 bg-[#141413]/80 text-[#faf9f5] text-xs px-2.5 py-1 rounded-md flex items-center gap-1.5 ltr-flex">
+                      <Clock className="w-3 h-3" />
+                      {heroDuration}
+                    </div>
+                  ) : null}
                 </div>
                 <div className="pt-5 pb-1 px-1 space-y-1.5">
                   <span className="text-xs tracking-[0.12px] uppercase text-[#87867f]">
@@ -180,9 +167,9 @@ export default function HomeClient() {
                     className="text-[22px] leading-tight text-[#141413]"
                     style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
                   >
-                    {t("home.hero.featuredTitle")}
+                    {heroTitle}
                   </h3>
-                  <p className="text-sm text-[#5e5d59]">{t("home.hero.featuredTeacher")}</p>
+                  <p className="text-sm text-[#5e5d59]">{heroTeacher}</p>
                 </div>
               </div>
             </motion.div>
@@ -194,15 +181,15 @@ export default function HomeClient() {
       <section className="bg-[#141413] py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-10 text-center">
-            <StatItem rawValue={t("home.stats.coursesCount")} label={t("home.stats.courses")} locale={locale} />
-            <StatItem rawValue={t("home.stats.teachersCount")} label={t("home.stats.teachers")} locale={locale} />
-            <StatItem rawValue={t("home.stats.studentsCount")} label={t("home.stats.activeStudents")} locale={locale} />
-            <StatItem rawValue={t("home.stats.specializationsCount")} label={t("home.stats.specializations")} locale={locale} />
+            <StatItem value={stats?.courses ?? 0} label={t("home.stats.courses")} locale={locale} />
+            <StatItem value={stats?.teachers ?? 0} label={t("home.stats.teachers")} locale={locale} />
+            <StatItem value={stats?.students ?? 0} label={t("home.stats.activeStudents")} locale={locale} />
+            <StatItem value={stats?.specializations ?? 0} label={t("home.stats.specializations")} locale={locale} />
           </div>
         </div>
       </section>
 
-      {/* ===== 3. CATEGORY PILLS ===== */}
+      {/* ===== 3. SPECIALIZATION PILLS ===== */}
       <section aria-labelledby="categories-heading" className="py-20 bg-[#f5f4ed]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -231,17 +218,19 @@ export default function HomeClient() {
             viewport={{ once: true, amount: 0.2 }}
             variants={staggerParent}
           >
-            {CATEGORY_KEYS.map((key, idx) => (
+            <motion.button
+              variants={fadeUp}
+              className="px-5 py-2.5 rounded-full bg-[#c96442] text-[#faf9f5] text-sm font-medium shadow-[0_0_0_1px_#c96442] hover:bg-[#b55836] transition-colors"
+            >
+              {t("home.categories.all")}
+            </motion.button>
+            {specializations.map((s) => (
               <motion.button
-                key={key}
+                key={s.id}
                 variants={fadeUp}
-                className={
-                  idx === 0
-                    ? "px-5 py-2.5 rounded-full bg-[#c96442] text-[#faf9f5] text-sm font-medium shadow-[0_0_0_1px_#c96442] hover:bg-[#b55836] transition-colors"
-                    : "px-5 py-2.5 rounded-full bg-[#e8e6dc] text-[#4d4c48] text-sm font-medium shadow-[0_0_0_1px_#d1cfc5] hover:shadow-[0_0_0_1px_#c2c0b6] hover:text-[#141413] transition-all"
-                }
+                className="px-5 py-2.5 rounded-full bg-[#e8e6dc] text-[#4d4c48] text-sm font-medium shadow-[0_0_0_1px_#d1cfc5] hover:shadow-[0_0_0_1px_#c2c0b6] hover:text-[#141413] transition-all"
               >
-                {t(`home.categories.${key}`)}
+                {isAr ? s.nameAr : s.nameEn}
               </motion.button>
             ))}
           </motion.div>
@@ -249,109 +238,114 @@ export default function HomeClient() {
       </section>
 
       {/* ===== 4. TEACHER CARDS ===== */}
-      <section aria-labelledby="teachers-heading" className="py-20 bg-[#faf9f5] border-y border-[#f0eee6]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10 ltr-flex"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.4 }}
-            variants={staggerParent}
-          >
-            <motion.div variants={fadeUp} className="space-y-3">
-              <h2
-                id="teachers-heading"
-                className="text-subhead-lg text-[#141413]"
-                style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
-              >
-                {t("home.teachers.title")}
-              </h2>
-              <p className="text-[#5e5d59] text-[17px] leading-[1.6]">
-                {t("home.teachers.subtitle")}
-              </p>
+      {featuredInstructors.length > 0 ? (
+        <section aria-labelledby="teachers-heading" className="py-20 bg-[#faf9f5] border-y border-[#f0eee6]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <motion.div
+              className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10 ltr-flex"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.4 }}
+              variants={staggerParent}
+            >
+              <motion.div variants={fadeUp} className="space-y-3">
+                <h2
+                  id="teachers-heading"
+                  className="text-subhead-lg text-[#141413]"
+                  style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
+                >
+                  {t("home.teachers.title")}
+                </h2>
+                <p className="text-[#5e5d59] text-[17px] leading-[1.6]">
+                  {t("home.teachers.subtitle")}
+                </p>
+              </motion.div>
+              <motion.div variants={fadeUp}>
+                <Link
+                  href="/instructors"
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-[#c96442] hover:text-[#b55836] transition-colors ltr-flex"
+                >
+                  {t("home.teachers.viewAll")}
+                  <ChevronRight className="w-4 h-4 rtl:rotate-180" />
+                </Link>
+              </motion.div>
             </motion.div>
-            <motion.div variants={fadeUp}>
-              <Link
-                href="/instructors"
-                className="inline-flex items-center gap-1.5 text-sm font-medium text-[#c96442] hover:text-[#b55836] transition-colors ltr-flex"
-              >
-                {t("home.teachers.viewAll")}
-                <ChevronRight className="w-4 h-4 rtl:rotate-180" />
-              </Link>
-            </motion.div>
-          </motion.div>
 
-          <motion.div
-            className="grid md:grid-cols-3 gap-6"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-            variants={staggerParent}
-          >
-            {TEACHERS.map((teacher) => (
-              <TeacherCard
-                key={teacher.name}
-                teacher={teacher}
-                coursesLabel={t("home.teachers.coursesLabel")}
-                studentsLabel={t("home.teachers.studentsLabel")}
-              />
-            ))}
-          </motion.div>
-        </div>
-      </section>
+            <motion.div
+              className="grid md:grid-cols-3 gap-6"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.2 }}
+              variants={staggerParent}
+            >
+              {featuredInstructors.map((teacher) => (
+                <TeacherCard
+                  key={teacher.id}
+                  teacher={teacher}
+                  locale={locale}
+                  coursesLabel={t("home.teachers.coursesLabel")}
+                  studentsLabel={t("home.teachers.studentsLabel")}
+                />
+              ))}
+            </motion.div>
+          </div>
+        </section>
+      ) : null}
 
       {/* ===== 5. COURSE GRID ===== */}
-      <section aria-labelledby="courses-heading" className="py-20 bg-[#f5f4ed]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10 ltr-flex"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.4 }}
-            variants={staggerParent}
-          >
-            <motion.div variants={fadeUp} className="space-y-3">
-              <h2
-                id="courses-heading"
-                className="text-subhead-lg text-[#141413]"
-                style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
-              >
-                {t("home.courses.title")}
-              </h2>
-              <p className="text-[#5e5d59] text-[17px] leading-[1.6]">
-                {t("home.courses.subtitle")}
-              </p>
+      {featuredCourses.length > 0 ? (
+        <section aria-labelledby="courses-heading" className="py-20 bg-[#f5f4ed]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <motion.div
+              className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10 ltr-flex"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.4 }}
+              variants={staggerParent}
+            >
+              <motion.div variants={fadeUp} className="space-y-3">
+                <h2
+                  id="courses-heading"
+                  className="text-subhead-lg text-[#141413]"
+                  style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
+                >
+                  {t("home.courses.title")}
+                </h2>
+                <p className="text-[#5e5d59] text-[17px] leading-[1.6]">
+                  {t("home.courses.subtitle")}
+                </p>
+              </motion.div>
+              <motion.div variants={fadeUp}>
+                <Link
+                  href="/courses"
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-[#c96442] hover:text-[#b55836] transition-colors ltr-flex"
+                >
+                  {t("home.courses.browseAll")}
+                  <ChevronRight className="w-4 h-4 rtl:rotate-180" />
+                </Link>
+              </motion.div>
             </motion.div>
-            <motion.div variants={fadeUp}>
-              <Link
-                href="/courses"
-                className="inline-flex items-center gap-1.5 text-sm font-medium text-[#c96442] hover:text-[#b55836] transition-colors ltr-flex"
-              >
-                {t("home.courses.browseAll")}
-                <ChevronRight className="w-4 h-4 rtl:rotate-180" />
-              </Link>
-            </motion.div>
-          </motion.div>
 
-          <motion.div
-            className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.15 }}
-            variants={staggerParent}
-          >
-            {COURSES.map((course) => (
-              <CourseCard
-                key={course.title}
-                course={course}
-                mostEnrolledLabel={t("home.courses.mostEnrolled")}
-                newLabel={t("home.courses.new")}
-                freeLabel={t("home.courses.free")}
-              />
-            ))}
-          </motion.div>
-        </div>
-      </section>
+            <motion.div
+              className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.15 }}
+              variants={staggerParent}
+            >
+              {featuredCourses.map((course) => (
+                <FeaturedCourseCard
+                  key={course.id}
+                  course={course}
+                  locale={locale}
+                  freeLabel={t("home.courses.free")}
+                  hoursLabel={t("common.duration")}
+                />
+              ))}
+            </motion.div>
+          </div>
+        </section>
+      ) : null}
 
       {/* ===== 6. CTA (dark chapter) ===== */}
       <section aria-labelledby="cta-heading" className="py-24 bg-[#141413]">
@@ -476,18 +470,6 @@ function toArabicDigits(n: number): string {
     .join("")
 }
 
-function parseStatValue(raw: string): { number: number; prefix: string; suffix: string } {
-  // Strip thousands separators and arabic digits, find leading numeric run.
-  const normalized = raw
-    .replace(/[٠-٩]/g, (c) => String(ARABIC_DIGITS.indexOf(c)))
-    .replace(/[,٬،]/g, "")
-
-  const match = normalized.match(/^(\D*)(\d+)(.*)$/)
-  if (!match) return { number: 0, prefix: "", suffix: raw }
-  const [, prefix, digits, suffix] = match
-  return { number: parseInt(digits, 10), prefix, suffix }
-}
-
 function formatStatNumber(n: number, locale: string): string {
   const rounded = Math.round(n)
   if (locale === "ar") return toArabicDigits(rounded)
@@ -495,27 +477,26 @@ function formatStatNumber(n: number, locale: string): string {
 }
 
 function StatItem({
-  rawValue,
+  value,
   label,
   locale,
 }: {
-  rawValue: string
+  value: number
   label: string
   locale: string
 }) {
   const reduced = useReducedMotion()
   const ref = useRef<HTMLDivElement>(null)
   const inView = useInView(ref, { once: true, amount: 0.4 })
-  const { number: target, prefix, suffix } = parseStatValue(rawValue)
   const motionValue = useMotionValue(0)
-  const display = useTransform(motionValue, (v) => `${prefix}${formatStatNumber(v, locale)}${suffix}`)
-  const [staticValue] = useState(rawValue)
+  const display = useTransform(motionValue, (v) => formatStatNumber(v, locale))
+  const [staticValue] = useState(formatStatNumber(value, locale))
 
   useEffect(() => {
     if (reduced || !inView) return
-    const controls = animate(motionValue, target, { duration: 1.4, ease: EASE })
+    const controls = animate(motionValue, value, { duration: 1.4, ease: EASE })
     return controls.stop
-  }, [inView, reduced, target, motionValue])
+  }, [inView, reduced, value, motionValue])
 
   return (
     <div ref={ref} className="space-y-2">
@@ -534,15 +515,26 @@ function StatItem({
   )
 }
 
+function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean)
+  if (parts.length === 0) return "?"
+  if (parts.length === 1) return parts[0].slice(0, 2)
+  return parts[0][0] + parts[parts.length - 1][0]
+}
+
 function TeacherCard({
   teacher,
+  locale,
   coursesLabel,
   studentsLabel,
 }: {
-  teacher: TeacherData
+  teacher: LandingTeacher
+  locale: string
   coursesLabel: string
   studentsLabel: string
 }) {
+  const courses = formatStatNumber(teacher.coursesCount, locale)
+  const students = formatStatNumber(teacher.studentsCount, locale)
   return (
     <motion.div
       variants={fadeUp}
@@ -550,10 +542,10 @@ function TeacherCard({
     >
       <div className="flex items-center gap-4 mb-4 ltr-flex">
         <div
-          className="w-12 h-12 rounded-full bg-[#e8e6dc] flex items-center justify-center text-[#4d4c48] text-[15px] ring-0 ring-[#c96442]/30 transition-all duration-300 group-hover:ring-2 group-hover:rotate-3"
+          className="w-12 h-12 rounded-full bg-[#e8e6dc] flex items-center justify-center text-[#4d4c48] text-[15px] ring-0 ring-[#c96442]/30 transition-all duration-300 group-hover:ring-2 group-hover:rotate-3 uppercase"
           style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
         >
-          {teacher.initials}
+          {getInitials(teacher.name)}
         </div>
         <div className="flex-1 min-w-0">
           <h3
@@ -562,17 +554,19 @@ function TeacherCard({
           >
             {teacher.name}
           </h3>
-          <p className="text-sm text-[#87867f] truncate">{teacher.specialty}</p>
+          {teacher.specialty ? (
+            <p className="text-sm text-[#87867f] truncate">{teacher.specialty}</p>
+          ) : null}
         </div>
       </div>
       <div className="flex items-center gap-5 pt-4 border-t border-[#f0eee6] text-sm text-[#5e5d59] ltr-flex">
         <div>
-          <span className="text-[#141413] font-medium">{teacher.courses}</span>{" "}
+          <span className="text-[#141413] font-medium">{courses}</span>{" "}
           <span>{coursesLabel}</span>
         </div>
         <div className="w-px h-4 bg-[#e8e6dc]" />
         <div>
-          <span className="text-[#141413] font-medium">{teacher.students}</span>{" "}
+          <span className="text-[#141413] font-medium">{students}</span>{" "}
           <span>{studentsLabel}</span>
         </div>
       </div>
@@ -580,70 +574,79 @@ function TeacherCard({
   )
 }
 
-function CourseCard({
+function FeaturedCourseCard({
   course,
-  mostEnrolledLabel,
-  newLabel,
+  locale,
   freeLabel,
+  hoursLabel,
 }: {
-  course: CourseData
-  mostEnrolledLabel: string
-  newLabel: string
+  course: LandingCourse
+  locale: string
   freeLabel: string
+  hoursLabel: string
 }) {
+  const isFree = course.price === 0 || course.price == null
+  const priceLabel = isFree
+    ? freeLabel
+    : locale === "ar"
+      ? `${toArabicDigits(course.price!)} ر.س`
+      : `${course.price} SAR`
+  const duration = course.durationHours
+    ? locale === "ar"
+      ? `${toArabicDigits(course.durationHours)} ${hoursLabel}`
+      : `${course.durationHours} ${hoursLabel}`
+    : null
+
   return (
-    <motion.div
-      variants={fadeUp}
-      className="group bg-[#faf9f5] border border-[#f0eee6] rounded-2xl overflow-hidden hover-lift transition-smooth flex flex-col"
-    >
-      <div className="relative aspect-video bg-[#30302e] overflow-hidden">
-        <div className="absolute inset-0 pattern-islamic opacity-40 transition-transform duration-500 ease-out group-hover:scale-105" />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className="relative flex">
-            <span className="absolute inset-0 rounded-full bg-[#c96442] opacity-0 group-hover:opacity-60 group-hover:animate-ping" />
-            <button
-              aria-label={`Play ${course.title}`}
-              className="relative w-12 h-12 rounded-full bg-[#c96442] text-[#faf9f5] flex items-center justify-center shadow-[0_0_0_5px_rgba(250,249,245,0.15)] hover:bg-[#b55836] transition-colors"
-            >
-              <Play className="w-5 h-5 ml-0.5" fill="currentColor" />
-            </button>
-          </span>
+    <Link href={`/courses/${course.id}`}>
+      <motion.div
+        variants={fadeUp}
+        className="group bg-[#faf9f5] border border-[#f0eee6] rounded-2xl overflow-hidden hover-lift transition-smooth flex flex-col h-full"
+      >
+        <div className="relative aspect-video bg-[#30302e] overflow-hidden">
+          {course.thumbnailUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={course.thumbnailUrl}
+              alt={course.title}
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+            />
+          ) : (
+            <div className="absolute inset-0 pattern-islamic opacity-40 transition-transform duration-500 ease-out group-hover:scale-105" />
+          )}
+          {course.category ? (
+            <div className="absolute top-3 left-3 bg-[#faf9f5]/95 text-[#4d4c48] text-xs font-medium px-2.5 py-1 rounded-md">
+              {course.category}
+            </div>
+          ) : null}
+          {duration ? (
+            <div className="absolute bottom-3 left-3 bg-[#141413]/80 text-[#faf9f5] text-xs px-2.5 py-1 rounded-md flex items-center gap-1.5 ltr-flex">
+              <Clock className="w-3 h-3" />
+              {duration}
+            </div>
+          ) : null}
         </div>
-        <div className="absolute top-3 left-3 bg-[#faf9f5]/95 text-[#4d4c48] text-xs font-medium px-2.5 py-1 rounded-md">
-          {course.category}
-        </div>
-        <div className="absolute bottom-3 left-3 bg-[#141413]/80 text-[#faf9f5] text-xs px-2.5 py-1 rounded-md flex items-center gap-1.5 ltr-flex">
-          <Clock className="w-3 h-3" />
-          {course.duration}
-        </div>
-        {course.badge && (
-          <div className="absolute top-3 right-3 bg-[#c96442] text-[#faf9f5] text-xs font-medium px-2.5 py-1 rounded-md">
-            {course.badge === "mostEnrolled" ? mostEnrolledLabel : newLabel}
-          </div>
-        )}
-      </div>
-      <div className="p-5 flex-1 flex flex-col gap-3">
-        <h3
-          className="text-[18px] leading-snug text-[#141413]"
-          style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
-        >
-          {course.title}
-        </h3>
-        <p className="text-sm text-[#87867f]">{course.teacher}</p>
-        <div className="flex items-center justify-between pt-2 mt-auto border-t border-[#f0eee6] ltr-flex">
-          <div className="flex items-center gap-1 text-sm text-[#4d4c48] ltr-flex">
-            <Star className="w-4 h-4 text-[#c96442]" fill="currentColor" />
-            <span className="font-medium">{course.rating}</span>
-          </div>
-          <div className="text-sm">
-            {course.free ? (
-              <span className="font-medium text-[#c96442]">{freeLabel}</span>
-            ) : (
-              <span className="font-medium text-[#141413]">{course.price}</span>
-            )}
+        <div className="p-5 flex-1 flex flex-col gap-3">
+          <h3
+            className="text-[18px] leading-snug text-[#141413]"
+            style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
+          >
+            {course.title}
+          </h3>
+          <p className="text-sm text-[#87867f]">{course.instructor}</p>
+          <div className="flex items-center justify-between pt-2 mt-auto border-t border-[#f0eee6] ltr-flex">
+            <div className="flex items-center gap-1 text-sm text-[#4d4c48] ltr-flex">
+              <Star className="w-4 h-4 text-[#c96442]" fill="currentColor" />
+              <span className="font-medium">{course.level ?? ""}</span>
+            </div>
+            <div className="text-sm">
+              <span className={isFree ? "font-medium text-[#c96442]" : "font-medium text-[#141413]"}>
+                {priceLabel}
+              </span>
+            </div>
           </div>
         </div>
-      </div>
-    </motion.div>
+      </motion.div>
+    </Link>
   )
 }

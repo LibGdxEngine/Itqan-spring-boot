@@ -29,6 +29,12 @@ public class LessonService {
 
         Lesson lesson = lessonMapper.toEntity(request);
         lesson.setModule(module);
+        if (lesson.getIsFree() == null) {
+            lesson.setIsFree(false);
+        }
+        if (lesson.getActive() == null) {
+            lesson.setActive(true);
+        }
         if (StringUtils.hasText(request.getVideoUrl())) {
             lesson.setVideoStatus(LessonVideoStatus.READY);
             lesson.setVideoUploadedAt(LocalDateTime.now());

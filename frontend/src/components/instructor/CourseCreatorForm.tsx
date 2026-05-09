@@ -1,11 +1,15 @@
 "use client";
 
-import { FormEvent, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
+import { ImagePlus, Loader2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { CoursesService } from "@/lib/api";
+import {
+  uploadCourseThumbnail,
+  validateThumbnailFile,
+} from "@/lib/courseThumbnail";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,7 +19,10 @@ export function CourseCreatorForm() {
   const router = useRouter();
   const t = useTranslations();
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -25,11 +32,67 @@ export function CourseCreatorForm() {
     level: "BEGINNER",
   });
 
+  useEffect(() => {
+    return () => {
+      if (thumbnailPreview) URL.revokeObjectURL(thumbnailPreview);
+    };
+  }, [thumbnailPreview]);
+
+  const onPickThumbnail = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    const validation = validateThumbnailFile(file);
+    if (!validation.ok) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description:
+          validation.reason === "size"
+            ? t("instructor.thumbnailTooLarge") ||
+              "Image is larger than 5 MB."
+            : t("instructor.thumbnailUnsupportedType") ||
+              "Use JPEG, PNG, or WebP.",
+      });
+      return;
+    }
+
+    if (thumbnailPreview) URL.revokeObjectURL(thumbnailPreview);
+    setThumbnailFile(file);
+    setThumbnailPreview(URL.createObjectURL(file));
+  };
+
+  const clearThumbnail = () => {
+    if (thumbnailPreview) URL.revokeObjectURL(thumbnailPreview);
+    setThumbnailFile(null);
+    setThumbnailPreview(null);
+  };
+
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLoading(true);
 
     try {
+      let thumbnailUrl: string | undefined;
+      if (thumbnailFile) {
+        try {
+          const uploaded = await uploadCourseThumbnail(thumbnailFile);
+          thumbnailUrl = uploaded.url;
+        } catch (uploadError) {
+          console.error("Failed to upload thumbnail", uploadError);
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description:
+              t("instructor.thumbnailUploadFailed") ||
+              "Couldn't upload the thumbnail. Try a different image.",
+          });
+          setLoading(false);
+          return;
+        }
+      }
+
       await CoursesService.createCourse({
         title: formData.title,
         description: formData.description || undefined,
@@ -39,6 +102,7 @@ export function CourseCreatorForm() {
         level: formData.level,
         // Backend currently validates category as required.
         category: "GENERAL",
+        thumbnailUrl,
       });
 
       toast({
@@ -56,6 +120,7 @@ export function CourseCreatorForm() {
         duration: "1",
         level: "BEGINNER",
       });
+      clearThumbnail();
       router.refresh();
     } catch (error) {
       console.error("Failed to create course", error);
@@ -71,6 +136,51 @@ export function CourseCreatorForm() {
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <label className="text-sm font-medium">
+          {t("instructor.thumbnail") || "Course thumbnail"}
+        </label>
+        {thumbnailPreview ? (
+          <div className="relative overflow-hidden rounded-md border border-[#e8e6dc] bg-[#f0eee6]">
+            <img
+              src={thumbnailPreview}
+              alt=""
+              className="aspect-video w-full object-cover"
+            />
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="absolute right-2 top-2 gap-1"
+              onClick={clearThumbnail}
+            >
+              <X className="h-3 w-3" />
+              {t("instructor.thumbnailRemove") || "Remove"}
+            </Button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="flex aspect-video w-full flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed border-[#e8e6dc] bg-[#faf9f5] text-sm text-[#87867f] transition-colors hover:border-[#c96442] hover:text-[#c96442]"
+          >
+            <ImagePlus className="h-6 w-6" />
+            <span>{t("instructor.thumbnailPickFile") || "Choose image"}</span>
+            <span className="text-xs">
+              {t("instructor.thumbnailHint") ||
+                "JPEG, PNG, or WebP. Max 5 MB."}
+            </span>
+          </button>
+        )}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          className="hidden"
+          onChange={onPickThumbnail}
+        />
+      </div>
+
       <div className="space-y-2">
         <label className="text-sm font-medium">{t("courses.title") || "Course Title"}</label>
         <Input

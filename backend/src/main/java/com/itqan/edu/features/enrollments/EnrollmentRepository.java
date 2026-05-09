@@ -35,4 +35,6 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     Object[] findCompletionStatsByCourse(@Param("courseId") Long courseId);
 
     long count();
+
+    long countByCourseIdIn(java.util.Collection<Long> courseIds);
 }

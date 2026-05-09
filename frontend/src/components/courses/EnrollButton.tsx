@@ -42,8 +42,8 @@ export function EnrollButton({ courseId, coursePrice }: EnrollButtonProps) {
             try {
                 // First get student profile to get ID
                 // Optimization: Store studentId in AuthContext or cache it
-                const student = await StudentsService.getProfile();
-                if (!student.id) return;
+                const student = await StudentsService.getProfile().catch(() => null);
+                if (!student?.id) return;
 
                 const enrolled = await EnrollmentsService.checkEnrollment(student.id, courseId);
                 setIsEnrolled(enrolled);
@@ -207,6 +207,7 @@ export function EnrollButton({ courseId, coursePrice }: EnrollButtonProps) {
                     placeholder="Coupon code"
                     value={couponCode}
                     onChange={(e) => setCouponCode(e.target.value)}
+                    className="text-[#141413]"
                 />
                 <Button
                     type="button"

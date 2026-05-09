@@ -14,9 +14,20 @@ export function CourseCard({ course }: CourseCardProps) {
   return (
     <Card className="flex flex-col h-full hover:shadow-lg transition-shadow duration-300">
       <CardHeader className="p-0">
-        <div className="h-48 bg-[#c96442] w-full rounded-t-lg flex items-center justify-center">
-             {/* Placeholder for course image */}
-             <BookOpen className="h-16 w-16 text-[#faf9f5] opacity-80" />
+        <div className="h-48 w-full overflow-hidden rounded-t-lg bg-[#c96442]">
+          {course.thumbnailUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={course.thumbnailUrl}
+              alt={course.title ?? ''}
+              className="h-full w-full object-cover"
+              loading="lazy"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center">
+              <BookOpen className="h-16 w-16 text-[#faf9f5] opacity-80" />
+            </div>
+          )}
         </div>
       </CardHeader>
       <CardContent className="flex-grow p-6">

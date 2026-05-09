@@ -1,4 +1,4 @@
-.PHONY: prod-build dev-build dev-up dev-down dev-stop dev-restart dev-logs dev-ps dev-clean
+.PHONY: prod-build dev-build dev-up dev-down dev-stop dev-restart dev-logs dev-ps dev-clean backend-recompile
 
 prod-build:
 	COMPOSE_PROFILES=prod docker compose --env-file .env.production up -d --build
@@ -26,3 +26,6 @@ dev-ps:
 
 dev-clean:
 	COMPOSE_PROFILES=dev docker compose --env-file .env down -v
+
+backend-recompile:
+	COMPOSE_PROFILES=dev docker compose --env-file .env exec -T backend mvn -q -DskipTests compile

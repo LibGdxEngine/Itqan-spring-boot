@@ -4,6 +4,8 @@
 /* eslint-disable */
 import type { CourseRequest } from '../models/CourseRequest';
 import type { CourseResponse } from '../models/CourseResponse';
+import type { Pageable } from '../models/Pageable';
+import type { PageCourseResponse } from '../models/PageCourseResponse';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
@@ -67,15 +69,21 @@ export class CoursesService {
         });
     }
     /**
-     * Get all courses
-     * Get all courses
-     * @returns CourseResponse OK
+     * Get all courses (paginated)
+     * Get all courses with pagination
+     * @param pageable
+     * @returns PageCourseResponse OK
      * @throws ApiError
      */
-    public static getAllCourses(): CancelablePromise<Array<CourseResponse>> {
+    public static getAllCourses(
+        pageable: Pageable,
+    ): CancelablePromise<PageCourseResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/courses',
+            query: {
+                'pageable': pageable,
+            },
         });
     }
     /**
@@ -147,27 +155,39 @@ export class CoursesService {
         });
     }
     /**
-     * Get current instructor courses
+     * Get current instructor courses (paginated)
      * Get courses owned by current instructor
-     * @returns CourseResponse OK
+     * @param pageable
+     * @returns PageCourseResponse OK
      * @throws ApiError
      */
-    public static getMyCourses(): CancelablePromise<Array<CourseResponse>> {
+    public static getMyCourses(
+        pageable: Pageable,
+    ): CancelablePromise<PageCourseResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/courses/mine',
+            query: {
+                'pageable': pageable,
+            },
         });
     }
     /**
-     * Get active courses
-     * Get all active courses
-     * @returns CourseResponse OK
+     * Get active courses (paginated)
+     * Get all active courses with pagination
+     * @param pageable
+     * @returns PageCourseResponse OK
      * @throws ApiError
      */
-    public static getActiveCourses(): CancelablePromise<Array<CourseResponse>> {
+    public static getActiveCourses(
+        pageable: Pageable,
+    ): CancelablePromise<PageCourseResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/courses/active',
+            query: {
+                'pageable': pageable,
+            },
         });
     }
 }

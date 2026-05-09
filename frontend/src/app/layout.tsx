@@ -3,8 +3,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages, getTranslations } from 'next-intl/server';
 import { IBM_Plex_Sans_Arabic, Amiri } from 'next/font/google';
 import "./globals.css";
-import { ToastProvider } from "@/components/ui/toast";
-import { AuthProvider } from "@/components/auth-context";
+import { ClientProviders } from "@/components/providers/ClientProviders";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
@@ -119,11 +118,7 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />
         <NextIntlClientProvider messages={messages}>
-          <AuthProvider>
-            <ToastProvider>
-              {children}
-            </ToastProvider>
-          </AuthProvider>
+          <ClientProviders>{children}</ClientProviders>
         </NextIntlClientProvider>
       </body>
     </html>

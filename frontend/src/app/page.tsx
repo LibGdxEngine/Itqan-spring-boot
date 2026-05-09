@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import HomeClient from "./_components/HomeClient";
+import { fetchLandingPageServerSide } from "@/lib/landingPage";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
@@ -30,6 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function Page() {
-  return <HomeClient />;
+export default async function Page() {
+  const data = await fetchLandingPageServerSide();
+  return <HomeClient data={data} />;
 }

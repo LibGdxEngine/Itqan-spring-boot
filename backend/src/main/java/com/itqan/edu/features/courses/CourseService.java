@@ -1,10 +1,12 @@
 package com.itqan.edu.features.courses;
 
+import com.itqan.edu.common.config.StorageProperties;
 import com.itqan.edu.common.exception.BusinessException;
 import com.itqan.edu.common.exception.ErrorCode;
 import com.itqan.edu.features.auth.User;
 import com.itqan.edu.features.courses.dto.CourseRequest;
 import com.itqan.edu.features.courses.dto.CourseResponse;
+import com.itqan.edu.features.courses.dto.ThumbnailUploadResponse;
 import com.itqan.edu.features.courses.mapper.CourseMapper;
 import com.itqan.edu.features.courses.search.CourseSearchService;
 import lombok.RequiredArgsConstructor;
@@ -14,17 +16,31 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class CourseService {
 
+    private static final long MAX_THUMBNAIL_BYTES = 5L * 1024 * 1024;
+    private static final Set<String> ALLOWED_THUMBNAIL_TYPES =
+            Set.of("image/jpeg", "image/jpg", "image/png", "image/webp");
+
     private final CourseRepository courseRepository;
     private final CourseMapper courseMapper;
     private final CourseSearchService courseSearchService;
+    private final S3Client s3Client;
+    private final StorageProperties storageProperties;
 
     @CacheEvict(value = "courses", allEntries = true)
     @Transactional
@@ -66,7 +82,6 @@ public class CourseService {
                 .collect(Collectors.toList());
     }
 
-    @Cacheable(value = "courses", key = "'active-page-' + #pageable.pageNumber + '-' + #pageable.pageSize + '-' + #pageable.sort.toString()")
     public Page<CourseResponse> getActiveCourses(Pageable pageable) {
         return courseRepository.findByActiveTrue(pageable)
                 .map(courseMapper::toResponse);
@@ -144,5 +159,59 @@ public class CourseService {
         if (course.getOwnerUserId() == null || !course.getOwnerUserId().equals(currentUser.getId())) {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
+    }
+
+    public ThumbnailUploadResponse uploadThumbnail(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new BusinessException(ErrorCode.VALIDATION_ERROR, "Thumbnail file is required");
+        }
+        if (file.getSize() > MAX_THUMBNAIL_BYTES) {
+            throw new BusinessException(ErrorCode.VALIDATION_ERROR, "Thumbnail file exceeds 5MB");
+        }
+        String contentType = file.getContentType();
+        String normalized = contentType == null ? "" : contentType.toLowerCase(Locale.ROOT);
+        if (!ALLOWED_THUMBNAIL_TYPES.contains(normalized)) {
+            throw new BusinessException(ErrorCode.VALIDATION_ERROR,
+                    "Only JPEG, PNG, or WebP images are allowed");
+        }
+
+        String objectKey = buildThumbnailObjectKey(file.getOriginalFilename());
+        try {
+            s3Client.putObject(PutObjectRequest.builder()
+                            .bucket(storageProperties.getBucket())
+                            .key(objectKey)
+                            .contentType(normalized)
+                            .build(),
+                    RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+        } catch (IOException ex) {
+            throw new BusinessException(ErrorCode.VALIDATION_ERROR,
+                    "Failed to read thumbnail upload: " + ex.getMessage());
+        } catch (Exception ex) {
+            throw new BusinessException(ErrorCode.VALIDATION_ERROR,
+                    "Failed to upload thumbnail: " + ex.getMessage());
+        }
+
+        return ThumbnailUploadResponse.builder()
+                .url(buildPublicUrl(objectKey))
+                .objectKey(objectKey)
+                .build();
+    }
+
+    private String buildThumbnailObjectKey(String filename) {
+        String safeName = (filename == null ? "thumbnail.jpg" : filename).toLowerCase(Locale.ROOT)
+                .replaceAll("[^a-z0-9.]+", "-")
+                .replaceAll("^-|-$", "");
+        if (safeName.isBlank()) safeName = "thumbnail.jpg";
+        return "courses/thumbnails/" + UUID.randomUUID() + "-" + safeName;
+    }
+
+    private String buildPublicUrl(String objectKey) {
+        String endpoint = storageProperties.getPublicEndpoint();
+        if (endpoint == null) endpoint = "";
+        endpoint = endpoint.replaceAll("/+$", "");
+        if (storageProperties.isPathStyleAccessEnabled()) {
+            return endpoint + "/" + storageProperties.getBucket() + "/" + objectKey;
+        }
+        return endpoint + "/" + objectKey;
     }
 }

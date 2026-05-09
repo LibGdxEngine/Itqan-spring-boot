@@ -20,8 +20,8 @@ export default function CoursesPage() {
         const fetchCourses = async () => {
             try {
                 // Fetch active courses
-                const data = await CoursesService.getActiveCourses();
-                setCourses(data);
+                const page = await CoursesService.getActiveCourses({});
+                setCourses(page.content ?? []);
             } catch (err) {
                 console.error("Failed to fetch courses", err);
                 setError("Failed to load courses. Please try again later.");

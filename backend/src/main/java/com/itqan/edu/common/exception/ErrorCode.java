@@ -92,8 +92,6 @@ public enum ErrorCode {
     REFRESH_TOKEN_INVALID(401, "AUTH_008", "Invalid refresh token"),
     REFRESH_TOKEN_EXPIRED(401, "AUTH_009", "Refresh token has expired"),
 
-    // Rate Limiting
-    RATE_LIMITED(429, "RATE_001", "Too many requests, please try again later"),
 
     // Internal Server Error
     INTERNAL_ERROR(500, "SYS_001", "Internal server error");

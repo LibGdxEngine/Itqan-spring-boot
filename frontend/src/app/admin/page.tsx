@@ -1,9 +1,10 @@
 "use client"
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
-import { Loader2, ShieldCheck, Users, BookOpen, CheckCircle2, UserCog, Crown } from "lucide-react"
+import { BarChart3, BookOpen, CheckCircle2, Crown, GraduationCap, Loader2, ShieldCheck, UserCog, Users } from "lucide-react"
 
 import { useAuth } from "@/components/auth-context"
 import { Navbar } from "@/components/Navbar"
@@ -14,6 +15,8 @@ import { useToast } from "@/components/ui/use-toast"
 import { getErrorMessage } from "@/lib/api-axios"
 import { CourseResponse, CoursesService, OpenAPI, StudentResponse, StudentsService } from "@/lib/api"
 import { AdminUser, adminsApi } from "@/lib/admins"
+import { InstructorUser, instructorsApi } from "@/lib/instructors"
+import { LandingPageAdmin } from "@/app/admin/_components/LandingPageAdmin"
 
 OpenAPI.BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"
 
@@ -21,6 +24,7 @@ interface ListErrors {
   students?: string
   courses?: string
   admins?: string
+  instructors?: string
 }
 
 interface CreateAdminForm {
@@ -39,6 +43,14 @@ interface EditAdminForm {
   password: string
   enabled: boolean
   superAdmin: boolean
+}
+
+interface InstructorFormState {
+  firstName: string
+  lastName: string
+  email: string
+  password: string
+  enabled: boolean
 }
 
 function formatDate(value?: string) {
@@ -61,6 +73,13 @@ function sortAdmins(items: AdminUser[]) {
   })
 }
 
+function sortInstructors(items: InstructorUser[]) {
+  return [...items].sort((a, b) => {
+    if (a.enabled !== b.enabled) return a.enabled ? -1 : 1
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  })
+}
+
 const defaultCreateForm: CreateAdminForm = {
   firstName: "",
   lastName: "",
@@ -68,6 +87,14 @@ const defaultCreateForm: CreateAdminForm = {
   password: "",
   enabled: true,
   superAdmin: false,
+}
+
+const defaultInstructorForm: InstructorFormState = {
+  firstName: "",
+  lastName: "",
+  email: "",
+  password: "",
+  enabled: true,
 }
 
 export default function AdminDashboardPage() {
@@ -88,15 +115,23 @@ export default function AdminDashboardPage() {
   const [editingAdminId, setEditingAdminId] = useState<number | null>(null)
   const [editingForm, setEditingForm] = useState<EditAdminForm | null>(null)
   const [savingAdmin, setSavingAdmin] = useState(false)
+  const [instructors, setInstructors] = useState<InstructorUser[]>([])
+  const [instructorCreateForm, setInstructorCreateForm] = useState<InstructorFormState>(defaultInstructorForm)
+  const [creatingInstructor, setCreatingInstructor] = useState(false)
+  const [editingInstructorId, setEditingInstructorId] = useState<number | null>(null)
+  const [instructorEditingForm, setInstructorEditingForm] = useState<InstructorFormState | null>(null)
+  const [savingInstructor, setSavingInstructor] = useState(false)
+  const [deactivatingInstructorIds, setDeactivatingInstructorIds] = useState<Set<number>>(new Set())
 
   const fetchAdminData = useCallback(async () => {
     setLoading(true)
     setErrors({})
 
-    const [adminsResult, studentsResult, coursesResult] = await Promise.allSettled([
+    const [adminsResult, studentsResult, coursesResult, instructorsResult] = await Promise.allSettled([
       adminsApi.getAll(),
-      StudentsService.getAllStudents(),
-      CoursesService.getMyCourses(),
+      StudentsService.getAllStudents({}),
+      CoursesService.getMyCourses({}),
+      instructorsApi.getAll(),
     ])
 
     const nextErrors: ListErrors = {}
@@ -108,15 +143,21 @@ export default function AdminDashboardPage() {
     }
 
     if (studentsResult.status === "fulfilled") {
-      setStudents(studentsResult.value)
+      setStudents(studentsResult.value.content ?? [])
     } else {
       nextErrors.students = getErrorMessage(studentsResult.reason)
     }
 
     if (coursesResult.status === "fulfilled") {
-      setCourses(coursesResult.value)
+      setCourses(coursesResult.value.content ?? [])
     } else {
       nextErrors.courses = getErrorMessage(coursesResult.reason)
+    }
+
+    if (instructorsResult.status === "fulfilled") {
+      setInstructors(sortInstructors(instructorsResult.value))
+    } else {
+      nextErrors.instructors = getErrorMessage(instructorsResult.reason)
     }
 
     setErrors(nextErrors)
@@ -158,6 +199,8 @@ export default function AdminDashboardPage() {
     const activeStudents = students.filter((student) => student.active).length
     const activeCourses = courses.filter((course) => course.active).length
 
+    const activeInstructors = instructors.filter((instructor) => instructor.enabled).length
+
     return {
       totalAdmins: admins.length,
       superAdmins: admins.filter((admin) => admin.superAdmin).length,
@@ -165,8 +208,10 @@ export default function AdminDashboardPage() {
       activeStudents,
       totalCourses: courses.length,
       activeCourses,
+      totalInstructors: instructors.length,
+      activeInstructors,
     }
-  }, [admins, students, courses])
+  }, [admins, students, courses, instructors])
 
   const deactivateStudent = async (student: StudentResponse) => {
     const studentId = student.id
@@ -295,6 +340,101 @@ export default function AdminDashboardPage() {
     }
   }
 
+  const createInstructor = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!canManageAdmins) return
+
+    setCreatingInstructor(true)
+    try {
+      const created = await instructorsApi.create({
+        firstName: instructorCreateForm.firstName.trim(),
+        lastName: instructorCreateForm.lastName.trim(),
+        email: instructorCreateForm.email.trim(),
+        password: instructorCreateForm.password,
+        enabled: instructorCreateForm.enabled,
+      })
+
+      setInstructors((prev) => sortInstructors([...prev, created]))
+      setInstructorCreateForm(defaultInstructorForm)
+      toast({ title: t("admin.actions.instructorCreated") })
+    } catch (error) {
+      toast({
+        title: t("admin.states.failed"),
+        description: getErrorMessage(error),
+        variant: "destructive",
+      })
+    } finally {
+      setCreatingInstructor(false)
+    }
+  }
+
+  const startEditingInstructor = (instructor: InstructorUser) => {
+    setEditingInstructorId(instructor.id)
+    setInstructorEditingForm({
+      firstName: instructor.firstName,
+      lastName: instructor.lastName,
+      email: instructor.email,
+      password: "",
+      enabled: instructor.enabled,
+    })
+  }
+
+  const cancelEditingInstructor = () => {
+    setEditingInstructorId(null)
+    setInstructorEditingForm(null)
+  }
+
+  const saveInstructorChanges = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!canManageAdmins || !instructorEditingForm || editingInstructorId === null) return
+
+    setSavingInstructor(true)
+    try {
+      const updated = await instructorsApi.update(editingInstructorId, {
+        firstName: instructorEditingForm.firstName.trim(),
+        lastName: instructorEditingForm.lastName.trim(),
+        email: instructorEditingForm.email.trim(),
+        password: instructorEditingForm.password || undefined,
+        enabled: instructorEditingForm.enabled,
+      })
+
+      setInstructors((prev) => sortInstructors(prev.map((item) => (item.id === updated.id ? updated : item))))
+      cancelEditingInstructor()
+      toast({ title: t("admin.actions.instructorUpdated") })
+    } catch (error) {
+      toast({
+        title: t("admin.states.failed"),
+        description: getErrorMessage(error),
+        variant: "destructive",
+      })
+    } finally {
+      setSavingInstructor(false)
+    }
+  }
+
+  const deactivateInstructor = async (instructor: InstructorUser) => {
+    if (!canManageAdmins || !instructor.enabled) return
+
+    setDeactivatingInstructorIds((prev) => new Set(prev).add(instructor.id))
+    try {
+      const updated = await instructorsApi.deactivate(instructor.id)
+      setInstructors((prev) => sortInstructors(prev.map((item) => (item.id === updated.id ? updated : item))))
+      toast({ title: t("admin.actions.instructorDeactivated") })
+    } catch (error) {
+      toast({
+        title: t("admin.states.failed"),
+        description: getErrorMessage(error),
+        variant: "destructive",
+      })
+    } finally {
+      setDeactivatingInstructorIds((prev) => {
+        const next = new Set(prev)
+        next.delete(instructor.id)
+        return next
+      })
+    }
+  }
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-[#f5f4ed]">
@@ -321,12 +461,21 @@ export default function AdminDashboardPage() {
     <div className="min-h-screen bg-[#f5f4ed]">
       <Navbar />
     <div className="container mx-auto max-w-7xl px-4 pt-24 pb-10">
-      <div className="mb-8">
-        <h1 className="flex items-center gap-2 text-3xl font-bold text-[#141413]">
-          <ShieldCheck className="h-8 w-8 text-[#c96442]" />
-          {t("admin.dashboard")}
-        </h1>
-        <p className="mt-2 text-[#5e5d59]">{t("admin.welcome", { name: user.firstName })}</p>
+      <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <h1 className="flex items-center gap-2 text-3xl font-bold text-[#141413]">
+            <ShieldCheck className="h-8 w-8 text-[#c96442]" />
+            {t("admin.dashboard")}
+          </h1>
+          <p className="mt-2 text-[#5e5d59]">{t("admin.welcome", { name: user.firstName })}</p>
+        </div>
+        <Link
+          href="/admin/analytics"
+          className="inline-flex items-center gap-2 self-start rounded-lg border border-[#c96442] bg-[#c96442] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#b3573a] md:self-auto"
+        >
+          <BarChart3 className="h-4 w-4" />
+          {t("admin.analytics.title")}
+        </Link>
       </div>
 
       <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -342,6 +491,20 @@ export default function AdminDashboardPage() {
           <p className="mt-2 flex items-center gap-2 text-2xl font-bold text-[#141413]">
             <Crown className="h-5 w-5 text-[#c96442]" />
             {stats.superAdmins}
+          </p>
+        </div>
+        <div className="rounded-xl border border-[#f0eee6] bg-[#faf9f5] p-4">
+          <p className="text-sm text-[#87867f]">{t("admin.stats.totalInstructors")}</p>
+          <p className="mt-2 flex items-center gap-2 text-2xl font-bold text-[#141413]">
+            <GraduationCap className="h-5 w-5 text-[#87867f]" />
+            {stats.totalInstructors}
+          </p>
+        </div>
+        <div className="rounded-xl border border-[#f0eee6] bg-[#faf9f5] p-4">
+          <p className="text-sm text-[#87867f]">{t("admin.stats.activeInstructors")}</p>
+          <p className="mt-2 flex items-center gap-2 text-2xl font-bold text-[#141413]">
+            <CheckCircle2 className="h-5 w-5 text-[#c96442]" />
+            {stats.activeInstructors}
           </p>
         </div>
         <div className="rounded-xl border border-[#f0eee6] bg-[#faf9f5] p-4">
@@ -618,6 +781,246 @@ export default function AdminDashboardPage() {
 
       <section className="mb-8 rounded-xl border border-[#f0eee6] bg-[#faf9f5]">
         <div className="flex items-center justify-between border-b border-[#f0eee6] px-4 py-3">
+          <h2 className="text-lg font-semibold text-[#141413]">{t("admin.instructors.title")}</h2>
+          <span className="text-sm text-[#87867f]">{instructors.length}</span>
+        </div>
+
+        {errors.instructors && (
+          <div className="flex flex-col gap-3 px-4 py-4 text-sm text-[#b53333] md:flex-row md:items-center md:justify-between">
+            <p>{errors.instructors}</p>
+            <Button variant="outline" size="sm" onClick={() => void fetchAdminData()}>
+              {t("admin.actions.retry")}
+            </Button>
+          </div>
+        )}
+
+        {!errors.instructors && !canManageAdmins && (
+          <div className="mx-4 mt-4 rounded-lg border border-[#e8e6dc] bg-[#f0eee6] px-4 py-3 text-sm text-[#4d4c48]">
+            {t("admin.instructors.permissionsHint")}
+          </div>
+        )}
+
+        {!errors.instructors && canManageAdmins && (
+          <div className="border-b border-[#f0eee6] px-4 py-4">
+            <h3 className="mb-3 text-sm font-semibold text-[#141413]">{t("admin.instructors.createTitle")}</h3>
+            <form className="grid gap-3 md:grid-cols-2 xl:grid-cols-3" onSubmit={createInstructor}>
+              <div className="space-y-1.5">
+                <Label htmlFor="create-instructor-first-name">{t("admin.instructors.firstName")}</Label>
+                <Input
+                  id="create-instructor-first-name"
+                  value={instructorCreateForm.firstName}
+                  onChange={(event) => setInstructorCreateForm((prev) => ({ ...prev, firstName: event.target.value }))}
+                  required
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="create-instructor-last-name">{t("admin.instructors.lastName")}</Label>
+                <Input
+                  id="create-instructor-last-name"
+                  value={instructorCreateForm.lastName}
+                  onChange={(event) => setInstructorCreateForm((prev) => ({ ...prev, lastName: event.target.value }))}
+                  required
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="create-instructor-email">{t("admin.instructors.email")}</Label>
+                <Input
+                  id="create-instructor-email"
+                  type="email"
+                  value={instructorCreateForm.email}
+                  onChange={(event) => setInstructorCreateForm((prev) => ({ ...prev, email: event.target.value }))}
+                  required
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="create-instructor-password">{t("admin.instructors.password")}</Label>
+                <Input
+                  id="create-instructor-password"
+                  type="password"
+                  value={instructorCreateForm.password}
+                  onChange={(event) => setInstructorCreateForm((prev) => ({ ...prev, password: event.target.value }))}
+                  minLength={8}
+                  required
+                />
+              </div>
+              <label className="flex items-center gap-2 rounded-lg border border-[#f0eee6] px-3 py-2 text-sm text-[#4d4c48]">
+                <input
+                  type="checkbox"
+                  checked={instructorCreateForm.enabled}
+                  onChange={(event) => setInstructorCreateForm((prev) => ({ ...prev, enabled: event.target.checked }))}
+                />
+                {t("admin.instructors.enabled")}
+              </label>
+              <div className="md:col-span-2 xl:col-span-3">
+                <Button type="submit" disabled={creatingInstructor}>
+                  {creatingInstructor ? (
+                    <span className="inline-flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      {t("admin.actions.creating")}
+                    </span>
+                  ) : (
+                    t("admin.actions.createInstructor")
+                  )}
+                </Button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {!errors.instructors && canManageAdmins && instructorEditingForm && editingInstructorId !== null && (
+          <div className="border-b border-[#f0eee6] px-4 py-4">
+            <h3 className="mb-3 text-sm font-semibold text-[#141413]">{t("admin.instructors.editTitle")}</h3>
+            <form className="grid gap-3 md:grid-cols-2 xl:grid-cols-3" onSubmit={saveInstructorChanges}>
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-instructor-first-name">{t("admin.instructors.firstName")}</Label>
+                <Input
+                  id="edit-instructor-first-name"
+                  value={instructorEditingForm.firstName}
+                  onChange={(event) =>
+                    setInstructorEditingForm((prev) => (prev ? { ...prev, firstName: event.target.value } : prev))
+                  }
+                  required
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-instructor-last-name">{t("admin.instructors.lastName")}</Label>
+                <Input
+                  id="edit-instructor-last-name"
+                  value={instructorEditingForm.lastName}
+                  onChange={(event) =>
+                    setInstructorEditingForm((prev) => (prev ? { ...prev, lastName: event.target.value } : prev))
+                  }
+                  required
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-instructor-email">{t("admin.instructors.email")}</Label>
+                <Input
+                  id="edit-instructor-email"
+                  type="email"
+                  value={instructorEditingForm.email}
+                  onChange={(event) =>
+                    setInstructorEditingForm((prev) => (prev ? { ...prev, email: event.target.value } : prev))
+                  }
+                  required
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-instructor-password">{t("admin.instructors.newPassword")}</Label>
+                <Input
+                  id="edit-instructor-password"
+                  type="password"
+                  value={instructorEditingForm.password}
+                  onChange={(event) =>
+                    setInstructorEditingForm((prev) => (prev ? { ...prev, password: event.target.value } : prev))
+                  }
+                  minLength={8}
+                  placeholder={t("admin.instructors.passwordOptional")}
+                />
+              </div>
+              <label className="flex items-center gap-2 rounded-lg border border-[#f0eee6] px-3 py-2 text-sm text-[#4d4c48]">
+                <input
+                  type="checkbox"
+                  checked={instructorEditingForm.enabled}
+                  onChange={(event) =>
+                    setInstructorEditingForm((prev) => (prev ? { ...prev, enabled: event.target.checked } : prev))
+                  }
+                />
+                {t("admin.instructors.enabled")}
+              </label>
+              <div className="flex items-center gap-2 md:col-span-2 xl:col-span-3">
+                <Button type="submit" disabled={savingInstructor}>
+                  {savingInstructor ? (
+                    <span className="inline-flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      {t("admin.actions.saving")}
+                    </span>
+                  ) : (
+                    t("admin.actions.save")
+                  )}
+                </Button>
+                <Button type="button" variant="outline" onClick={cancelEditingInstructor} disabled={savingInstructor}>
+                  {t("admin.actions.cancel")}
+                </Button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {!errors.instructors && instructors.length === 0 && (
+          <div className="px-4 py-6 text-sm text-[#87867f]">{t("admin.states.noInstructors")}</div>
+        )}
+
+        {!errors.instructors && instructors.length > 0 && (
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead className="bg-[#f0eee6] text-left text-[#5e5d59]">
+                <tr>
+                  <th className="px-4 py-3">{t("admin.instructors.name")}</th>
+                  <th className="px-4 py-3">{t("admin.instructors.email")}</th>
+                  <th className="px-4 py-3">{t("admin.instructors.createdAt")}</th>
+                  <th className="px-4 py-3">{t("admin.instructors.status")}</th>
+                  {canManageAdmins && <th className="px-4 py-3 text-right">{t("admin.instructors.actions")}</th>}
+                </tr>
+              </thead>
+              <tbody>
+                {instructors.map((instructor) => {
+                  const isEditing = editingInstructorId === instructor.id
+                  const isDeactivating = deactivatingInstructorIds.has(instructor.id)
+                  return (
+                    <tr key={instructor.id} className="border-t border-[#f0eee6]">
+                      <td className="px-4 py-3 font-medium text-[#141413]">
+                        {[instructor.firstName, instructor.lastName].filter(Boolean).join(" ").trim() || "-"}
+                      </td>
+                      <td className="px-4 py-3 text-[#4d4c48]">{instructor.email}</td>
+                      <td className="px-4 py-3 text-[#4d4c48]">{formatDate(instructor.createdAt)}</td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`rounded-full px-2 py-1 text-xs font-medium ${
+                            instructor.enabled ? "bg-[#e8e6dc] text-[#4d4c48]" : "bg-[#f0eee6] text-[#87867f]"
+                          }`}
+                        >
+                          {instructor.enabled ? t("admin.status.active") : t("admin.status.inactive")}
+                        </span>
+                      </td>
+                      {canManageAdmins && (
+                        <td className="flex justify-end gap-2 px-4 py-3 text-right">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => startEditingInstructor(instructor)}
+                            disabled={savingInstructor}
+                          >
+                            {isEditing ? t("admin.actions.editing") : t("admin.actions.edit")}
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={!instructor.enabled || isDeactivating}
+                            onClick={() => void deactivateInstructor(instructor)}
+                          >
+                            {isDeactivating ? (
+                              <span className="inline-flex items-center gap-2">
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                {t("admin.actions.deactivating")}
+                              </span>
+                            ) : (
+                              t("admin.actions.deactivate")
+                            )}
+                          </Button>
+                        </td>
+                      )}
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      <section className="mb-8 rounded-xl border border-[#f0eee6] bg-[#faf9f5]">
+        <div className="flex items-center justify-between border-b border-[#f0eee6] px-4 py-3">
           <h2 className="text-lg font-semibold text-[#141413]">{t("admin.students.title")}</h2>
           <span className="text-sm text-[#87867f]">{students.length}</span>
         </div>
@@ -773,6 +1176,8 @@ export default function AdminDashboardPage() {
           </div>
         )}
       </section>
+
+      <LandingPageAdmin />
     </div>
     </div>
   )

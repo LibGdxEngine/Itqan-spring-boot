@@ -2,6 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { Pageable } from '../models/Pageable';
+import type { PageStudentResponse } from '../models/PageStudentResponse';
 import type { StudentRequest } from '../models/StudentRequest';
 import type { StudentResponse } from '../models/StudentResponse';
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -67,15 +69,21 @@ export class StudentsService {
         });
     }
     /**
-     * Get all students
-     * Get all students
-     * @returns StudentResponse OK
+     * Get all students (paginated)
+     * Get all students with pagination
+     * @param pageable
+     * @returns PageStudentResponse OK
      * @throws ApiError
      */
-    public static getAllStudents(): CancelablePromise<Array<StudentResponse>> {
+    public static getAllStudents(
+        pageable: Pageable,
+    ): CancelablePromise<PageStudentResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/students',
+            query: {
+                'pageable': pageable,
+            },
         });
     }
     /**
@@ -126,15 +134,21 @@ export class StudentsService {
         });
     }
     /**
-     * Get active students
-     * Get all active students
-     * @returns StudentResponse OK
+     * Get active students (paginated)
+     * Get all active students with pagination
+     * @param pageable
+     * @returns PageStudentResponse OK
      * @throws ApiError
      */
-    public static getActiveStudents(): CancelablePromise<Array<StudentResponse>> {
+    public static getActiveStudents(
+        pageable: Pageable,
+    ): CancelablePromise<PageStudentResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/students/active',
+            query: {
+                'pageable': pageable,
+            },
         });
     }
 }

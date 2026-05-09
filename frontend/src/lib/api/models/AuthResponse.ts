@@ -5,10 +5,12 @@
 export type AuthResponse = {
     id?: number;
     token?: string;
+    refreshToken?: string;
     email?: string;
     firstName?: string;
     lastName?: string;
     role?: AuthResponse.role;
+    superAdmin?: boolean;
 };
 export namespace AuthResponse {
     export enum role {

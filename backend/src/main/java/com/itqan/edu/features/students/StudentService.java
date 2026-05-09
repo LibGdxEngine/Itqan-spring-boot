@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -46,6 +47,10 @@ public class StudentService {
         Student student = studentRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STUDENT_NOT_FOUND));
         return studentMapper.toResponse(student);
+    }
+
+    public Optional<StudentResponse> findByEmail(String email) {
+        return studentRepository.findByEmail(email).map(studentMapper::toResponse);
     }
 
     public List<StudentResponse> getAllStudents() {

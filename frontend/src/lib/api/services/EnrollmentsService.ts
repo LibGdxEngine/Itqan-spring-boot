@@ -4,6 +4,8 @@
 /* eslint-disable */
 import type { EnrollmentRequest } from '../models/EnrollmentRequest';
 import type { EnrollmentResponse } from '../models/EnrollmentResponse';
+import type { Pageable } from '../models/Pageable';
+import type { PageEnrollmentResponse } from '../models/PageEnrollmentResponse';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
@@ -72,20 +74,25 @@ export class EnrollmentsService {
         });
     }
     /**
-     * Get student enrollments
-     * Get all enrollments for a student
+     * Get student enrollments (paginated)
+     * Get all enrollments for a student with pagination
      * @param studentId
-     * @returns EnrollmentResponse OK
+     * @param pageable
+     * @returns PageEnrollmentResponse OK
      * @throws ApiError
      */
     public static getStudentEnrollments(
         studentId: number,
-    ): CancelablePromise<Array<EnrollmentResponse>> {
+        pageable: Pageable,
+    ): CancelablePromise<PageEnrollmentResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/enrollments/student/{studentId}',
             path: {
                 'studentId': studentId,
+            },
+            query: {
+                'pageable': pageable,
             },
         });
     }

@@ -118,8 +118,20 @@ export default function CourseDetailPage() {
                         <div className="hidden lg:block relative">
                             <div className="absolute top-0 right-0 w-full">
                                 <div className="bg-[#faf9f5] rounded-2xl shadow-xl overflow-hidden border border-[#e8e6dc]">
-                                    <div className="h-48 bg-[#c96442] flex items-center justify-center">
-                                        <BookOpen className="h-20 w-20 text-[#faf9f5]" />
+                                    <div className="h-48 bg-[#c96442] overflow-hidden">
+                                        {course.thumbnailUrl ? (
+                                            // eslint-disable-next-line @next/next/no-img-element
+                                            <img
+                                                src={course.thumbnailUrl}
+                                                alt={course.title ?? ''}
+                                                className="h-full w-full object-cover"
+                                                loading="lazy"
+                                            />
+                                        ) : (
+                                            <div className="flex h-full w-full items-center justify-center">
+                                                <BookOpen className="h-20 w-20 text-[#faf9f5]" />
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="p-6 space-y-6">
                                         <div className="flex items-end justify-between">

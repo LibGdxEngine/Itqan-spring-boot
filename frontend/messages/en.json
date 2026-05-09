@@ -24,6 +24,11 @@
     "active": "Active",
     "draft": "Draft",
     "modules": "Modules",
+    "duration": "Duration",
+    "level": "Level",
+    "price": "Price",
+    "completed": "Completed",
+    "continueLearning": "Continue Learning",
     "save": "Save",
     "cancel": "Cancel",
     "edit": "Edit"
@@ -61,7 +66,22 @@
     "address": "Address",
     "role": "Role",
     "updated": "Profile updated successfully",
-    "updateFailed": "Failed to update profile"
+    "updateFailed": "Failed to update profile",
+    "loadFailed": "Failed to load profile",
+    "addressPlaceholder": "Your address",
+    "phonePlaceholder": "+1 234 567 8900",
+    "roles": {
+      "student": "Student",
+      "instructor": "Instructor",
+      "admin": "Admin"
+    }
+  },
+  "myCourses": {
+    "title": "My Learning",
+    "subtitle": "Continue learning where you left off.",
+    "empty": "You are not enrolled in any courses yet.",
+    "status": "Status",
+    "loadFailed": "Failed to load your courses."
   },
   "dashboard": {
     "title": "Dashboard",
@@ -79,7 +99,9 @@
       "totalStudents": "Total Students",
       "activeStudents": "Active Students",
       "totalCourses": "Total Courses",
-      "activeCourses": "Active Courses"
+      "activeCourses": "Active Courses",
+      "totalInstructors": "Total Instructors",
+      "activeInstructors": "Active Instructors"
     },
     "admins": {
       "title": "Admins",
@@ -137,13 +159,63 @@
       "adminCreated": "Admin created",
       "adminUpdated": "Admin updated",
       "studentDeactivated": "Student deactivated",
-      "courseDeactivated": "Course deactivated"
+      "courseDeactivated": "Course deactivated",
+      "createInstructor": "Create Instructor",
+      "instructorCreated": "Instructor created",
+      "instructorUpdated": "Instructor updated",
+      "instructorDeactivated": "Instructor deactivated"
     },
     "states": {
       "failed": "Action failed",
       "noAdmins": "No admins found.",
       "noStudents": "No students found.",
-      "noCourses": "No courses found."
+      "noCourses": "No courses found.",
+      "noInstructors": "No instructors found."
+    },
+    "analytics": {
+      "title": "Analytics",
+      "subtitle": "Platform performance overview for the past 30 days.",
+      "backToDashboard": "Back to dashboard",
+      "refresh": "Refresh",
+      "loadFailed": "Failed to load analytics",
+      "cards": {
+        "revenue": "Total revenue",
+        "enrollments": "Total enrollments",
+        "students": "Total students",
+        "activeCourses": "Active courses",
+        "newThisMonth": "{count} new users this month",
+        "activeUsers": "{count} active users in the last 30 days"
+      },
+      "revenueTrend": {
+        "title": "Revenue trend",
+        "last30Days": "Last 30 days",
+        "empty": "No revenue data in this period yet."
+      },
+      "topCourses": {
+        "title": "Top courses by enrollment",
+        "courseTitle": "Course",
+        "enrollments": "Enrollments",
+        "completionRate": "Completion rate",
+        "averageProgress": "Average progress",
+        "empty": "No enrollments yet."
+      }
+    },
+    "instructors": {
+      "title": "Instructors",
+      "createTitle": "Create New Instructor",
+      "editTitle": "Edit Instructor",
+      "permissionsHint": "Only super admins can create or edit instructors.",
+      "name": "Name",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "password": "Password",
+      "newPassword": "New Password",
+      "passwordOptional": "Leave blank to keep current password",
+      "enabled": "Enabled",
+      "createdAt": "Created",
+      "status": "Status",
+      "actions": "Actions"
     }
   },
   "home": {
@@ -270,6 +342,9 @@
       "passwordsNoMatch": "Passwords don't match",
       "nameMinLength": "Name must be at least 2 characters",
       "acceptTermsRequired": "You must accept the terms and conditions"
+    },
+    "google": {
+      "failed": "Google sign-in failed"
     }
   },
   "footer": {
@@ -317,6 +392,127 @@
       "registerTitle": "Create account | Itqan",
       "forgotTitle": "Forgot password | Itqan",
       "resetTitle": "Reset password | Itqan"
+    }
+  },
+  "quiz": {
+    "lesson": {
+      "startQuiz": "Start quiz"
+    },
+    "page": {
+      "backToLesson": "Back to lesson",
+      "noQuiz": "No quiz is attached to this lesson.",
+      "loadFailed": "Failed to load quiz"
+    },
+    "player": {
+      "questionLabel": "Question {index} of {total}",
+      "points": "{count} pt",
+      "shortAnswerPlaceholder": "Type your answer here...",
+      "intro": "{count} questions • Passing score {passing}%",
+      "allAnswered": "All questions answered.",
+      "someUnanswered": "Some questions are not answered yet.",
+      "submit": "Submit answers",
+      "submitting": "Submitting...",
+      "submitFailed": "Failed to submit quiz",
+      "startFailed": "Failed to start quiz",
+      "noQuestions": "This quiz has no questions."
+    },
+    "result": {
+      "passedTitle": "Great job! You passed",
+      "failedTitle": "You did not pass this time",
+      "passingScore": "Passing score: {score}%",
+      "breakdownTitle": "Answer breakdown",
+      "yourAnswer": "Your answer",
+      "noAnswer": "No answer",
+      "pointsEarned": "{earned} of {total} pts",
+      "retry": "Try again",
+      "retrying": "Preparing retry...",
+      "backToLesson": "Back to lesson"
+    }
+  },
+  "courses": {
+    "title": "Course Title",
+    "description": "Description",
+    "instructor": "Instructor",
+    "duration": "Duration",
+    "level": "Level",
+    "price": "Price",
+    "curriculum": "Curriculum",
+    "lessonTitle": "Lesson Title",
+    "videoUrl": "Manual Video URL (optional)",
+    "durationMinutes": "Duration (min)",
+    "order": "Order",
+    "content": "Content / Description"
+  },
+  "instructor": {
+    "dashboard": "Instructor Dashboard",
+    "welcome": "Welcome {name}, manage your courses and content.",
+    "createCourse": "Create New Course",
+    "createFirstCourse": "Create Your First Course",
+    "manageContent": "Manage Content",
+    "noCourses": "You haven't created any courses yet.",
+    "courseCreated": "Course Created",
+    "courseCreatedDesc": "Your course has been created successfully.",
+    "backToDashboard": "Back to Dashboard",
+    "manageContentDesc": "Manage modules and lessons for this course.",
+    "newModuleName": "New Module Name",
+    "addModule": "Add",
+    "addLesson": "Add Lesson",
+    "addLessonTo": "Add Lesson to",
+    "noModules": "No modules yet. Add one above.",
+    "courseStatus": "Course Status",
+    "lessonCreated": "Lesson saved",
+    "thumbnail": "Course thumbnail",
+    "thumbnailHint": "JPEG, PNG, or WebP. Max 5 MB.",
+    "thumbnailPickFile": "Choose image",
+    "thumbnailRemove": "Remove image",
+    "changeThumbnail": "Change thumbnail",
+    "thumbnailUpdated": "Thumbnail updated",
+    "thumbnailUploadFailed": "Couldn't upload the thumbnail. Try a different image.",
+    "thumbnailTooLarge": "Image is larger than 5 MB. Pick a smaller one.",
+    "thumbnailUnsupportedType": "Use JPEG, PNG, or WebP.",
+    "videoUploader": {
+      "uploadButton": "Upload video",
+      "dialogTitle": "Upload lesson video",
+      "start": "Start upload",
+      "preparing": "Preparing...",
+      "partProgress": "Uploading part {current} of {total}",
+      "retryAttempt": "attempt {n}",
+      "finalizing": "Finalizing...",
+      "successTitle": "Video uploaded successfully",
+      "done": "Video uploaded successfully.",
+      "uploadAnother": "Upload another",
+      "cancel": "Cancel",
+      "cancelled": "Upload cancelled.",
+      "retry": "Retry",
+      "failed": "Video upload failed",
+      "tooLarge": "Maximum file size is {max}.",
+      "statusReady": "Ready",
+      "statusFailed": "Upload failed",
+      "statusUploading": "Uploading",
+      "statusPending": "Pending"
+    }
+  },
+  "lesson": {
+    "videoProcessing": "Video is still uploading. Please refresh in a moment.",
+    "videoFailed": "Video upload failed. Please contact your instructor.",
+    "videoTryAgain": "Try again"
+  },
+  "checkout": {
+    "success": {
+      "verifying": "Verifying payment...",
+      "finalizing": "Payment received, finalizing enrollment...",
+      "success": "Payment successful",
+      "couldNotVerify": "Could not verify payment",
+      "missingSession": "Missing checkout session id.",
+      "paymentStatus": "Payment status: {status}",
+      "startLearning": "Start Learning",
+      "goToDashboard": "Go to Dashboard"
+    },
+    "cancel": {
+      "title": "Checkout canceled",
+      "description": "No payment was charged. You can return to the course page and try again.",
+      "browseCourses": "Browse Courses",
+      "goToDashboard": "Go to Dashboard"
     }
   }
 }

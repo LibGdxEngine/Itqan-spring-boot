@@ -6,6 +6,7 @@ import type { AuthResponse } from '../models/AuthResponse';
 import type { ForgotPasswordRequest } from '../models/ForgotPasswordRequest';
 import type { GoogleAuthRequest } from '../models/GoogleAuthRequest';
 import type { LoginRequest } from '../models/LoginRequest';
+import type { RefreshTokenRequest } from '../models/RefreshTokenRequest';
 import type { RegisterRequest } from '../models/RegisterRequest';
 import type { ResetPasswordRequest } from '../models/ResetPasswordRequest';
 import type { VerifyOtpRequest } from '../models/VerifyOtpRequest';
@@ -49,7 +50,7 @@ export class AuthenticationService {
     }
     /**
      * Register a new user
-     * Register a new user and get JWT token
+     * Register a new user and get JWT token with refresh token
      * @param requestBody
      * @returns AuthResponse OK
      * @throws ApiError
@@ -65,8 +66,37 @@ export class AuthenticationService {
         });
     }
     /**
+     * Refresh access token
+     * Get a new access token using a refresh token
+     * @param requestBody
+     * @returns AuthResponse OK
+     * @throws ApiError
+     */
+    public static refreshToken(
+        requestBody: RefreshTokenRequest,
+    ): CancelablePromise<AuthResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/auth/refresh',
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Logout user
+     * Revoke all refresh tokens for the current user
+     * @returns string OK
+     * @throws ApiError
+     */
+    public static logout(): CancelablePromise<Record<string, string>> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/auth/logout',
+        });
+    }
+    /**
      * Login user
-     * Authenticate user and get JWT token
+     * Authenticate user and get JWT token with refresh token
      * @param requestBody
      * @returns AuthResponse OK
      * @throws ApiError

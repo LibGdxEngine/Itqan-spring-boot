@@ -1,10 +1,14 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { ChangeEvent, useCallback, useEffect, useRef, useState } from "react"
 import { useAuth } from "@/components/auth-context"
 import { Navbar } from "@/components/Navbar"
-import { CourseResponse } from "@/lib/api"
-import { Loader2, Plus, LayoutDashboard, Film } from "lucide-react"
+import { CourseResponse, CoursesService } from "@/lib/api"
+import {
+  uploadCourseThumbnail,
+  validateThumbnailFile,
+} from "@/lib/courseThumbnail"
+import { ImageIcon, Loader2, Plus, LayoutDashboard, Film } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -18,19 +22,25 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { useTranslations } from "next-intl"
+import { useToast } from "@/components/ui/use-toast"
 import api from "@/lib/api-axios"
 
 export default function InstructorDashboardPage() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth()
   const [courses, setCourses] = useState<CourseResponse[]>([])
   const [loading, setLoading] = useState(true)
+  const [updatingThumbnailId, setUpdatingThumbnailId] = useState<number | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const targetCourseIdRef = useRef<number | null>(null)
   const router = useRouter()
   const t = useTranslations()
+  const { toast } = useToast()
 
   const fetchInstructorCourses = useCallback(async () => {
     try {
-      const response = await api.get<CourseResponse[]>("/api/courses/mine")
-      setCourses(response.data)
+      const response = await api.get<{ content: CourseResponse[] } | CourseResponse[]>("/api/courses/mine")
+      const data = response.data
+      setCourses(Array.isArray(data) ? data : data?.content ?? [])
       setLoading(false)
     } catch (error) {
       console.error("Failed to fetch courses", error)
@@ -51,6 +61,70 @@ export default function InstructorDashboardPage() {
     }
   }, [isAuthenticated, user, authLoading, router, fetchInstructorCourses])
 
+  const startThumbnailChange = (courseId: number) => {
+    targetCourseIdRef.current = courseId
+    fileInputRef.current?.click()
+  }
+
+  const onThumbnailFilePicked = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    const courseId = targetCourseIdRef.current
+    event.target.value = ""
+    targetCourseIdRef.current = null
+    if (!file || courseId == null) return
+
+    const validation = validateThumbnailFile(file)
+    if (!validation.ok) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description:
+          validation.reason === "size"
+            ? t("instructor.thumbnailTooLarge") || "Image is larger than 5 MB."
+            : t("instructor.thumbnailUnsupportedType") || "Use JPEG, PNG, or WebP.",
+      })
+      return
+    }
+
+    const course = courses.find((c) => c.id === courseId)
+    if (!course) return
+
+    setUpdatingThumbnailId(courseId)
+    try {
+      const uploaded = await uploadCourseThumbnail(file)
+      await CoursesService.updateCourse(courseId, {
+        title: course.title ?? "",
+        description: course.description,
+        instructor: course.instructor ?? "",
+        price: course.price ?? 0,
+        duration: course.duration ?? 0,
+        level: course.level ?? "BEGINNER",
+        category: course.category ?? "GENERAL",
+        thumbnailUrl: uploaded.url,
+        tags: course.tags,
+      })
+      setCourses((prev) =>
+        prev.map((c) =>
+          c.id === courseId ? { ...c, thumbnailUrl: uploaded.url } : c,
+        ),
+      )
+      toast({
+        title: t("instructor.thumbnailUpdated") || "Thumbnail updated",
+      })
+    } catch (error) {
+      console.error("Failed to update thumbnail", error)
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description:
+          t("instructor.thumbnailUploadFailed") ||
+          "Couldn't upload the thumbnail. Try a different image.",
+      })
+    } finally {
+      setUpdatingThumbnailId(null)
+    }
+  }
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-[#f5f4ed]">
@@ -65,6 +139,13 @@ export default function InstructorDashboardPage() {
   return (
     <div className="min-h-screen bg-[#f5f4ed]">
       <Navbar />
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        className="hidden"
+        onChange={onThumbnailFilePicked}
+      />
     <div className="container max-w-7xl mx-auto px-4 pt-24 pb-10">
       <div className="flex items-center justify-between mb-8">
         <div>
@@ -76,7 +157,7 @@ export default function InstructorDashboardPage() {
             {t("instructor.welcome", { name: user?.firstName || "" }) || "Manage your courses and content."}
           </p>
         </div>
-        
+
         <Dialog>
           <DialogTrigger asChild>
             <Button className="gap-2">
@@ -84,7 +165,7 @@ export default function InstructorDashboardPage() {
               {t("instructor.createCourse") || "Create New Course"}
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[600px]">
+          <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{t("instructor.createCourse") || "Create New Course"}</DialogTitle>
             </DialogHeader>
@@ -94,36 +175,70 @@ export default function InstructorDashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {courses.map((course) => (
-          <div key={course.id} className="bg-[#faf9f5] rounded-xl border border-[#f0eee6] shadow-[0_0_0_1px_#f0eee6] p-5 hover:shadow-[0_4px_24px_rgba(0,0,0,0.05)] transition-shadow">
-            <div className="flex justify-between items-start mb-4">
-               <h3 className="text-lg line-clamp-1 text-[#141413]" style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }} title={course.title}>
-                 {course.title}
-               </h3>
-               <span className={`px-2 py-1 rounded-full text-xs font-medium ${course.active ? 'bg-[#e8e6dc] text-[#4d4c48]' : 'bg-[#f0eee6] text-[#87867f]'}`}>
-                 {course.active ? (t("common.active") || "Active") : (t("common.draft") || "Draft")}
-               </span>
-            </div>
-
-            <p className="text-sm text-[#87867f] mb-4 line-clamp-2">
-              {course.description || "No description provided."}
-            </p>
-
-            <div className="flex items-center justify-between mt-4 border-t border-[#f0eee6] pt-4">
-              <div className="text-sm text-[#87867f]">
-                 {course.modules?.length || 0} {t("common.modules") || "Modules"}
-              </div>
-              
-              <Button variant="outline" size="sm" asChild>
-                <Link href={`/instructor/courses/${course.id}/lessons`}>
-                  <Film className="w-4 h-4 mr-2" />
-                  {t("instructor.manageContent") || "Manage Content"}
-                </Link>
+        {courses.map((course) => {
+          const isUpdating = updatingThumbnailId === course.id
+          return (
+          <div key={course.id} className="bg-[#faf9f5] rounded-xl border border-[#f0eee6] shadow-[0_0_0_1px_#f0eee6] overflow-hidden hover:shadow-[0_4px_24px_rgba(0,0,0,0.05)] transition-shadow">
+            <div className="relative group">
+              {course.thumbnailUrl ? (
+                <img
+                  src={course.thumbnailUrl}
+                  alt={course.title || ""}
+                  className="aspect-video w-full object-cover"
+                />
+              ) : (
+                <div className="aspect-video w-full flex items-center justify-center bg-[#f0eee6] text-[#87867f]">
+                  <ImageIcon className="w-10 h-10" />
+                </div>
+              )}
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                disabled={isUpdating || course.id == null}
+                onClick={() => course.id != null && startThumbnailChange(course.id)}
+                className="absolute bottom-2 right-2 gap-1 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
+              >
+                {isUpdating ? (
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                ) : (
+                  <ImageIcon className="w-3 h-3" />
+                )}
+                {t("instructor.changeThumbnail") || "Change thumbnail"}
               </Button>
             </div>
+
+            <div className="p-5">
+              <div className="flex justify-between items-start mb-4">
+                 <h3 className="text-lg line-clamp-1 text-[#141413]" style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }} title={course.title}>
+                   {course.title}
+                 </h3>
+                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${course.active ? 'bg-[#e8e6dc] text-[#4d4c48]' : 'bg-[#f0eee6] text-[#87867f]'}`}>
+                   {course.active ? (t("common.active") || "Active") : (t("common.draft") || "Draft")}
+                 </span>
+              </div>
+
+              <p className="text-sm text-[#87867f] mb-4 line-clamp-2">
+                {course.description || "No description provided."}
+              </p>
+
+              <div className="flex items-center justify-between mt-4 border-t border-[#f0eee6] pt-4">
+                <div className="text-sm text-[#87867f]">
+                   {course.modules?.length || 0} {t("common.modules") || "Modules"}
+                </div>
+
+                <Button variant="outline" size="sm" asChild>
+                  <Link href={`/instructor/courses/${course.id}/lessons`}>
+                    <Film className="w-4 h-4 mr-2" />
+                    {t("instructor.manageContent") || "Manage Content"}
+                  </Link>
+                </Button>
+              </div>
+            </div>
           </div>
-        ))}
-        
+          )
+        })}
+
         {courses.length === 0 && (
             <div className="col-span-full text-center py-12 border-2 border-dashed border-[#e8e6dc] rounded-xl">
                 <p className="text-[#87867f] mb-4">{t("instructor.noCourses") || "You haven't created any courses yet."}</p>
@@ -134,7 +249,7 @@ export default function InstructorDashboardPage() {
                       {t("instructor.createFirstCourse") || "Create Your First Course"}
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="sm:max-w-[600px]">
+                  <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
                      <DialogHeader>
                        <DialogTitle>{t("instructor.createCourse") || "Create New Course"}</DialogTitle>
                      </DialogHeader>

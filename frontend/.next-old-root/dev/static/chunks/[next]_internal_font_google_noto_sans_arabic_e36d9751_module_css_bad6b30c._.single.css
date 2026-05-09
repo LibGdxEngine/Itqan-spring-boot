@@ -1,0 +1,20 @@
+/* [next]/internal/font/google/noto_sans_arabic_e36d9751.module.css [app-client] (css) */
+@font-face {
+  font-family: Noto Sans Arabic Fallback;
+  src: local(Arial);
+  ascent-override: 113.22%;
+  descent-override: 60.81%;
+  line-gap-override: 0.0%;
+  size-adjust: 121.35%;
+}
+
+.noto_sans_arabic_e36d9751-module__FkSewq__className {
+  font-family: Noto Sans Arabic, Noto Sans Arabic Fallback;
+  font-style: normal;
+}
+
+.noto_sans_arabic_e36d9751-module__FkSewq__variable {
+  --font-noto-arabic: "Noto Sans Arabic", "Noto Sans Arabic Fallback";
+}
+
+/*# sourceMappingURL=%5Bnext%5D_internal_font_google_noto_sans_arabic_e36d9751_module_css_bad6b30c._.single.css.map*/

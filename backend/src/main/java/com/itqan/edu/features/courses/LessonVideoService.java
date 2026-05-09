@@ -12,6 +12,7 @@ import com.itqan.edu.features.courses.dto.LessonVideoMultipartInitiateResponse;
 import com.itqan.edu.features.courses.dto.LessonVideoPlaybackResponse;
 import com.itqan.edu.features.courses.mapper.LessonMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -39,6 +40,7 @@ import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class LessonVideoService {
 
     private static final long MIN_MULTIPART_PART_SIZE_BYTES = 5L * 1024 * 1024;
@@ -81,6 +83,7 @@ public class LessonVideoService {
                             .contentType(request.getMimeType())
                             .build());
         } catch (Exception ex) {
+            log.error("Multipart initiate failed lesson={} key={}: {}", lessonId, objectKey, ex.toString(), ex);
             throw new BusinessException(ErrorCode.VIDEO_UPLOAD_FAILED, ex.getMessage());
         }
 
@@ -154,6 +157,8 @@ public class LessonVideoService {
                                     .build())
                             .build());
         } catch (Exception ex) {
+            log.error("Multipart complete failed lesson={} key={} uploadId={}: {}",
+                    lessonId, request.getObjectKey(), request.getUploadId(), ex.toString(), ex);
             lesson.setVideoStatus(LessonVideoStatus.FAILED);
             lessonRepository.save(lesson);
             throw new BusinessException(ErrorCode.VIDEO_UPLOAD_FAILED, ex.getMessage());
@@ -182,6 +187,8 @@ public class LessonVideoService {
                     .uploadId(request.getUploadId())
                     .build());
         } catch (Exception ex) {
+            log.warn("Multipart abort failed lesson={} key={} uploadId={}: {}",
+                    lessonId, request.getObjectKey(), request.getUploadId(), ex.toString(), ex);
             throw new BusinessException(ErrorCode.VIDEO_UPLOAD_FAILED, ex.getMessage());
         }
 

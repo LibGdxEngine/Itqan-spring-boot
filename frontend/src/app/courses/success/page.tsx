@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { paymentsBillingApi } from "@/lib/payments-billing";
@@ -12,11 +13,12 @@ type Status = "loading" | "success" | "pending" | "failed";
 export default function CheckoutSuccessPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const t = useTranslations();
   const sessionId = useMemo(() => searchParams.get("session_id"), [searchParams]);
 
   const [status, setStatus] = useState<Status>("loading");
   const [courseId, setCourseId] = useState<number | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string>("We could not verify your payment.");
+  const [errorMessage, setErrorMessage] = useState<string>(t("checkout.success.couldNotVerify"));
 
   useEffect(() => {
     let mounted = true;
@@ -25,7 +27,7 @@ export default function CheckoutSuccessPage() {
     const verify = async () => {
       if (!sessionId) {
         setStatus("failed");
-        setErrorMessage("Missing checkout session id.");
+        setErrorMessage(t("checkout.success.missingSession"));
         return;
       }
 
@@ -49,7 +51,7 @@ export default function CheckoutSuccessPage() {
           }
 
           setStatus("failed");
-          setErrorMessage(`Payment status: ${response.status}`);
+          setErrorMessage(t("checkout.success.paymentStatus", { status: response.status }));
           return;
         } catch {
           await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -65,7 +67,7 @@ export default function CheckoutSuccessPage() {
     return () => {
       mounted = false;
     };
-  }, [sessionId]);
+  }, [sessionId, t]);
 
   return (
     <div className="min-h-screen bg-[#f5f4ed]">
@@ -76,19 +78,19 @@ export default function CheckoutSuccessPage() {
         {status === "success" && <CheckCircle2 className="mb-4 h-12 w-12 text-[#c96442]" />}
         {status === "failed" && <AlertCircle className="mb-4 h-12 w-12 text-red-600" />}
 
-        {status === "loading" && <h1 className="text-2xl font-semibold">Verifying payment...</h1>}
-        {status === "pending" && <h1 className="text-2xl font-semibold">Payment received, finalizing enrollment...</h1>}
-        {status === "success" && <h1 className="text-2xl font-semibold">Payment successful</h1>}
-        {status === "failed" && <h1 className="text-2xl font-semibold">Could not verify payment</h1>}
+        {status === "loading" && <h1 className="text-2xl font-semibold">{t("checkout.success.verifying")}</h1>}
+        {status === "pending" && <h1 className="text-2xl font-semibold">{t("checkout.success.finalizing")}</h1>}
+        {status === "success" && <h1 className="text-2xl font-semibold">{t("checkout.success.success")}</h1>}
+        {status === "failed" && <h1 className="text-2xl font-semibold">{t("checkout.success.couldNotVerify")}</h1>}
 
         {status === "failed" && <p className="mt-2 text-[#5e5d59]">{errorMessage}</p>}
 
         <div className="mt-6 flex gap-3">
           {status === "success" && courseId !== null && (
-            <Button onClick={() => router.push(`/learn/${courseId}`)}>Start Learning</Button>
+            <Button onClick={() => router.push(`/learn/${courseId}`)}>{t("checkout.success.startLearning")}</Button>
           )}
           <Button variant="outline" onClick={() => router.push("/dashboard")}>
-            Go to Dashboard
+            {t("checkout.success.goToDashboard")}
           </Button>
         </div>
       </main>

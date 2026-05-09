@@ -20,6 +20,7 @@ export type LessonResponse = {
     isFree?: boolean;
     active?: boolean;
     moduleId?: number;
+    quizId?: number;
     createdAt?: string;
     updatedAt?: string;
 };

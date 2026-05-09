@@ -7,12 +7,14 @@ import { Navbar } from '@/components/Navbar';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '@/components/auth-context';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 OpenAPI.BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
 export default function MyCoursesPage() {
-    const { isAuthenticated, token, isLoading: authLoading } = useAuth();
+    const { user, isAuthenticated, token, isLoading: authLoading } = useAuth();
     const router = useRouter();
+    const t = useTranslations();
     const [enrollments, setEnrollments] = useState<EnrollmentResponse[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -25,14 +27,19 @@ export default function MyCoursesPage() {
             
             try {
                 // Get student profile
-                const student = await StudentsService.getProfile();
-                if (!student.id) return;
+                const student = await StudentsService.getProfile().catch(() => null);
+                if (!student?.id) {
+                    if (user?.role === "INSTRUCTOR") router.replace("/instructor");
+                    else if (user?.role === "ADMIN") router.replace("/admin");
+                    else router.replace("/");
+                    return;
+                }
 
-                const data = await EnrollmentsService.getStudentEnrollments(student.id);
-                setEnrollments(data);
+                const data = await EnrollmentsService.getStudentEnrollments(student.id, { page: 0, size: 100 });
+                setEnrollments(data.content ?? []);
             } catch (err) {
                 console.error("Failed to fetch enrollments", err);
-                setError("Failed to load your courses.");
+                setError(t('myCourses.loadFailed'));
             } finally {
                 setLoading(false);
             }
@@ -45,7 +52,7 @@ export default function MyCoursesPage() {
              setLoading(false);
              router.push('/login?redirect=/my-courses');
         }
-    }, [isAuthenticated, router, authLoading]);
+    }, [isAuthenticated, router, authLoading, user, t]);
 
     return (
         <div className="min-h-screen bg-[#f5f4ed]">
@@ -54,10 +61,10 @@ export default function MyCoursesPage() {
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-[#141413]">
-                        My Learning
+                        {t('myCourses.title')}
                     </h1>
                     <p className="mt-2 text-[#5e5d59]">
-                        Continue learning where you left off.
+                        {t('myCourses.subtitle')}
                     </p>
                 </div>
 
@@ -71,7 +78,7 @@ export default function MyCoursesPage() {
                     </div>
                 ) : enrollments.length === 0 ? (
                     <div className="text-center text-[#87867f] py-12">
-                        You are not enrolled in any courses yet.
+                        {t('myCourses.empty')}
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -80,7 +87,7 @@ export default function MyCoursesPage() {
                                 <div key={enrollment.id} className="h-full">
                                     <CourseCard course={enrollment.course} />
                                     <div className="mt-2 text-sm text-gray-500 text-right">
-                                        Status: <span className="font-semibold text-[#c96442]">{enrollment.status}</span>
+                                        {t('myCourses.status')}: <span className="font-semibold text-[#c96442]">{enrollment.status}</span>
                                     </div>
                                 </div>
                             ) : null

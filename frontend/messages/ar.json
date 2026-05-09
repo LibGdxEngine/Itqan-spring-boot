@@ -24,6 +24,11 @@
     "active": "نشط",
     "draft": "مسودة",
     "modules": "وحدات",
+    "duration": "المدة",
+    "level": "المستوى",
+    "price": "السعر",
+    "completed": "مكتمل",
+    "continueLearning": "متابعة التعلم",
     "save": "حفظ",
     "cancel": "إلغاء",
     "edit": "تعديل"
@@ -61,7 +66,22 @@
     "address": "العنوان",
     "role": "الدور",
     "updated": "تم تحديث الملف الشخصي بنجاح",
-    "updateFailed": "فشل تحديث الملف الشخصي"
+    "updateFailed": "فشل تحديث الملف الشخصي",
+    "loadFailed": "فشل تحميل الملف الشخصي",
+    "addressPlaceholder": "عنوانك",
+    "phonePlaceholder": "+966 5xxxxxxxx",
+    "roles": {
+      "student": "طالب",
+      "instructor": "مدرب",
+      "admin": "مشرف"
+    }
+  },
+  "myCourses": {
+    "title": "تعليمي",
+    "subtitle": "تابع التعلم من حيث توقفت.",
+    "empty": "لم تسجل في أي دورات بعد.",
+    "status": "الحالة",
+    "loadFailed": "فشل تحميل دوراتك."
   },
   "dashboard": {
     "title": "لوحة التحكم",
@@ -79,7 +99,9 @@
       "totalStudents": "إجمالي الطلاب",
       "activeStudents": "الطلاب النشطون",
       "totalCourses": "إجمالي الدورات",
-      "activeCourses": "الدورات النشطة"
+      "activeCourses": "الدورات النشطة",
+      "totalInstructors": "إجمالي المعلمين",
+      "activeInstructors": "المعلمون النشطون"
     },
     "admins": {
       "title": "المشرفون",
@@ -137,13 +159,63 @@
       "adminCreated": "تم إنشاء المشرف",
       "adminUpdated": "تم تحديث المشرف",
       "studentDeactivated": "تم تعطيل الطالب",
-      "courseDeactivated": "تم تعطيل الدورة"
+      "courseDeactivated": "تم تعطيل الدورة",
+      "createInstructor": "إنشاء معلم",
+      "instructorCreated": "تم إنشاء المعلم",
+      "instructorUpdated": "تم تحديث المعلم",
+      "instructorDeactivated": "تم تعطيل المعلم"
     },
     "states": {
       "failed": "فشلت العملية",
       "noAdmins": "لا يوجد مشرفون.",
       "noStudents": "لا يوجد طلاب.",
-      "noCourses": "لا توجد دورات."
+      "noCourses": "لا توجد دورات.",
+      "noInstructors": "لا يوجد معلمون."
+    },
+    "analytics": {
+      "title": "التحليلات",
+      "subtitle": "نظرة عامة على أداء المنصة في آخر 30 يوماً.",
+      "backToDashboard": "العودة إلى لوحة التحكم",
+      "refresh": "تحديث",
+      "loadFailed": "تعذّر تحميل التحليلات",
+      "cards": {
+        "revenue": "إجمالي الإيرادات",
+        "enrollments": "إجمالي التسجيلات",
+        "students": "إجمالي الطلاب",
+        "activeCourses": "الدورات النشطة",
+        "newThisMonth": "{count} مستخدم جديد هذا الشهر",
+        "activeUsers": "{count} مستخدم نشط آخر 30 يوماً"
+      },
+      "revenueTrend": {
+        "title": "اتجاه الإيرادات",
+        "last30Days": "آخر 30 يوماً",
+        "empty": "لا توجد بيانات إيرادات في هذه الفترة بعد."
+      },
+      "topCourses": {
+        "title": "الدورات الأكثر تسجيلاً",
+        "courseTitle": "الدورة",
+        "enrollments": "التسجيلات",
+        "completionRate": "نسبة الإكمال",
+        "averageProgress": "متوسط التقدم",
+        "empty": "لا توجد تسجيلات بعد."
+      }
+    },
+    "instructors": {
+      "title": "المعلمون",
+      "createTitle": "إنشاء معلم جديد",
+      "editTitle": "تعديل المعلم",
+      "permissionsHint": "يمكن للمشرف العام فقط إنشاء أو تعديل المعلمين.",
+      "name": "الاسم",
+      "firstName": "الاسم الأول",
+      "lastName": "اسم العائلة",
+      "email": "البريد الإلكتروني",
+      "password": "كلمة المرور",
+      "newPassword": "كلمة مرور جديدة",
+      "passwordOptional": "اتركه فارغاً للإبقاء على كلمة المرور الحالية",
+      "enabled": "مفعّل",
+      "createdAt": "تاريخ الإنشاء",
+      "status": "الحالة",
+      "actions": "الإجراءات"
     }
   },
   "home": {
@@ -270,6 +342,9 @@
       "passwordsNoMatch": "كلمات المرور غير متطابقة",
       "nameMinLength": "يجب أن يكون الاسم حرفين على الأقل",
       "acceptTermsRequired": "يجب أن توافق على الشروط والأحكام"
+    },
+    "google": {
+      "failed": "تعذّر تسجيل الدخول عبر Google"
     }
   },
   "footer": {
@@ -317,6 +392,127 @@
       "registerTitle": "إنشاء حساب | إتقان",
       "forgotTitle": "استعادة كلمة المرور | إتقان",
       "resetTitle": "إعادة تعيين كلمة المرور | إتقان"
+    }
+  },
+  "quiz": {
+    "lesson": {
+      "startQuiz": "بدء الاختبار"
+    },
+    "page": {
+      "backToLesson": "العودة إلى الدرس",
+      "noQuiz": "لا يوجد اختبار مرتبط بهذا الدرس.",
+      "loadFailed": "تعذّر تحميل الاختبار"
+    },
+    "player": {
+      "questionLabel": "السؤال {index} من {total}",
+      "points": "{count} نقطة",
+      "shortAnswerPlaceholder": "اكتب إجابتك هنا...",
+      "intro": "{count} سؤال • درجة النجاح {passing}%",
+      "allAnswered": "تمت الإجابة على جميع الأسئلة.",
+      "someUnanswered": "لم يتم الإجابة على بعض الأسئلة بعد.",
+      "submit": "إرسال الإجابات",
+      "submitting": "جاري الإرسال...",
+      "submitFailed": "فشل إرسال الاختبار",
+      "startFailed": "فشل بدء الاختبار",
+      "noQuestions": "لا توجد أسئلة في هذا الاختبار."
+    },
+    "result": {
+      "passedTitle": "أحسنت! لقد نجحت في الاختبار",
+      "failedTitle": "للأسف، لم تجتز الاختبار",
+      "passingScore": "درجة النجاح: {score}%",
+      "breakdownTitle": "تفاصيل الإجابات",
+      "yourAnswer": "إجابتك",
+      "noAnswer": "لم يتم الإجابة",
+      "pointsEarned": "{earned} من {total} نقطة",
+      "retry": "إعادة المحاولة",
+      "retrying": "جاري إعادة التهيئة...",
+      "backToLesson": "العودة إلى الدرس"
+    }
+  },
+  "courses": {
+    "title": "عنوان الدورة",
+    "description": "الوصف",
+    "instructor": "المدرب",
+    "duration": "المدة",
+    "level": "المستوى",
+    "price": "السعر",
+    "curriculum": "المنهج",
+    "lessonTitle": "عنوان الدرس",
+    "videoUrl": "رابط الفيديو (اختياري)",
+    "durationMinutes": "المدة (دقيقة)",
+    "order": "الترتيب",
+    "content": "المحتوى / الوصف"
+  },
+  "instructor": {
+    "dashboard": "لوحة تحكم المدرب",
+    "welcome": "مرحباً {name}، قم بإدارة دوراتك ومحتواك.",
+    "createCourse": "إنشاء دورة جديدة",
+    "createFirstCourse": "أنشئ دورتك الأولى",
+    "manageContent": "إدارة المحتوى",
+    "noCourses": "لم تقم بإنشاء أي دورات بعد.",
+    "courseCreated": "تم إنشاء الدورة",
+    "courseCreatedDesc": "تم إنشاء دورتك بنجاح.",
+    "backToDashboard": "العودة إلى لوحة التحكم",
+    "manageContentDesc": "إدارة الوحدات والدروس لهذه الدورة.",
+    "newModuleName": "اسم الوحدة الجديدة",
+    "addModule": "إضافة",
+    "addLesson": "إضافة درس",
+    "addLessonTo": "إضافة درس إلى",
+    "noModules": "لا توجد وحدات بعد. أضف واحدة بالأعلى.",
+    "courseStatus": "حالة الدورة",
+    "lessonCreated": "تم حفظ الدرس",
+    "thumbnail": "صورة الدورة",
+    "thumbnailHint": "JPEG أو PNG أو WebP. الحد الأقصى 5 ميجابايت.",
+    "thumbnailPickFile": "اختر صورة",
+    "thumbnailRemove": "إزالة الصورة",
+    "changeThumbnail": "تغيير الصورة",
+    "thumbnailUpdated": "تم تحديث الصورة",
+    "thumbnailUploadFailed": "تعذّر رفع الصورة. جرّب صورة أخرى.",
+    "thumbnailTooLarge": "حجم الصورة أكبر من 5 ميجابايت. اختر صورة أصغر.",
+    "thumbnailUnsupportedType": "استخدم JPEG أو PNG أو WebP.",
+    "videoUploader": {
+      "uploadButton": "رفع فيديو",
+      "dialogTitle": "رفع فيديو الدرس",
+      "start": "بدء الرفع",
+      "preparing": "جاري التحضير...",
+      "partProgress": "جاري رفع الجزء {current} من {total}",
+      "retryAttempt": "محاولة {n}",
+      "finalizing": "جاري الإنهاء...",
+      "successTitle": "تم رفع الفيديو بنجاح",
+      "done": "تم رفع الفيديو بنجاح.",
+      "uploadAnother": "رفع فيديو آخر",
+      "cancel": "إلغاء",
+      "cancelled": "تم إلغاء الرفع.",
+      "retry": "إعادة المحاولة",
+      "failed": "فشل رفع الفيديو",
+      "tooLarge": "الحد الأقصى لحجم الملف هو {max}.",
+      "statusReady": "جاهز",
+      "statusFailed": "فشل الرفع",
+      "statusUploading": "جاري الرفع",
+      "statusPending": "قيد الانتظار"
+    }
+  },
+  "lesson": {
+    "videoProcessing": "لا يزال الفيديو قيد الرفع. يرجى تحديث الصفحة بعد لحظات.",
+    "videoFailed": "فشل رفع الفيديو. يرجى التواصل مع المدرّب.",
+    "videoTryAgain": "إعادة المحاولة"
+  },
+  "checkout": {
+    "success": {
+      "verifying": "جاري التحقق من الدفع...",
+      "finalizing": "تم استلام الدفع، جاري إكمال التسجيل...",
+      "success": "تم الدفع بنجاح",
+      "couldNotVerify": "تعذّر التحقق من الدفع",
+      "missingSession": "معرّف جلسة الدفع مفقود.",
+      "paymentStatus": "حالة الدفع: {status}",
+      "startLearning": "ابدأ التعلم",
+      "goToDashboard": "الذهاب إلى لوحة التحكم"
+    },
+    "cancel": {
+      "title": "تم إلغاء عملية الدفع",
+      "description": "لم يتم خصم أي مبلغ. يمكنك العودة إلى صفحة الدورة والمحاولة مرة أخرى.",
+      "browseCourses": "تصفح الدورات",
+      "goToDashboard": "الذهاب إلى لوحة التحكم"
     }
   }
 }

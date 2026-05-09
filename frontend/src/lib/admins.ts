@@ -31,8 +31,9 @@ export interface UpdateAdminRequest {
 
 export const adminsApi = {
   async getAll(): Promise<AdminUser[]> {
-    const response = await api.get<AdminUser[]>("/api/admins")
-    return response.data
+    const response = await api.get<AdminUser[] | { content?: AdminUser[] }>("/api/admins")
+    const data = response.data
+    return Array.isArray(data) ? data : (data?.content ?? [])
   },
 
   async create(data: CreateAdminRequest): Promise<AdminUser> {

@@ -13,6 +13,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -49,12 +50,15 @@ public class StudentController {
     }
 
     @GetMapping("/profile")
-    @Operation(summary = "Get current student profile", description = "Get profile of the currently logged in student")
-    public ResponseEntity<StudentResponse> getProfile() {
-        String email = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication()
-                .getName();
-        StudentResponse response = studentService.getStudentByEmail(email);
-        return ResponseEntity.ok(response);
+    @Operation(summary = "Get current student profile",
+            description = "Returns the student profile of the currently logged-in user, or 204 No Content if the user is not a student")
+    public ResponseEntity<StudentResponse> getProfile(Authentication authentication) {
+        if (authentication == null || authentication.getName() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return studentService.findByEmail(authentication.getName())
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.noContent().build());
     }
 
     @GetMapping("/active")

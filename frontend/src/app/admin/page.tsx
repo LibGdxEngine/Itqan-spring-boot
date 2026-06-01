@@ -17,6 +17,7 @@ import { CourseResponse, CoursesService, OpenAPI, StudentResponse, StudentsServi
 import { AdminUser, adminsApi } from "@/lib/admins"
 import { InstructorUser, instructorsApi } from "@/lib/instructors"
 import { LandingPageAdmin } from "@/app/admin/_components/LandingPageAdmin"
+import { MuqtatafatAdmin } from "@/app/admin/_components/MuqtatafatAdmin"
 
 OpenAPI.BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"
 
@@ -1178,6 +1179,8 @@ export default function AdminDashboardPage() {
       </section>
 
       <LandingPageAdmin />
+
+      <MuqtatafatAdmin />
     </div>
     </div>
   )

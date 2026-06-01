@@ -50,6 +50,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/api/courses/**",
+                                "/api/clips",
+                                "/api/clips/**",
                                 "/api/specializations",
                                 "/api/landing-page",
                                 "/api/payments/webhook/stripe",

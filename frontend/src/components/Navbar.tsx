@@ -40,6 +40,9 @@ export function Navbar() {
             <Link href="/courses" className="hover:text-[#141413] transition-colors">
               {t("nav.publicCourses")}
             </Link>
+            <Link href="/muqtatafat" className="hover:text-[#141413] transition-colors">
+              {t("nav.muqtatafat")}
+            </Link>
             <Link href="/instructors" className="hover:text-[#141413] transition-colors">
               {t("nav.instructors") || "Instructors"}
             </Link>
@@ -140,6 +143,13 @@ export function Navbar() {
               className="px-4 py-2.5 rounded-lg text-sm font-medium text-[#4d4c48] hover:bg-[#e8e6dc] hover:text-[#141413] transition-colors"
             >
               {t("nav.publicCourses")}
+            </Link>
+            <Link
+              href="/muqtatafat"
+              onClick={closeMobileMenu}
+              className="px-4 py-2.5 rounded-lg text-sm font-medium text-[#4d4c48] hover:bg-[#e8e6dc] hover:text-[#141413] transition-colors"
+            >
+              {t("nav.muqtatafat")}
             </Link>
             <Link
               href="/instructors"

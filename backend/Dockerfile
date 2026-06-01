@@ -13,7 +13,7 @@ COPY pom.xml .
 COPY src ./src
 RUN mvn clean package -DskipTests
 
-FROM eclipse-temurin:21-jre-alpine AS production
+FROM eclipse-temurin:25-jre-alpine AS production
 WORKDIR /app
 # curl is required by the container healthcheck and scripts/deploy.sh readiness probe.
 RUN apk add --no-cache curl

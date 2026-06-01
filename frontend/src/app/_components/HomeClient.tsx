@@ -133,12 +133,21 @@ export default function HomeClient({ data }: HomeClientProps) {
               <div className="bg-[#faf9f5] border border-[#f0eee6] rounded-[32px] p-5 shadow-whisper">
                 <div className="relative aspect-video rounded-[20px] overflow-hidden bg-[#30302e]">
                   {heroVideoUrl ? (
-                    <video
-                      src={heroVideoUrl}
-                      controls
-                      preload="metadata"
-                      className="absolute inset-0 w-full h-full object-cover"
-                    />
+                    heroVideoUrl.includes("youtube.com/embed") || heroVideoUrl.includes("youtu.be") ? (
+                      <iframe
+                        src={heroVideoUrl}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        className="absolute inset-0 w-full h-full"
+                      />
+                    ) : (
+                      <video
+                        src={heroVideoUrl}
+                        controls
+                        preload="metadata"
+                        className="absolute inset-0 w-full h-full object-cover"
+                      />
+                    )
                   ) : (
                     <>
                       <div className="absolute inset-0 pattern-islamic opacity-40" />

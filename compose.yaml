@@ -30,6 +30,11 @@ x-backend-base: &backend-base
     STRIPE_SUCCESS_URL: ${STRIPE_SUCCESS_URL:-http://localhost:3000/courses/success}
     STRIPE_CANCEL_URL: ${STRIPE_CANCEL_URL:-http://localhost:3000/courses/cancel}
     STRIPE_CURRENCY: ${STRIPE_CURRENCY:-usd}
+    MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
+    MAIL_PORT: ${MAIL_PORT:-587}
+    MAIL_USERNAME: ${MAIL_USERNAME:-}
+    MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+    GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
     SPRING_WEB_CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000}
     SPRING_WEB_CORS_ALLOWED_METHODS: GET,POST,PUT,DELETE,PATCH,OPTIONS
     SPRING_WEB_CORS_ALLOWED_HEADERS: "Authorization,Content-Type,Accept,Origin,X-Requested-With,Cache-Control"
@@ -118,18 +123,19 @@ services:
     container_name: itqan-minio-init
     depends_on:
       - minio
-    entrypoint: >
-      /bin/sh -c "
-      until mc alias set local http://minio:9000 ${MINIO_ROOT_USER:-minioadmin} ${MINIO_ROOT_PASSWORD:-minioadmin}; do
-        echo 'Waiting for MinIO...';
-        sleep 2;
-      done;
-      mc mb --ignore-existing local/${APP_STORAGE_S3_BUCKET:-itqan-videos};
-      cat >/tmp/thumbnails-policy.json <<EOF
-      {\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"AWS\":[\"*\"]},\"Action\":[\"s3:GetObject\"],\"Resource\":[\"arn:aws:s3:::${APP_STORAGE_S3_BUCKET:-itqan-videos}/courses/thumbnails/*\"]}]}
-      EOF
-      mc anonymous set-json /tmp/thumbnails-policy.json local/${APP_STORAGE_S3_BUCKET:-itqan-videos};
-      "
+    environment:
+      MINIO_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_PASS: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      BUCKET: ${APP_STORAGE_S3_BUCKET:-itqan-videos}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        until mc alias set local http://minio:9000 "$$MINIO_USER" "$$MINIO_PASS"; do
+          echo 'Waiting for MinIO...'; sleep 2;
+        done
+        mc mb --ignore-existing "local/$$BUCKET"
+        printf '%s' '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":["*"]},"Action":["s3:GetObject"],"Resource":["arn:aws:s3:::'"$$BUCKET"'/courses/thumbnails/*"]}]}' > /tmp/thumbnails-policy.json
+        mc anonymous set-json /tmp/thumbnails-policy.json "local/$$BUCKET"
     networks:
       - itqan-network
     restart: "no"
@@ -258,6 +264,9 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       target: production
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8080}
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
     environment:
       <<: *frontend-env
       NODE_ENV: production

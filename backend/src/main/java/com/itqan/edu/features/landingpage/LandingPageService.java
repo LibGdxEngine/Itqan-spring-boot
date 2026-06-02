@@ -101,10 +101,16 @@ public class LandingPageService {
         if (request.getHeroDurationLabelEn() != null) config.setHeroDurationLabelEn(emptyToNull(request.getHeroDurationLabelEn()));
 
         if (request.getFeaturedCourseIds() != null) {
+            if (config.getFeaturedCourseIds() == null) {
+                config.setFeaturedCourseIds(new ArrayList<>());
+            }
             config.getFeaturedCourseIds().clear();
             config.getFeaturedCourseIds().addAll(request.getFeaturedCourseIds());
         }
         if (request.getFeaturedInstructorIds() != null) {
+            if (config.getFeaturedInstructorIds() == null) {
+                config.setFeaturedInstructorIds(new ArrayList<>());
+            }
             config.getFeaturedInstructorIds().clear();
             config.getFeaturedInstructorIds().addAll(request.getFeaturedInstructorIds());
         }

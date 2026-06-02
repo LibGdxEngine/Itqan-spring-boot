@@ -33,7 +33,7 @@ export default async function OgImage() {
   const isAr = locale === "ar";
   const t = await getTranslations({ locale, namespace: "seo.home" });
   const brand = isAr ? "إتقان" : "Itqan";
-  const tagline = isAr ? "أتقن رحلة التعلم الخاصة بك" : "Master Your Learning Journey";
+  const tagline = isAr ? "طريقك مع القرآن الكريم" : "Master Your Learning Journey";
   const subtitle = t("description");
 
   const fontData = await loadArabicFont();

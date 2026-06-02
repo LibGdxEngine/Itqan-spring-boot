@@ -7,7 +7,7 @@
     "watchDemo": "شاهد العرض",
     "createAccount": "إنشاء حساب",
     "createFreeAccount": "إنشاء حساب مجاني",
-    "startLearning": "ابدأ التعلم مجاناً",
+    "startLearning": "ابدأ التعلم",
     "orContinueWithEmail": "أو تابع بالبريد الإلكتروني",
     "alreadyHaveAccount": "لديك حساب بالفعل؟",
     "dontHaveAccount": "ليس لديك حساب؟",
@@ -220,8 +220,8 @@
     }
   },
   "home": {
-    "heroTitle1": "أتقن",
-    "heroTitle2": "رحلة التعلم الخاصة بك",
+    "heroTitle1": "رحلتك لتعلم",
+    "heroTitle2": "كتاب الله",
     "heroDescription": "انضم إلى آلاف الطلاب الذين يحققون أهدافهم التعليمية من خلال منصتنا الشاملة. دورات بقيادة خبراء، ومسارات تعلم مخصصة، ومجتمع داعم.",
     "socialProof": {
       "count": "+10,000 طالب",

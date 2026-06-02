@@ -75,7 +75,7 @@ export default function MuqtatafatPage() {
         {/* Header */}
         <div className="mb-8 text-right" dir="rtl">
           <h1 className="text-3xl font-bold text-[#141413] font-serif-ar">مقطتفات</h1>
-          <p className="mt-2 text-[#5e5d59]">مقاطع مرئية وصوتية متاحة للجميع مجاناً</p>
+          <p className="mt-2 text-[#5e5d59]">مقاطع مرئية وصوتية متاحة للجميع </p>
         </div>
 
         {/* Search + Filter row */}

@@ -85,7 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await authApi.login({ email, password })
       handleAuthResponse(response)
-      router.push('/dashboard')
+      router.push('/courses')
     } catch (error) {
       throw new Error(getErrorMessage(error))
     }
@@ -95,7 +95,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await authApi.register({ email, password, firstName, lastName })
       handleAuthResponse(response)
-      router.push('/dashboard')
+      router.push('/courses')
     } catch (error) {
       throw new Error(getErrorMessage(error))
     }
@@ -105,7 +105,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await authApi.googleAuth({ idToken })
       handleAuthResponse(response)
-      router.push('/dashboard')
+      router.push('/courses')
     } catch (error) {
       throw new Error(getErrorMessage(error))
     }

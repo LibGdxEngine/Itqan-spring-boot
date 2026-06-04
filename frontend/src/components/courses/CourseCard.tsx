@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { CourseResponse } from '@/lib/api';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,6 +10,7 @@ interface CourseCardProps {
 }
 
 export function CourseCard({ course }: CourseCardProps) {
+  const t = useTranslations();
   const price = typeof course.price === 'number' ? course.price : 0;
 
   return (
@@ -53,13 +55,13 @@ export function CourseCard({ course }: CourseCardProps) {
           </div>
         </div>
         <div className="mt-4 text-sm text-gray-500">
-            Instructor: <span className="font-semibold text-gray-700">{course.instructor}</span>
+            {t('courses.instructorLabel')} <span className="font-semibold text-gray-700">{course.instructor}</span>
         </div>
       </CardContent>
       <CardFooter className="p-6 pt-0 mt-auto">
         <Link href={`/courses/${course.id}`} className="w-full">
             <Button className="w-full bg-[#c96442] hover:bg-[#b55836] text-[#faf9f5]">
-                View Course
+                {t('courses.viewCourse')}
             </Button>
         </Link>
       </CardFooter>

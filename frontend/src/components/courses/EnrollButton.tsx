@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/components/auth-context';
 import { useRouter } from 'next/navigation';
@@ -19,6 +20,7 @@ export function EnrollButton({ courseId, coursePrice }: EnrollButtonProps) {
     const { isAuthenticated, token } = useAuth();
     const router = useRouter();
     const { toast } = useToast();
+    const t = useTranslations();
     const [loading, setLoading] = useState(false);
     const [validatingCoupon, setValidatingCoupon] = useState(false);
     const [isEnrolled, setIsEnrolled] = useState(false);
@@ -88,7 +90,7 @@ export function EnrollButton({ courseId, coursePrice }: EnrollButtonProps) {
                 return message;
             }
         }
-        return "Please try again.";
+        return t('courses.enroll.tryAgain');
     };
 
     const handleApplyCoupon = async () => {
@@ -122,8 +124,8 @@ export function EnrollButton({ courseId, coursePrice }: EnrollButtonProps) {
                 free: response.free,
             });
             toast({
-                title: "Coupon applied",
-                description: `${response.discountPercent}% discount has been applied.`,
+                title: t('courses.enroll.couponApplied'),
+                description: t('courses.enroll.couponAppliedDesc', { percent: response.discountPercent }),
             });
         } catch (error) {
             setAppliedCouponCode(undefined);
@@ -134,7 +136,7 @@ export function EnrollButton({ courseId, coursePrice }: EnrollButtonProps) {
                 free: coursePrice === 0,
             });
             toast({
-                title: "Invalid coupon",
+                title: t('courses.enroll.invalidCoupon'),
                 description: getErrorDetail(error),
                 variant: "destructive",
             });
@@ -159,8 +161,8 @@ export function EnrollButton({ courseId, coursePrice }: EnrollButtonProps) {
             if (response.mode === "FREE_ENROLLED") {
                 setIsEnrolled(true);
                 toast({
-                    title: "Enrollment completed",
-                    description: "You are now enrolled in this course.",
+                    title: t('courses.enroll.enrollmentCompleted'),
+                    description: t('courses.enroll.enrollmentCompletedDesc'),
                 });
                 router.push(`/learn/${courseId}`);
                 return;
@@ -170,11 +172,11 @@ export function EnrollButton({ courseId, coursePrice }: EnrollButtonProps) {
                 window.location.href = response.checkoutUrl;
                 return;
             }
-            throw new Error("Checkout URL is missing.");
+            throw new Error(t('courses.enroll.checkoutUrlMissing'));
         } catch (error) {
             console.error("Checkout failed", error);
             toast({
-                title: "Checkout failed",
+                title: t('courses.enroll.checkoutFailed'),
                 description: getErrorDetail(error),
                 variant: "destructive"
             });
@@ -184,7 +186,7 @@ export function EnrollButton({ courseId, coursePrice }: EnrollButtonProps) {
     };
 
     if (initializing) {
-        return <Button disabled variant="secondary" className="w-full">Checking...</Button>;
+        return <Button disabled variant="secondary" className="w-full">{t('courses.enroll.checking')}</Button>;
     }
 
     if (isEnrolled) {
@@ -195,7 +197,7 @@ export function EnrollButton({ courseId, coursePrice }: EnrollButtonProps) {
                 onClick={() => router.push(`/learn/${courseId}`)}
             >
                 <CheckCircle className="mr-2 h-4 w-4" />
-                Continue Learning
+                {t('courses.enroll.continueLearning')}
             </Button>
         );
     }
@@ -204,7 +206,7 @@ export function EnrollButton({ courseId, coursePrice }: EnrollButtonProps) {
         <div className="space-y-3">
             <div className="flex gap-2">
                 <Input
-                    placeholder="Coupon code"
+                    placeholder={t('courses.enroll.couponPlaceholder')}
                     value={couponCode}
                     onChange={(e) => setCouponCode(e.target.value)}
                     className="text-[#141413]"
@@ -215,21 +217,21 @@ export function EnrollButton({ courseId, coursePrice }: EnrollButtonProps) {
                     onClick={handleApplyCoupon}
                     disabled={validatingCoupon}
                 >
-                    {validatingCoupon ? <Loader2 className="h-4 w-4 animate-spin" /> : "Apply"}
+                    {validatingCoupon ? <Loader2 className="h-4 w-4 animate-spin" /> : t('courses.enroll.apply')}
                 </Button>
             </div>
 
             <div className="rounded-lg border border-[#e8e6dc] p-3 text-sm text-[#4d4c48]">
                 <div className="flex items-center justify-between">
-                    <span>Original</span>
+                    <span>{t('courses.enroll.original')}</span>
                     <span>${pricing.originalAmount.toFixed(2)}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                    <span>Discount</span>
+                    <span>{t('courses.enroll.discount')}</span>
                     <span>- ${pricing.discountAmount.toFixed(2)}</span>
                 </div>
                 <div className="mt-2 flex items-center justify-between font-semibold text-[#141413]">
-                    <span>Total</span>
+                    <span>{t('courses.enroll.total')}</span>
                     <span>${pricing.finalAmount.toFixed(2)}</span>
                 </div>
             </div>
@@ -240,7 +242,7 @@ export function EnrollButton({ courseId, coursePrice }: EnrollButtonProps) {
                 disabled={loading}
             >
                 {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                {pricing.free ? "Enroll for Free" : "Checkout"}
+                {pricing.free ? t('courses.enroll.enrollFree') : t('courses.enroll.checkout')}
             </Button>
         </div>
     );

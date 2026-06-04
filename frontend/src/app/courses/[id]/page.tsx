@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { CoursesService, CourseResponse, OpenAPI } from '@/lib/api';
 import { Navbar } from '@/components/Navbar';
 import { EnrollButton } from '@/components/courses/EnrollButton';
@@ -17,6 +18,7 @@ export default function CourseDetailPage() {
     const params = useParams();
     const id = Number(params.id);
     const { toast } = useToast();
+    const t = useTranslations();
     
     const [course, setCourse] = useState<CourseResponse | null>(null);
     const [loading, setLoading] = useState(true);
@@ -31,10 +33,10 @@ export default function CourseDetailPage() {
                 setCourse(data);
             } catch (err) {
                 console.error("Failed to fetch course", err);
-                setError("Failed to load course details.");
+                setError(t('courses.detailLoadFailed'));
                 toast({
-                    title: "Error",
-                    description: "Failed to load course details.",
+                    title: t('courses.errorTitle'),
+                    description: t('courses.detailLoadFailed'),
                     variant: "destructive"
                 });
             } finally {
@@ -59,15 +61,15 @@ export default function CourseDetailPage() {
                 <Navbar />
                 <div className="flex flex-col items-center justify-center h-[80vh] text-center px-4">
                     <AlertCircle className="h-16 w-16 text-red-500 mb-4" />
-                    <h1 className="text-2xl font-bold text-gray-900 mb-2">Course Not Found</h1>
-                    <p className="text-gray-600">{error || "The requested course could not be found."}</p>
+                    <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('courses.notFoundTitle')}</h1>
+                    <p className="text-gray-600">{error || t('courses.notFoundDesc')}</p>
                 </div>
             </div>
         );
     }
 
     const coursePrice = typeof course.price === "number" ? course.price : 0;
-    const instructorName = course.instructor || "Unknown Instructor";
+    const instructorName = course.instructor || t('courses.unknownInstructor');
 
     return (
         <div className="min-h-screen bg-[#f5f4ed]">
@@ -91,15 +93,15 @@ export default function CourseDetailPage() {
                             <div className="flex flex-wrap items-center gap-6 text-sm text-[#b0aea5]">
                                 <div className="flex items-center">
                                     <Clock className="h-5 w-5 mr-2 text-[#d97757]" />
-                                    <span>{course.duration} Hours</span>
+                                    <span>{course.duration} {t('courses.hours')}</span>
                                 </div>
                                 <div className="flex items-center">
                                     <BookOpen className="h-5 w-5 mr-2 text-[#d97757]" />
-                                    <span>{course.modules?.length || 0} Modules</span>
+                                    <span>{course.modules?.length || 0} {t('courses.modulesLabel')}</span>
                                 </div>
                                 <div className="flex items-center">
                                     <BarChart className="h-5 w-5 mr-2 text-[#d97757]" />
-                                    <span>All Levels</span>
+                                    <span>{t('courses.allLevels')}</span>
                                 </div>
                             </div>
 
@@ -108,7 +110,7 @@ export default function CourseDetailPage() {
                                     {instructorName.charAt(0)}
                                 </div>
                                 <div>
-                                    <p className="text-sm text-[#b0aea5]">Created by</p>
+                                    <p className="text-sm text-[#b0aea5]">{t('courses.createdBy')}</p>
                                     <p className="font-semibold text-[#faf9f5]">{instructorName}</p>
                                 </div>
                             </div>
@@ -136,7 +138,7 @@ export default function CourseDetailPage() {
                                     <div className="p-6 space-y-6">
                                         <div className="flex items-end justify-between">
                                             <div>
-                                                <p className="text-sm text-[#87867f] mb-1">Total Price</p>
+                                                <p className="text-sm text-[#87867f] mb-1">{t('courses.totalPrice')}</p>
                                                 <p className="text-3xl font-bold text-[#141413]">${coursePrice.toFixed(2)}</p>
                                             </div>
                                         </div>
@@ -146,15 +148,15 @@ export default function CourseDetailPage() {
                                         <ul className="space-y-3 text-sm text-[#5e5d59]">
                                             <li className="flex items-center">
                                                 <CheckCircleIcon className="h-4 w-4 mr-2 text-[#c96442]" />
-                                                Full Lifetime Access
+                                                {t('courses.fullLifetimeAccess')}
                                             </li>
                                             <li className="flex items-center">
                                                 <CheckCircleIcon className="h-4 w-4 mr-2 text-[#c96442]" />
-                                                Certificate of Completion
+                                                {t('courses.certificate')}
                                             </li>
                                             <li className="flex items-center">
                                                 <CheckCircleIcon className="h-4 w-4 mr-2 text-[#c96442]" />
-                                                Mobile & TV Support
+                                                {t('courses.mobileTvSupport')}
                                             </li>
                                         </ul>
                                     </div>
@@ -181,7 +183,7 @@ export default function CourseDetailPage() {
                      
                      {/* Description */}
                      <div className="bg-[#faf9f5] p-6 rounded-xl border border-[#e8e6dc] shadow-sm">
-                        <h2 className="text-2xl font-bold mb-4">Description</h2>
+                        <h2 className="text-2xl font-bold mb-4">{t('courses.description')}</h2>
                         <div className="prose max-w-none text-[#5e5d59]">
                             {course.description}
                         </div>

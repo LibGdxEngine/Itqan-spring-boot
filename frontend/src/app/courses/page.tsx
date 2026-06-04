@@ -24,7 +24,7 @@ export default function CoursesPage() {
                 setCourses(page.content ?? []);
             } catch (err) {
                 console.error("Failed to fetch courses", err);
-                setError("Failed to load courses. Please try again later.");
+                setError(t('courses.loadFailed'));
             } finally {
                 setLoading(false);
             }
@@ -40,10 +40,10 @@ export default function CoursesPage() {
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-[#141413]">
-                        Explore Our Courses
+                        {t('courses.exploreTitle')}
                     </h1>
                     <p className="mt-2 text-[#5e5d59]">
-                        Discover top-rated courses to upskill yourself.
+                        {t('courses.exploreSubtitle')}
                     </p>
                 </div>
 
@@ -57,7 +57,7 @@ export default function CoursesPage() {
                     </div>
                 ) : courses.length === 0 ? (
                     <div className="text-center text-[#87867f] py-12">
-                        No active courses found.
+                        {t('courses.noCourses')}
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

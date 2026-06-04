@@ -32,6 +32,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Page() {
-  const data = await fetchLandingPageServerSide();
+  let data = null;
+  try {
+    data = await fetchLandingPageServerSide();
+  } catch (error) {
+    console.error('Failed to fetch landing page data:', error);
+  }
   return <HomeClient data={data} />;
 }

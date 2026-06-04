@@ -179,7 +179,10 @@ public class ClipService {
                 .id(clip.getId())
                 .title(clip.getTitle())
                 .type(clip.getType())
-                .fileUrl(clip.getFileUrl())
+                // Derive the public URL from the object key + current config on every read.
+                // The stored file_url can go stale if the public endpoint changes (it did:
+                // old rows kept a "/media" prefix that 404s); object_key is always correct.
+                .fileUrl(buildPublicUrl(clip.getObjectKey()))
                 .mimeType(clip.getMimeType())
                 .sizeBytes(clip.getSizeBytes())
                 .createdAt(clip.getCreatedAt())

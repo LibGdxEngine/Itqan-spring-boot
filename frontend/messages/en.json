@@ -332,6 +332,43 @@
       },
       "success": "Account created successfully! Welcome to Itqan."
     },
+    "forgotPassword": {
+      "title": "Forgot password?",
+      "description": "No worries, we'll send you a reset code",
+      "email": "Email",
+      "emailPlaceholder": "name@example.com",
+      "sendCode": "Send reset code",
+      "sending": "Sending code...",
+      "backToSignIn": "Back to sign in",
+      "otpSentToast": "OTP sent to your email!",
+      "checkEmailTitle": "Check your email",
+      "sentCodeTo": "We've sent a 6-digit OTP code to",
+      "enterOtp": "Enter OTP code",
+      "didntReceive": "Didn't receive the email? Check your spam folder or",
+      "tryAnotherEmail": "try another email address"
+    },
+    "resetPassword": {
+      "title": "Set new password",
+      "description": "Enter the OTP code sent to <mark>{email}</mark>",
+      "otpLabel": "OTP Code",
+      "otpPlaceholder": "Enter 6-digit code",
+      "newPassword": "New Password",
+      "passwordPlaceholder": "Create a strong password",
+      "confirmNewPassword": "Confirm New Password",
+      "confirmPlaceholder": "Confirm your password",
+      "resetButton": "Reset password",
+      "resetting": "Resetting password...",
+      "didntReceiveCode": "Didn't receive the code? Request again",
+      "missingEmailTitle": "Missing email",
+      "missingEmailDescription": "Please request a password reset first.",
+      "requestReset": "Request password reset",
+      "successTitle": "Password reset successful",
+      "successLine1": "Your password has been successfully reset.",
+      "successLine2": "You can now sign in with your new password.",
+      "continueToSignIn": "Continue to sign in",
+      "invalidOtpToast": "Invalid OTP code. Please try again.",
+      "successToast": "Password reset successful!"
+    },
     "branding": {
       "tagline": "Master Your Learning Journey",
       "description": "Join thousands of students achieving their educational goals with our comprehensive learning platform."
@@ -344,7 +381,9 @@
       "passwordNumber": "Password must contain at least one number",
       "passwordsNoMatch": "Passwords don't match",
       "nameMinLength": "Name must be at least 2 characters",
-      "acceptTermsRequired": "You must accept the terms and conditions"
+      "acceptTermsRequired": "You must accept the terms and conditions",
+      "otpLength": "OTP must be 6 digits",
+      "otpDigits": "OTP must contain only digits"
     },
     "google": {
       "failed": "Google sign-in failed"

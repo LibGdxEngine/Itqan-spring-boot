@@ -7,6 +7,7 @@ import { Eye, EyeOff, Lock, ArrowRight, Loader2, CheckCircle2, Check, X, KeyRoun
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
+import { useTranslations } from "next-intl"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -16,38 +17,39 @@ import { useToast } from "@/components/ui/toast"
 import { authApi } from "@/lib/auth"
 import { getErrorMessage } from "@/lib/api-axios"
 
-const resetPasswordSchema = z.object({
-  otp: z.string().length(6, "OTP must be 6 digits").regex(/^[0-9]+$/, "OTP must contain only digits"),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-    .regex(/[0-9]/, "Password must contain at least one number"),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-})
-
-type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>
-
-const passwordRequirements = [
-  { regex: /.{8,}/, label: "At least 8 characters" },
-  { regex: /[A-Z]/, label: "One uppercase letter" },
-  { regex: /[a-z]/, label: "One lowercase letter" },
-  { regex: /[0-9]/, label: "One number" },
-]
-
 function ResetPasswordContent() {
+  const t = useTranslations()
   const searchParams = useSearchParams()
   const email = searchParams.get("email")
   const { showToast } = useToast()
-  
+
   const [showPassword, setShowPassword] = React.useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false)
   const [isLoading, setIsLoading] = React.useState(false)
   const [isSubmitted, setIsSubmitted] = React.useState(false)
+
+  const resetPasswordSchema = z.object({
+    otp: z.string().length(6, t("auth.validation.otpLength")).regex(/^[0-9]+$/, t("auth.validation.otpDigits")),
+    password: z
+      .string()
+      .min(8, t("auth.validation.passwordMinLength"))
+      .regex(/[A-Z]/, t("auth.validation.passwordUppercase"))
+      .regex(/[a-z]/, t("auth.validation.passwordLowercase"))
+      .regex(/[0-9]/, t("auth.validation.passwordNumber")),
+    confirmPassword: z.string(),
+  }).refine((data) => data.password === data.confirmPassword, {
+    message: t("auth.validation.passwordsNoMatch"),
+    path: ["confirmPassword"],
+  })
+
+  type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>
+
+  const passwordRequirements = [
+    { regex: /.{8,}/, label: t("auth.register.passwordRequirements.minLength") },
+    { regex: /[A-Z]/, label: t("auth.register.passwordRequirements.uppercase") },
+    { regex: /[a-z]/, label: t("auth.register.passwordRequirements.lowercase") },
+    { regex: /[0-9]/, label: t("auth.register.passwordRequirements.number") },
+  ]
 
   const {
     register,
@@ -67,14 +69,14 @@ function ResetPasswordContent() {
 
   const onSubmit = async (data: ResetPasswordFormData) => {
     if (!email) return
-    
+
     setIsLoading(true)
     try {
       // First verify the OTP
       const verifyResult = await authApi.verifyOtp({ email, otp: data.otp })
-      
+
       if (!verifyResult.valid) {
-        showToast('error', 'Invalid OTP code. Please try again.')
+        showToast('error', t('auth.resetPassword.invalidOtpToast'))
         setIsLoading(false)
         return
       }
@@ -85,9 +87,9 @@ function ResetPasswordContent() {
         otp: data.otp,
         newPassword: data.password,
       })
-      
+
       setIsSubmitted(true)
-      showToast('success', 'Password reset successful!')
+      showToast('success', t('auth.resetPassword.successToast'))
     } catch (error) {
       const message = getErrorMessage(error)
       showToast('error', message)
@@ -108,16 +110,16 @@ function ResetPasswordContent() {
 
         <div className="space-y-2">
           <h1 className="text-3xl font-bold tracking-tight text-[#141413]">
-            Missing email
+            {t("auth.resetPassword.missingEmailTitle")}
           </h1>
           <p className="text-[#87867f]">
-            Please request a password reset first.
+            {t("auth.resetPassword.missingEmailDescription")}
           </p>
         </div>
 
         <Link href="/forgot-password">
           <Button className="w-full h-12">
-            <span>Request password reset</span>
+            <span>{t("auth.resetPassword.requestReset")}</span>
             <ArrowRight className="w-5 h-5" />
           </Button>
         </Link>
@@ -138,18 +140,18 @@ function ResetPasswordContent() {
         {/* Header */}
         <div className="space-y-2">
           <h1 className="text-3xl font-bold tracking-tight text-[#141413]">
-            Password reset successful
+            {t("auth.resetPassword.successTitle")}
           </h1>
           <p className="text-[#87867f]">
-            Your password has been successfully reset.<br />
-            You can now sign in with your new password.
+            {t("auth.resetPassword.successLine1")}<br />
+            {t("auth.resetPassword.successLine2")}
           </p>
         </div>
 
         {/* Continue to login */}
         <Link href="/login">
           <Button className="w-full h-12">
-            <span>Continue to sign in</span>
+            <span>{t("auth.resetPassword.continueToSignIn")}</span>
             <ArrowRight className="w-5 h-5" />
           </Button>
         </Link>
@@ -162,10 +164,13 @@ function ResetPasswordContent() {
       {/* Header */}
       <div className="space-y-2 text-center">
         <h1 className="text-3xl font-bold tracking-tight text-[#141413]">
-          Set new password
+          {t("auth.resetPassword.title")}
         </h1>
         <p className="text-[#87867f]">
-          Enter the OTP code sent to <span className="font-medium text-[#4d4c48]">{email}</span>
+          {t.rich("auth.resetPassword.description", {
+            email,
+            mark: (chunks) => <span className="font-medium text-[#4d4c48]">{chunks}</span>,
+          })}
         </p>
       </div>
 
@@ -173,13 +178,13 @@ function ResetPasswordContent() {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         {/* OTP field */}
         <div className="space-y-2">
-          <Label htmlFor="otp">OTP Code</Label>
+          <Label htmlFor="otp">{t("auth.resetPassword.otpLabel")}</Label>
           <div className="relative">
             <KeyRound className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
             <Input
               id="otp"
               type="text"
-              placeholder="Enter 6-digit code"
+              placeholder={t("auth.resetPassword.otpPlaceholder")}
               className="pl-11 text-center tracking-widest font-mono text-lg"
               maxLength={6}
               {...register("otp")}
@@ -192,13 +197,13 @@ function ResetPasswordContent() {
 
         {/* Password field */}
         <div className="space-y-2">
-          <Label htmlFor="password">New Password</Label>
+          <Label htmlFor="password">{t("auth.resetPassword.newPassword")}</Label>
           <div className="relative">
             <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
             <Input
               id="password"
               type={showPassword ? "text" : "password"}
-              placeholder="Create a strong password"
+              placeholder={t("auth.resetPassword.passwordPlaceholder")}
               className="pl-11 pr-11"
               {...register("password")}
             />
@@ -210,7 +215,7 @@ function ResetPasswordContent() {
               {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
           </div>
-          
+
           {/* Password requirements */}
           {password && (
             <div className="grid grid-cols-2 gap-2 pt-2">
@@ -239,13 +244,13 @@ function ResetPasswordContent() {
 
         {/* Confirm Password field */}
         <div className="space-y-2">
-          <Label htmlFor="confirmPassword">Confirm New Password</Label>
+          <Label htmlFor="confirmPassword">{t("auth.resetPassword.confirmNewPassword")}</Label>
           <div className="relative">
             <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
             <Input
               id="confirmPassword"
               type={showConfirmPassword ? "text" : "password"}
-              placeholder="Confirm your password"
+              placeholder={t("auth.resetPassword.confirmPlaceholder")}
               className="pl-11 pr-11"
               {...register("confirmPassword")}
             />
@@ -267,11 +272,11 @@ function ResetPasswordContent() {
           {isLoading ? (
             <>
               <Loader2 className="w-5 h-5 animate-spin" />
-              <span>Resetting password...</span>
+              <span>{t("auth.resetPassword.resetting")}</span>
             </>
           ) : (
             <>
-              <span>Reset password</span>
+              <span>{t("auth.resetPassword.resetButton")}</span>
               <ArrowRight className="w-5 h-5" />
             </>
           )}
@@ -284,7 +289,7 @@ function ResetPasswordContent() {
           href="/forgot-password"
           className="text-sm font-medium text-[#87867f] hover:text-[#4d4c48] transition-colors"
         >
-          Didn&apos;t receive the code? Request again
+          {t("auth.resetPassword.didntReceiveCode")}
         </Link>
       </div>
     </div>

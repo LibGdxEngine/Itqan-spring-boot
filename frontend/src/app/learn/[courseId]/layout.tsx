@@ -3,8 +3,10 @@
 import { useEffect, useState } from 'react';
 import { CoursesService, CourseResponse, OpenAPI } from '@/lib/api';
 import { LearningSidebar } from '@/components/learning/LearningSidebar';
+import { LearnProvider } from '@/components/learning/learn-context';
 import { Loader2 } from 'lucide-react';
 import { useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 OpenAPI.BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
@@ -15,7 +17,8 @@ export default function LearnLayout({
 }) {
     const params = useParams();
     const courseId = Number(params.courseId);
-    
+    const t = useTranslations('lesson');
+
     const [course, setCourse] = useState<CourseResponse | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -45,18 +48,20 @@ export default function LearnLayout({
     }
 
     if (!course) {
-        return <div className="text-[#faf9f5] p-8">Course not found</div>;
+        return <div className="text-[#faf9f5] p-8">{t('courseNotFound')}</div>;
     }
 
     return (
-        <div className="min-h-screen bg-[#f5f4ed]">
-            {/* Sidebar */}
-            <LearningSidebar courseTitle={course.title || "Course"} modules={course.modules || []} />
-            
-            {/* Main Content Area */}
-            <div className="ml-80 min-h-screen">
-                {children}
+        <LearnProvider course={course} courseId={courseId}>
+            <div className="min-h-screen bg-[#f5f4ed]">
+                {/* Sidebar */}
+                <LearningSidebar />
+
+                {/* Main Content Area */}
+                <div className="ml-80 min-h-screen">
+                    {children}
+                </div>
             </div>
-        </div>
+        </LearnProvider>
     );
 }

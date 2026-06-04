@@ -5,6 +5,7 @@ import { ArrowRight, Play, Star, Clock, Mail, ChevronRight } from "lucide-react"
 import { Navbar } from "@/components/Navbar"
 import { useTranslations, useLocale } from "next-intl"
 import { Button } from "@/components/ui/button"
+import { getYouTubeVideoId } from "@/lib/videoSource"
 import {
   motion,
   useReducedMotion,
@@ -43,6 +44,7 @@ export default function HomeClient({ data }: HomeClientProps) {
   const isAr = locale === "ar"
 
   const heroVideoUrl = data?.hero.videoUrl ?? null
+  const heroYouTubeId = getYouTubeVideoId(heroVideoUrl)
   const heroTitle = (isAr ? data?.hero.titleAr : data?.hero.titleEn) ?? t("home.hero.featuredTitle")
   const heroTeacher = (isAr ? data?.hero.teacherNameAr : data?.hero.teacherNameEn) ?? t("home.hero.featuredTeacher")
   const heroDuration = (isAr ? data?.hero.durationLabelAr : data?.hero.durationLabelEn) ?? t("home.hero.featuredDuration")
@@ -133,9 +135,9 @@ export default function HomeClient({ data }: HomeClientProps) {
               <div className="bg-[#faf9f5] border border-[#f0eee6] rounded-[32px] p-5 shadow-whisper">
                 <div className="relative aspect-video rounded-[20px] overflow-hidden bg-[#30302e]">
                   {heroVideoUrl ? (
-                    heroVideoUrl.includes("youtube.com/embed") || heroVideoUrl.includes("youtu.be") ? (
+                    heroYouTubeId ? (
                       <iframe
-                        src={heroVideoUrl}
+                        src={`https://www.youtube.com/embed/${heroYouTubeId}`}
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
                         className="absolute inset-0 w-full h-full"

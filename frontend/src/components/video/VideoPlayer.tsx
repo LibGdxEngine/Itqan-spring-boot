@@ -1,11 +1,14 @@
 'use client';
 
 import React, { useRef, useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Play, Pause, Volume2, VolumeX, Maximize, PictureInPicture2, Bookmark } from 'lucide-react';
 import { VideoPlayerProps, VideoBookmark } from '@/types/video';
 import { VideoBookmarkService, PictureInPictureService } from '@/lib/videoService';
+import { parseVideoSource } from '@/lib/videoSource';
 import { BookmarkPanel } from './BookmarkPanel';
 import { InteractiveTranscript } from './InteractiveTranscript';
+import { useYouTubePlayer } from './useYouTubePlayer';
 
 export function VideoPlayer({
   videoUrl,
@@ -16,6 +19,7 @@ export function VideoPlayer({
   onEnded,
   onPlaybackError,
 }: VideoPlayerProps) {
+  const t = useTranslations('lesson.player');
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -27,6 +31,31 @@ export function VideoPlayer({
   const [showTranscript, setShowTranscript] = useState(false);
   const [bookmarks, setBookmarks] = useState<VideoBookmark[]>([]);
   const [isPiPActive, setIsPiPActive] = useState(false);
+
+  // A pasted YouTube link can't load in a <video> element — it must be driven
+  // through the IFrame Player API instead. Everything else is a plain file.
+  const source = parseVideoSource(videoUrl);
+  const isYouTube = source.kind === 'youtube';
+  const youTubeVideoId = source.kind === 'youtube' ? source.videoId : null;
+
+  const yt = useYouTubePlayer({
+    videoId: youTubeVideoId,
+    autoPlay,
+    initialVolume: volume,
+    initialMuted: isMuted,
+    initialPlaybackRate: playbackSpeed,
+    onReady: (videoDuration) => setDuration(videoDuration),
+    onPlayingChange: (playing) => setIsPlaying(playing),
+    onTime: (time) => {
+      setCurrentTime(time);
+      onTimeUpdate?.(time);
+    },
+    onEnded: () => {
+      setIsPlaying(false);
+      onEnded?.();
+    },
+    onError: (code) => console.error('YouTube player error', code),
+  });
 
   // Load bookmarks on mount
   useEffect(() => {
@@ -82,6 +111,11 @@ export function VideoPlayer({
   };
 
   const togglePlay = () => {
+    if (isYouTube) {
+      if (isPlaying) yt.pause();
+      else yt.play();
+      return; // play/pause state is reflected via onPlayingChange
+    }
     if (videoRef.current) {
       if (isPlaying) {
         videoRef.current.pause();
@@ -107,6 +141,11 @@ export function VideoPlayer({
   };
 
   const handleSeek = (time: number) => {
+    if (isYouTube) {
+      yt.seekTo(time);
+      setCurrentTime(time);
+      return;
+    }
     if (videoRef.current) {
       videoRef.current.currentTime = time;
       setCurrentTime(time);
@@ -115,31 +154,43 @@ export function VideoPlayer({
 
   const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    const percent = (e.clientX - rect.left) / rect.width;
+    // The bar is forced to dir="ltr", so this left-based fraction is correct in
+    // both LTR and RTL. Clamp so edge/overshoot clicks stay within [0, 1].
+    const percent = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
     handleSeek(percent * duration);
   };
 
   const toggleMute = () => {
-    if (videoRef.current) {
-      videoRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
+    const nextMuted = !isMuted;
+    if (isYouTube) {
+      if (nextMuted) yt.mute();
+      else yt.unMute();
+    } else if (videoRef.current) {
+      videoRef.current.muted = nextMuted;
     }
+    setIsMuted(nextMuted);
   };
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newVolume = parseFloat(e.target.value);
-    if (videoRef.current) {
+    if (isYouTube) {
+      yt.setVolume(newVolume);
+      if (newVolume === 0) yt.mute();
+      else yt.unMute();
+    } else if (videoRef.current) {
       videoRef.current.volume = newVolume;
-      setVolume(newVolume);
-      setIsMuted(newVolume === 0);
     }
+    setVolume(newVolume);
+    setIsMuted(newVolume === 0);
   };
 
   const changePlaybackSpeed = (speed: number) => {
-    if (videoRef.current) {
+    if (isYouTube) {
+      yt.setPlaybackRate(speed);
+    } else if (videoRef.current) {
       videoRef.current.playbackRate = speed;
-      setPlaybackSpeed(speed);
     }
+    setPlaybackSpeed(speed);
   };
 
   const skipForward = () => {
@@ -151,12 +202,14 @@ export function VideoPlayer({
   };
 
   const toggleFullscreen = () => {
-    if (videoRef.current) {
-      if (document.fullscreenElement) {
-        document.exitFullscreen();
-      } else {
-        videoRef.current.requestFullscreen();
-      }
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+      return;
+    }
+    if (isYouTube) {
+      yt.requestFullscreen();
+    } else if (videoRef.current) {
+      videoRef.current.requestFullscreen();
     }
   };
 
@@ -177,7 +230,7 @@ export function VideoPlayer({
   };
 
   const handleCreateBookmark = async () => {
-    const note = prompt('Add a note for this bookmark:');
+    const note = prompt(t('addNotePrompt'));
     if (note !== null) {
       try {
         await VideoBookmarkService.createBookmark(lessonId, {
@@ -201,7 +254,7 @@ export function VideoPlayer({
   };
 
   const handleEditBookmark = async (bookmark: VideoBookmark) => {
-    const note = prompt('Edit note:', bookmark.note);
+    const note = prompt(t('editNotePrompt'), bookmark.note);
     if (note !== null) {
       try {
         await VideoBookmarkService.updateBookmark(bookmark.id, {
@@ -231,18 +284,22 @@ export function VideoPlayer({
   return (
     <div className="w-full bg-gray-900 rounded-xl overflow-hidden shadow-2xl">
       <div className="relative aspect-video bg-black">
-        <video
-          ref={videoRef}
-          src={videoUrl}
-          className="w-full h-full"
-          onTimeUpdate={handleTimeUpdate}
-          onLoadedMetadata={handleLoadedMetadata}
-          onPlay={() => setIsPlaying(true)}
-          onPause={() => setIsPlaying(false)}
-          onEnded={onEnded}
-          onError={onPlaybackError}
-          autoPlay={autoPlay}
-        />
+        {isYouTube ? (
+          <div ref={yt.containerRef} className="w-full h-full" />
+        ) : (
+          <video
+            ref={videoRef}
+            src={videoUrl}
+            className="w-full h-full"
+            onTimeUpdate={handleTimeUpdate}
+            onLoadedMetadata={handleLoadedMetadata}
+            onPlay={() => setIsPlaying(true)}
+            onPause={() => setIsPlaying(false)}
+            onEnded={onEnded}
+            onError={onPlaybackError}
+            autoPlay={autoPlay}
+          />
+        )}
 
         {/* Bookmark markers on progress bar */}
         <div className="absolute bottom-20 left-0 right-0 h-2 pointer-events-none px-4">
@@ -263,7 +320,8 @@ export function VideoPlayer({
       {/* Controls */}
       <div className="bg-gradient-to-t from-gray-900 to-gray-800 p-4 space-y-3">
         {/* Progress bar */}
-        <div 
+        <div
+          dir="ltr"
           className="w-full h-2 bg-gray-700 rounded-full cursor-pointer group"
           onClick={handleProgressClick}
         >
@@ -320,7 +378,7 @@ export function VideoPlayer({
             <button
               onClick={handleCreateBookmark}
               className="p-2 hover:bg-gray-700 rounded-full transition"
-              title="Add bookmark (B)"
+              title={t('addBookmarkTitle')}
             >
               <Bookmark size={20} />
             </button>
@@ -331,7 +389,7 @@ export function VideoPlayer({
                 showBookmarks ? 'bg-[#c96442]' : 'bg-gray-700 hover:bg-gray-600'
               }`}
             >
-              Bookmarks ({bookmarks.length})
+              {t('bookmarks')} ({bookmarks.length})
             </button>
 
             {transcript && (
@@ -341,22 +399,24 @@ export function VideoPlayer({
                   showTranscript ? 'bg-[#c96442]' : 'bg-gray-700 hover:bg-gray-600'
                 }`}
               >
-                Transcript
+                {t('transcript')}
+              </button>
+            )}
+
+            {!isYouTube && (
+              <button
+                onClick={togglePictureInPicture}
+                className="p-2 hover:bg-gray-700 rounded-full transition"
+                title={t('pictureInPicture')}
+              >
+                <PictureInPicture2 size={20} />
               </button>
             )}
 
             <button
-              onClick={togglePictureInPicture}
-              className="p-2 hover:bg-gray-700 rounded-full transition"
-              title="Picture-in-Picture"
-            >
-              <PictureInPicture2 size={20} />
-            </button>
-
-            <button
               onClick={toggleFullscreen}
               className="p-2 hover:bg-gray-700 rounded-full transition"
-              title="Fullscreen (F)"
+              title={t('fullscreen')}
             >
               <Maximize size={20} />
             </button>

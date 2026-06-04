@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { Trash2, Edit, Clock } from 'lucide-react';
 import { BookmarkPanelProps } from '@/types/video';
 
@@ -11,6 +12,7 @@ export function BookmarkPanel({
   onDelete,
   onCreate,
 }: BookmarkPanelProps) {
+  const t = useTranslations('lesson.player');
   const formatTime = (seconds: number): string => {
     const h = Math.floor(seconds / 3600);
     const m = Math.floor((seconds % 3600) / 60);
@@ -25,18 +27,18 @@ export function BookmarkPanel({
   return (
     <div className="bg-gray-800 p-4 max-h-96 overflow-y-auto">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-white font-semibold text-lg">Bookmarks</h3>
+        <h3 className="text-white font-semibold text-lg">{t('bookmarks')}</h3>
         <button
           onClick={onCreate}
           className="bg-[#c96442] hover:bg-[#b55836] text-[#faf9f5] px-4 py-2 rounded-lg text-sm font-medium transition"
         >
-          Add Bookmark
+          {t('addBookmark')}
         </button>
       </div>
 
       {bookmarks.length === 0 ? (
         <p className="text-gray-400 text-center py-8">
-          No bookmarks yet. Click "Add Bookmark" to save your first note!
+          {t('noBookmarks')}
         </p>
       ) : (
         <div className="space-y-3">
@@ -62,7 +64,7 @@ export function BookmarkPanel({
                     </p>
                   )}
                   {!bookmark.note && (
-                    <p className="text-gray-400 text-sm italic">No note</p>
+                    <p className="text-gray-400 text-sm italic">{t('noNote')}</p>
                   )}
                 </button>
 
@@ -70,14 +72,14 @@ export function BookmarkPanel({
                   <button
                     onClick={() => onEdit(bookmark)}
                     className="p-2 hover:bg-gray-600 rounded-lg transition text-gray-300 hover:text-white"
-                    title="Edit bookmark"
+                    title={t('editBookmark')}
                   >
                     <Edit size={16} />
                   </button>
                   <button
                     onClick={() => onDelete(bookmark.id)}
                     className="p-2 hover:bg-red-600 rounded-lg transition text-gray-300 hover:text-white"
-                    title="Delete bookmark"
+                    title={t('deleteBookmark')}
                   >
                     <Trash2 size={16} />
                   </button>

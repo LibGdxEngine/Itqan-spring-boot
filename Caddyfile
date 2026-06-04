@@ -42,6 +42,15 @@ www.{$DOMAIN} {
             header_up X-Forwarded-For {remote_host}
             header_up X-Forwarded-Proto {scheme}
             header_up Host {host}
+
+            # Same restart resilience as /api/* — don't bounce payment
+            # webhooks with a 502 during a deploy.
+            health_uri /actuator/health/readiness
+            health_interval 2s
+            health_timeout 2s
+            health_status 200
+            lb_try_duration 60s
+            lb_try_interval 1s
         }
     }
 
@@ -58,6 +67,19 @@ www.{$DOMAIN} {
         }
     }
 
+    # payment-config is a Next.js (frontend) route, NOT a backend endpoint.
+    # Must be matched before the generic /api/* handler below, otherwise it
+    # proxies to Spring, which 403s the unknown path -> the checkout dialog's
+    # Vodafone Cash / InstaPay options receive empty numbers and render disabled.
+    handle /api/payment-config {
+        reverse_proxy frontend-prod:3000 {
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+            header_up Host {host}
+        }
+    }
+
     # Backend API
     handle /api/* {
         reverse_proxy backend-prod:8080 {
@@ -65,6 +87,17 @@ www.{$DOMAIN} {
             header_up X-Forwarded-For {remote_host}
             header_up X-Forwarded-Proto {scheme}
             header_up Host {host}
+
+            # Ride out backend restarts/boot instead of returning 502.
+            # readiness is 200/UP only once Spring has bound :8080 and is ready;
+            # the aggregate /actuator/health can be 503 from non-critical
+            # indicators, so we probe the readiness group specifically.
+            health_uri /actuator/health/readiness
+            health_interval 2s
+            health_timeout 2s
+            health_status 200
+            lb_try_duration 60s
+            lb_try_interval 1s
         }
     }
 

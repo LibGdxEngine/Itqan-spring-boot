@@ -564,7 +564,33 @@
   "lesson": {
     "videoProcessing": "لا يزال الفيديو قيد الرفع. يرجى تحديث الصفحة بعد لحظات.",
     "videoFailed": "فشل رفع الفيديو. يرجى التواصل مع المدرّب.",
-    "videoTryAgain": "إعادة المحاولة"
+    "videoTryAgain": "إعادة المحاولة",
+    "backToCourse": "→ العودة إلى صفحة الدورة",
+    "module": "الوحدة {number}",
+    "markComplete": "تحديد كمكتمل",
+    "completed": "مكتمل",
+    "markCompleteSuccess": "تم تحديد الدرس كمكتمل",
+    "markCompleteError": "تعذّر تحديد الدرس كمكتمل",
+    "lessonContent": "محتوى الدرس",
+    "previous": "السابق",
+    "nextLesson": "الدرس التالي",
+    "notFound": "لم يتم العثور على الدرس.",
+    "noContent": "لا يوجد محتوى متاح لهذا الدرس.",
+    "courseNotFound": "لم يتم العثور على الدورة",
+    "player": {
+      "bookmarks": "الإشارات المرجعية",
+      "addBookmarkTitle": "إضافة إشارة مرجعية (B)",
+      "addBookmark": "إضافة إشارة مرجعية",
+      "noBookmarks": "لا توجد إشارات مرجعية بعد. انقر على \"إضافة إشارة مرجعية\" لحفظ أول ملاحظة لك!",
+      "editBookmark": "تعديل الإشارة المرجعية",
+      "deleteBookmark": "حذف الإشارة المرجعية",
+      "noNote": "لا توجد ملاحظة",
+      "addNotePrompt": "أضف ملاحظة لهذه الإشارة المرجعية:",
+      "editNotePrompt": "تعديل الملاحظة:",
+      "transcript": "النص التفريغي",
+      "pictureInPicture": "صورة داخل صورة",
+      "fullscreen": "ملء الشاشة (F)"
+    }
   },
   "checkout": {
     "success": {

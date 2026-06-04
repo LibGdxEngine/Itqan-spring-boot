@@ -23,10 +23,24 @@ function useDialogContext() {
 
 interface DialogProps {
   children: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function Dialog({ children }: DialogProps) {
-  const [open, setOpen] = React.useState(false);
+export function Dialog({ children, open: openProp, onOpenChange }: DialogProps) {
+  const [uncontrolledOpen, setUncontrolledOpen] = React.useState(false);
+  const isControlled = openProp !== undefined;
+  const open = isControlled ? openProp : uncontrolledOpen;
+
+  const setOpen = React.useCallback(
+    (next: boolean) => {
+      if (!isControlled) {
+        setUncontrolledOpen(next);
+      }
+      onOpenChange?.(next);
+    },
+    [isControlled, onOpenChange]
+  );
 
   return (
     <DialogContext.Provider value={{ open, setOpen }}>

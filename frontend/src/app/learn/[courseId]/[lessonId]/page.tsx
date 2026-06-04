@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { VideoPlayer } from '@/components/video';
 import { getLessonVideoPlaybackUrl } from '@/lib/lessonVideoUploadService';
+import { useLearn } from '@/components/learning/learn-context';
+import { useToast } from '@/components/ui/use-toast';
 
 type LessonWithQuiz = LessonResponse & { quizId?: number };
 
@@ -21,12 +23,15 @@ export default function LessonPage() {
     const courseId = params.courseId;
     const router = useRouter();
     const t = useTranslations();
+    const { toast } = useToast();
+    const { orderedLessons, completedLessonIds, studentId, markComplete } = useLearn();
 
     const [lesson, setLesson] = useState<LessonWithQuiz | null>(null);
     const [loading, setLoading] = useState(true);
     const [videoUrl, setVideoUrl] = useState<string | null>(null);
     const [playbackRetryUsed, setPlaybackRetryUsed] = useState(false);
     const [playbackError, setPlaybackError] = useState(false);
+    const [marking, setMarking] = useState(false);
 
     const resolveVideoUrl = useCallback(async (lessonData: LessonResponse) => {
         if (lessonData.type !== 'VIDEO') {
@@ -82,7 +87,7 @@ export default function LessonPage() {
     }
 
     if (!lesson) {
-        return <div className="p-10">Lesson not found.</div>;
+        return <div className="p-10">{t('lesson.notFound')}</div>;
     }
 
     const isVideoLesson = lesson.type === 'VIDEO';
@@ -100,6 +105,29 @@ export default function LessonPage() {
         } catch (error) {
             console.error('Failed to refresh playback URL', error);
             setPlaybackError(true);
+        }
+    };
+
+    // Lesson navigation derived from the ordered list shared via the learn context.
+    const currentIndex = orderedLessons.findIndex((l) => l.id === lessonId);
+    const prevLesson = currentIndex > 0 ? orderedLessons[currentIndex - 1] : null;
+    const nextLesson =
+        currentIndex >= 0 && currentIndex < orderedLessons.length - 1
+            ? orderedLessons[currentIndex + 1]
+            : null;
+    const isCompleted = completedLessonIds.has(lessonId);
+
+    const handleMarkComplete = async () => {
+        if (marking || isCompleted) return;
+        setMarking(true);
+        try {
+            await markComplete(lessonId);
+            toast({ title: t('lesson.markCompleteSuccess') });
+        } catch (error) {
+            console.error('Failed to mark lesson complete', error);
+            toast({ title: t('lesson.markCompleteError'), variant: 'destructive' });
+        } finally {
+            setMarking(false);
         }
     };
 
@@ -164,10 +192,25 @@ export default function LessonPage() {
                                 {t("quiz.lesson.startQuiz")}
                             </Link>
                         )}
-                        <Button variant="outline" className="text-[#c96442] border-[#e8e6dc] hover:bg-[#f0eee6]">
-                            <CheckCircle className="mr-2 h-4 w-4" />
-                            Mark as Complete
-                        </Button>
+                        {studentId != null && (
+                            <Button
+                                variant="outline"
+                                onClick={handleMarkComplete}
+                                disabled={isCompleted || marking}
+                                className={
+                                    isCompleted
+                                        ? "text-emerald-600 border-emerald-200 bg-emerald-50 hover:bg-emerald-50 disabled:opacity-100"
+                                        : "text-[#c96442] border-[#e8e6dc] hover:bg-[#f0eee6]"
+                                }
+                            >
+                                {marking ? (
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                ) : (
+                                    <CheckCircle className="mr-2 h-4 w-4" />
+                                )}
+                                {isCompleted ? t('lesson.completed') : t('lesson.markComplete')}
+                            </Button>
+                        )}
                     </div>
                 </div>
                 <Separator />
@@ -183,25 +226,32 @@ export default function LessonPage() {
             {/* Content */}
             {lesson.content && (
                 <div className="prose max-w-none text-[#4d4c48] mb-12 bg-[#faf9f5] rounded-xl p-6 shadow-sm border border-[#e8e6dc]">
-                    <h2 className="text-xl font-semibold mb-4">Lesson Content</h2>
+                    <h2 className="text-xl font-semibold mb-4">{t('lesson.lessonContent')}</h2>
                     <div dangerouslySetInnerHTML={{ __html: lesson.content || '' }} />
                 </div>
             )}
 
             {!lesson.content && !videoUrl && !showProcessing && !showFailed && (
                 <p className="italic text-gray-500 text-center py-8">
-                    No content available for this lesson.
+                    {t('lesson.noContent')}
                 </p>
             )}
 
             {/* Navigation Footer */}
             <div className="flex justify-between mt-auto pt-8 border-t border-[#f0eee6]">
-                <Button variant="ghost" onClick={() => router.back()}>
+                <Button
+                    variant="ghost"
+                    disabled={!prevLesson}
+                    onClick={() => prevLesson && router.push(`/learn/${courseId}/${prevLesson.id}`)}
+                >
                     <ChevronLeft className="mr-2 h-4 w-4" />
-                    Previous
+                    {t('lesson.previous')}
                 </Button>
-                <Button onClick={() => { /* Logic to find next lesson */ }}>
-                    Next Lesson
+                <Button
+                    disabled={!nextLesson}
+                    onClick={() => nextLesson && router.push(`/learn/${courseId}/${nextLesson.id}`)}
+                >
+                    {t('lesson.nextLesson')}
                     <ChevronRight className="ml-2 h-4 w-4" />
                 </Button>
             </div>

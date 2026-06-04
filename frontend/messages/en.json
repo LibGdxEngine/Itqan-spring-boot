@@ -564,7 +564,33 @@
   "lesson": {
     "videoProcessing": "Video is still uploading. Please refresh in a moment.",
     "videoFailed": "Video upload failed. Please contact your instructor.",
-    "videoTryAgain": "Try again"
+    "videoTryAgain": "Try again",
+    "backToCourse": "← Back to Course Home",
+    "module": "Module {number}",
+    "markComplete": "Mark as Complete",
+    "completed": "Completed",
+    "markCompleteSuccess": "Lesson marked as complete",
+    "markCompleteError": "Couldn't mark the lesson complete",
+    "lessonContent": "Lesson Content",
+    "previous": "Previous",
+    "nextLesson": "Next Lesson",
+    "notFound": "Lesson not found.",
+    "noContent": "No content available for this lesson.",
+    "courseNotFound": "Course not found",
+    "player": {
+      "bookmarks": "Bookmarks",
+      "addBookmarkTitle": "Add bookmark (B)",
+      "addBookmark": "Add Bookmark",
+      "noBookmarks": "No bookmarks yet. Click \"Add Bookmark\" to save your first note!",
+      "editBookmark": "Edit bookmark",
+      "deleteBookmark": "Delete bookmark",
+      "noNote": "No note",
+      "addNotePrompt": "Add a note for this bookmark:",
+      "editNotePrompt": "Edit note:",
+      "transcript": "Transcript",
+      "pictureInPicture": "Picture-in-Picture",
+      "fullscreen": "Fullscreen (F)"
+    }
   },
   "checkout": {
     "success": {

@@ -9,6 +9,7 @@ import com.itqan.edu.features.courses.dto.ModuleResponse;
 import com.itqan.edu.features.courses.mapper.LessonMapper;
 import com.itqan.edu.features.courses.mapper.ModuleMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +29,7 @@ public class ModuleService {
     private final ModuleMapper moduleMapper;
     private final LessonMapper lessonMapper;
 
+    @CacheEvict(value = "courses", allEntries = true)
     @Transactional
     public ModuleResponse createModule(ModuleRequest request) {
         Course course = courseRepository.findById(request.getCourseId())
@@ -52,6 +54,7 @@ public class ModuleService {
                 .collect(Collectors.toList());
     }
 
+    @CacheEvict(value = "courses", allEntries = true)
     @Transactional
     public ModuleResponse updateModule(Long id, ModuleRequest request) {
         Module module = moduleRepository.findById(id)
@@ -77,6 +80,7 @@ public class ModuleService {
         return moduleMapper.toResponse(module);
     }
 
+    @CacheEvict(value = "courses", allEntries = true)
     @Transactional
     public void deleteModule(Long id) {
         Module module = moduleRepository.findById(id)
@@ -84,6 +88,7 @@ public class ModuleService {
         moduleRepository.delete(module);
     }
 
+    @CacheEvict(value = "courses", allEntries = true)
     @Transactional
     public List<LessonResponse> reorderLessons(Long moduleId, LessonReorderRequest request) {
         Module module = moduleRepository.findById(moduleId)

@@ -15,7 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 export function Navbar() {
   const t = useTranslations()
@@ -75,10 +75,12 @@ export function Navbar() {
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src="/avatars/01.png" alt={user?.firstName} />
-                      <AvatarFallback>
+                  <Button
+                    variant="ghost"
+                    className="relative h-9 w-9 rounded-full p-0 ring-1 ring-[#e8e6dc] transition-all hover:ring-[#c96442]/40 hover:shadow-sm focus-visible:ring-2 focus-visible:ring-[#c96442]/50"
+                  >
+                    <Avatar className="h-9 w-9">
+                      <AvatarFallback className="bg-gradient-to-br from-[#d97757] to-[#c96442] text-sm font-semibold uppercase text-[#faf9f5]">
                         {user?.firstName?.[0]}
                         {user?.lastName?.[0]}
                       </AvatarFallback>

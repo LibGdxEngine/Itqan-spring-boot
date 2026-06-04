@@ -45,9 +45,12 @@ www.{$DOMAIN} {
         }
     }
 
-    # MinIO (media files — clips/videos)
-    handle /media/* {
-        uri strip_prefix /media
+    # MinIO (media files — clips/videos).
+    # Path matches the S3 bucket and is proxied UNCHANGED: presigned URLs are
+    # SigV4-signed over the literal request path, so any rewrite (e.g. strip_prefix)
+    # would change what MinIO re-signs and produce SignatureDoesNotMatch (403).
+    # Host is preserved by Caddy's default, matching the signed host.
+    handle /itqan-videos/* {
         reverse_proxy minio:9000 {
             header_up X-Real-IP {remote_host}
             header_up X-Forwarded-For {remote_host}

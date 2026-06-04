@@ -10,13 +10,15 @@ import { useToast } from '@/components/ui/use-toast'; // Assuming it exists
 import { Loader2, CheckCircle } from 'lucide-react';
 import { paymentsBillingApi } from '@/lib/payments-billing';
 import { Input } from '@/components/ui/input';
+import { PaymentMethodDialog } from '@/components/courses/PaymentMethodDialog';
 
 interface EnrollButtonProps {
     courseId: number;
     coursePrice: number;
+    courseTitle: string;
 }
 
-export function EnrollButton({ courseId, coursePrice }: EnrollButtonProps) {
+export function EnrollButton({ courseId, coursePrice, courseTitle }: EnrollButtonProps) {
     const { isAuthenticated, token } = useAuth();
     const router = useRouter();
     const { toast } = useToast();
@@ -236,14 +238,22 @@ export function EnrollButton({ courseId, coursePrice }: EnrollButtonProps) {
                 </div>
             </div>
 
-            <Button
-                className="w-full bg-[#c96442] hover:bg-[#b55836] text-[#faf9f5]"
-                onClick={handleCheckout}
-                disabled={loading}
-            >
-                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                {pricing.free ? t('courses.enroll.enrollFree') : t('courses.enroll.checkout')}
-            </Button>
+            {pricing.free ? (
+                <Button
+                    className="w-full bg-[#c96442] hover:bg-[#b55836] text-[#faf9f5]"
+                    onClick={handleCheckout}
+                    disabled={loading}
+                >
+                    {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    {t('courses.enroll.enrollFree')}
+                </Button>
+            ) : (
+                <PaymentMethodDialog
+                    courseTitle={courseTitle}
+                    amount={pricing.finalAmount}
+                    couponCode={appliedCouponCode}
+                />
+            )}
         </div>
     );
 }

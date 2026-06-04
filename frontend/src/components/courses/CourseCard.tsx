@@ -12,6 +12,10 @@ interface CourseCardProps {
 export function CourseCard({ course }: CourseCardProps) {
   const t = useTranslations();
   const price = typeof course.price === 'number' ? course.price : 0;
+  const levelLabel =
+    course.level && t.has(`courses.levels.${course.level}`)
+      ? t(`courses.levels.${course.level}`)
+      : course.level;
 
   return (
     <Card className="flex flex-col h-full hover:shadow-lg transition-shadow duration-300">
@@ -35,7 +39,7 @@ export function CourseCard({ course }: CourseCardProps) {
       <CardContent className="flex-grow p-6">
         <div className="flex justify-between items-start mb-2">
             <span className="bg-[#f0eee6] text-[#c96442] text-xs px-2 py-1 rounded-full font-semibold">
-              {course.level}
+              {levelLabel}
             </span>
             <span className="text-xl font-bold text-gray-900">
                 ${price.toFixed(2)}
@@ -51,7 +55,7 @@ export function CourseCard({ course }: CourseCardProps) {
           </div>
           <div className="flex items-center">
              <BarChart className="h-4 w-4 mr-1" />
-             <span>{course.level}</span>
+             <span>{levelLabel}</span>
           </div>
         </div>
         <div className="mt-4 text-sm text-gray-500">

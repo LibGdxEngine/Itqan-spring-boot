@@ -16,6 +16,7 @@ import com.itqan.edu.features.quizzes.QuestionOption;
 import com.itqan.edu.features.quizzes.Quiz;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,6 +35,7 @@ public class AdminContentService {
     private final ModuleRepository moduleRepository;
     private final LessonRepository lessonRepository;
 
+    @CacheEvict(value = "courses", allEntries = true)
     @Transactional
     public List<Module> reorderModules(Long courseId, ModuleReorderRequest request) {
         Course course = courseRepository.findById(courseId)
@@ -68,6 +70,7 @@ public class AdminContentService {
         return reordered;
     }
 
+    @CacheEvict(value = "courses", allEntries = true)
     @Transactional
     public Course duplicateCourse(Long courseId, Long adminUserId) {
         Course original = courseRepository.findById(courseId)
@@ -195,6 +198,7 @@ public class AdminContentService {
         return copy;
     }
 
+    @CacheEvict(value = "courses", allEntries = true)
     @Transactional
     public List<Lesson> bulkUploadLessons(Long moduleId, List<MultipartFile> files) {
         if (files.size() > 20) {

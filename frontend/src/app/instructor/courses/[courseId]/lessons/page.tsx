@@ -3,14 +3,15 @@
 import { useCallback, useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
-import { AlertTriangle, ArrowLeft, CheckCircle2, Clock, Loader2, Plus, Trash2, Upload, Video } from "lucide-react"
+import { AlertTriangle, ArrowLeft, CheckCircle2, Clock, Loader2, Pencil, Plus, Trash2, Upload, Video } from "lucide-react"
 import { useTranslations } from "next-intl"
 
 import { useAuth } from "@/components/auth-context"
-import { LessonResponse, CourseResponse, CoursesService, ModulesService } from "@/lib/api"
+import { LessonResponse, CourseResponse, CoursesService, LessonsService, ModulesService } from "@/lib/api"
 import { reorderModuleLessons } from "@/lib/lessonVideoUploadService"
 import { Button } from "@/components/ui/button"
 import { LessonCreatorForm } from "@/components/instructor/LessonCreatorForm"
+import { LessonEditForm } from "@/components/instructor/LessonEditForm"
 import { VideoUploader } from "@/components/instructor/VideoUploader"
 import { useToast } from "@/components/ui/use-toast"
 import { Input } from "@/components/ui/input"
@@ -62,6 +63,9 @@ export default function CourseLessonsPage() {
   const [isCreatingModule, setIsCreatingModule] = useState(false)
   const [dragState, setDragState] = useState<DragState | null>(null)
   const [reorderingModuleId, setReorderingModuleId] = useState<number | null>(null)
+  const [lessonToDelete, setLessonToDelete] = useState<LessonResponse | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [lessonToEdit, setLessonToEdit] = useState<LessonResponse | null>(null)
   const router = useRouter()
   const t = useTranslations()
   const { toast } = useToast()
@@ -115,6 +119,30 @@ export default function CourseLessonsPage() {
       })
     } finally {
       setIsCreatingModule(false)
+    }
+  }
+
+  const handleDeleteLesson = async () => {
+    if (lessonToDelete?.id == null) return
+
+    setIsDeleting(true)
+    try {
+      await LessonsService.deleteLesson(lessonToDelete.id)
+      setLessonToDelete(null)
+      await fetchCourse()
+      toast({
+        title: t("common.success") || "Success",
+        description: t("instructor.lessonDeleted") || "Lesson deleted",
+      })
+    } catch (error) {
+      console.error("Failed to delete lesson", error)
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: t("instructor.lessonDeleteFailed") || "Failed to delete lesson",
+      })
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -331,7 +359,18 @@ export default function CourseLessonsPage() {
                               <Button
                                 size="icon"
                                 variant="ghost"
+                                className="h-8 w-8 text-[#5e5d59] hover:bg-[#e8e6dc] hover:text-[#141413]"
+                                title={t("common.edit") || "Edit"}
+                                onClick={() => setLessonToEdit(lesson)}
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="icon"
+                                variant="ghost"
                                 className="h-8 w-8 text-[#b53333] hover:bg-[#f4e3e3] hover:text-[#b53333]"
+                                title={t("instructor.deleteLesson") || "Delete lesson"}
+                                onClick={() => setLessonToDelete(lesson)}
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
@@ -408,6 +447,52 @@ export default function CourseLessonsPage() {
           </div>
         </div>
       </div>
+
+      <Dialog open={!!lessonToDelete} onOpenChange={(open) => !open && !isDeleting && setLessonToDelete(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("instructor.deleteLesson") || "Delete lesson"}</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-[#5e5d59]">
+            {t("instructor.deleteLessonConfirm") || "Are you sure you want to delete this lesson? This action cannot be undone."}
+            {lessonToDelete?.title ? ` (${lessonToDelete.title})` : ""}
+          </p>
+          <div className="mt-4 flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setLessonToDelete(null)} disabled={isDeleting}>
+              {t("common.cancel") || "Cancel"}
+            </Button>
+            <Button
+              className="bg-[#b53333] text-white hover:bg-[#9e2c2c]"
+              onClick={() => void handleDeleteLesson()}
+              disabled={isDeleting}
+            >
+              {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {t("common.delete") || "Delete"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!lessonToEdit} onOpenChange={(open) => !open && setLessonToEdit(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {t("instructor.editLesson") || "Edit Lesson"}
+              {lessonToEdit?.title ? `: ${lessonToEdit.title}` : ""}
+            </DialogTitle>
+          </DialogHeader>
+          {lessonToEdit?.moduleId != null && (
+            <LessonEditForm
+              lesson={lessonToEdit}
+              moduleId={lessonToEdit.moduleId}
+              onSuccess={() => {
+                setLessonToEdit(null)
+                void fetchCourse()
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

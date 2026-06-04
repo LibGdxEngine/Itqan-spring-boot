@@ -6,6 +6,7 @@ import com.itqan.edu.features.courses.dto.LessonRequest;
 import com.itqan.edu.features.courses.dto.LessonResponse;
 import com.itqan.edu.features.courses.mapper.LessonMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -22,6 +23,7 @@ public class LessonService {
     private final ModuleRepository moduleRepository;
     private final LessonMapper lessonMapper;
 
+    @CacheEvict(value = "courses", allEntries = true)
     @Transactional
     public LessonResponse createLesson(LessonRequest request) {
         Module module = moduleRepository.findById(request.getModuleId())
@@ -59,6 +61,7 @@ public class LessonService {
                 .collect(Collectors.toList());
     }
 
+    @CacheEvict(value = "courses", allEntries = true)
     @Transactional
     public LessonResponse updateLesson(Long id, LessonRequest request) {
         Lesson lesson = lessonRepository.findById(id)
@@ -102,6 +105,7 @@ public class LessonService {
         return lessonMapper.toResponse(lesson);
     }
 
+    @CacheEvict(value = "courses", allEntries = true)
     @Transactional
     public void deleteLesson(Long id) {
         Lesson lesson = lessonRepository.findById(id)

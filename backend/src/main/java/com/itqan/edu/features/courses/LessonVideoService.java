@@ -13,6 +13,7 @@ import com.itqan.edu.features.courses.dto.LessonVideoPlaybackResponse;
 import com.itqan.edu.features.courses.mapper.LessonMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -53,6 +54,7 @@ public class LessonVideoService {
     private final StorageProperties storageProperties;
     private final VideoStorageProperties videoStorageProperties;
 
+    @CacheEvict(value = "courses", allEntries = true)
     @Transactional
     public LessonVideoMultipartInitiateResponse initiateMultipartUpload(
             Long lessonId,
@@ -126,6 +128,7 @@ public class LessonVideoService {
                 .build();
     }
 
+    @CacheEvict(value = "courses", allEntries = true)
     @Transactional
     public LessonResponse completeMultipartUpload(Long lessonId, LessonVideoMultipartCompleteRequest request) {
         Lesson lesson = getLessonOrThrow(lessonId);
@@ -173,6 +176,7 @@ public class LessonVideoService {
         return lessonMapper.toResponse(lesson);
     }
 
+    @CacheEvict(value = "courses", allEntries = true)
     @Transactional
     public void abortMultipartUpload(Long lessonId, LessonVideoMultipartAbortRequest request) {
         Lesson lesson = getLessonOrThrow(lessonId);

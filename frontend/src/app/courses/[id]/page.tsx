@@ -70,6 +70,10 @@ export default function CourseDetailPage() {
 
     const coursePrice = typeof course.price === "number" ? course.price : 0;
     const instructorName = course.instructor || t('courses.unknownInstructor');
+    const levelLabel =
+        course.level && t.has(`courses.levels.${course.level}`)
+            ? t(`courses.levels.${course.level}`)
+            : course.level;
 
     return (
         <div className="min-h-screen bg-[#f5f4ed]">
@@ -81,7 +85,7 @@ export default function CourseDetailPage() {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         <div className="lg:col-span-2 space-y-6">
                             <div className="inline-flex items-center space-x-2 bg-[#30302e] text-[#d97757] px-3 py-1 rounded-full text-sm font-medium">
-                                <span className="uppercase tracking-wide">{course.level}</span>
+                                <span className="uppercase tracking-wide">{levelLabel}</span>
                             </div>
                             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight">
                                 {course.title}
@@ -143,7 +147,7 @@ export default function CourseDetailPage() {
                                             </div>
                                         </div>
 
-                                        <EnrollButton courseId={course.id ?? id} coursePrice={coursePrice} />
+                                        <EnrollButton courseId={course.id ?? id} coursePrice={coursePrice} courseTitle={course.title ?? ''} />
 
                                         <ul className="space-y-3 text-sm text-[#5e5d59]">
                                             <li className="flex items-center">
@@ -172,7 +176,7 @@ export default function CourseDetailPage() {
                  <div className="flex items-center justify-between mb-4">
                     <span className="text-2xl font-bold">${coursePrice.toFixed(2)}</span>
                  </div>
-                 <EnrollButton courseId={course.id ?? id} coursePrice={coursePrice} />
+                 <EnrollButton courseId={course.id ?? id} coursePrice={coursePrice} courseTitle={course.title ?? ''} />
             </div>
 
             {/* Content Section */}

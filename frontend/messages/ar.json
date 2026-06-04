@@ -31,7 +31,9 @@
     "continueLearning": "متابعة التعلم",
     "save": "حفظ",
     "cancel": "إلغاء",
-    "edit": "تعديل"
+    "edit": "تعديل",
+    "delete": "حذف",
+    "success": "تم بنجاح"
   },
   "nav": {
     "brand": "إتقان",
@@ -436,6 +438,11 @@
     "instructor": "المدرب",
     "duration": "المدة",
     "level": "المستوى",
+    "levels": {
+      "BEGINNER": "مستوى مبتدئ",
+      "INTERMEDIATE": "مستوى متوسط",
+      "ADVANCED": "مستوى متقدم"
+    },
     "price": "السعر",
     "curriculum": "المنهج",
     "lessonTitle": "عنوان الدرس",
@@ -486,6 +493,17 @@
       "enrollmentCompletedDesc": "أنت الآن مسجّل في هذه الدورة.",
       "checkoutFailed": "فشل إتمام الشراء",
       "checkoutUrlMissing": "رابط الدفع غير متوفر."
+    },
+    "payment": {
+      "title": "اختر طريقة الدفع",
+      "paymob": "الدفع الإلكتروني (Paymob)",
+      "comingSoon": "غير متاح حالياً",
+      "vodafoneCash": "فودافون كاش",
+      "instapay": "انستا باي",
+      "viaWhatsapp": "عبر واتساب",
+      "numberMissing": "رقم التواصل غير متاح حالياً",
+      "whatsappMessage": "أريد شراء دورة \"{course}\" بمبلغ ${amount} عبر {method}.",
+      "whatsappCoupon": " (كوبون: {coupon})"
     }
   },
   "instructor": {
@@ -506,6 +524,12 @@
     "noModules": "لا توجد وحدات بعد. أضف واحدة بالأعلى.",
     "courseStatus": "حالة الدورة",
     "lessonCreated": "تم حفظ الدرس",
+    "lessonUpdated": "تم تحديث الدرس",
+    "lessonDeleted": "تم حذف الدرس",
+    "lessonDeleteFailed": "فشل حذف الدرس",
+    "editLesson": "تعديل الدرس",
+    "deleteLesson": "حذف الدرس",
+    "deleteLessonConfirm": "هل أنت متأكد من حذف هذا الدرس؟ لا يمكن التراجع عن هذا الإجراء.",
     "thumbnail": "صورة الدورة",
     "thumbnailHint": "JPEG أو PNG أو WebP. الحد الأقصى 5 ميجابايت.",
     "thumbnailPickFile": "اختر صورة",

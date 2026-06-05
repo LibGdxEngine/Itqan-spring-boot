@@ -66,6 +66,8 @@ export default function CourseLessonsPage() {
   const [lessonToDelete, setLessonToDelete] = useState<LessonResponse | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const [lessonToEdit, setLessonToEdit] = useState<LessonResponse | null>(null)
+  const [moduleToDelete, setModuleToDelete] = useState<{ id: number; title: string } | null>(null)
+  const [isDeletingModule, setIsDeletingModule] = useState(false)
   const router = useRouter()
   const t = useTranslations()
   const { toast } = useToast()
@@ -143,6 +145,29 @@ export default function CourseLessonsPage() {
       })
     } finally {
       setIsDeleting(false)
+    }
+  }
+
+  const handleDeleteModule = async () => {
+    if (moduleToDelete?.id == null) return
+    setIsDeletingModule(true)
+    try {
+      await ModulesService.deleteModule(moduleToDelete.id)
+      setModuleToDelete(null)
+      await fetchCourse()
+      toast({
+        title: t("common.success") || "Success",
+        description: t("instructor.moduleDeleted") || "Module deleted",
+      })
+    } catch (error) {
+      console.error("Failed to delete module", error)
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: t("instructor.moduleDeleteFailed") || "Failed to delete module",
+      })
+    } finally {
+      setIsDeletingModule(false)
     }
   }
 
@@ -269,14 +294,28 @@ export default function CourseLessonsPage() {
               {course.modules?.map((module) => (
                 <AccordionItem key={module.id} value={`module-${module.id}`}>
                   <AccordionTrigger className="hover:no-underline">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-[#141413]">{module.title}</span>
-                      <span className="text-xs font-normal text-[#87867f]">
-                        ({module.lessons?.length || 0} lessons)
-                      </span>
-                      {reorderingModuleId === module.id && (
-                        <Loader2 className="h-3 w-3 animate-spin text-[#c96442]" />
-                      )}
+                    <div className="flex flex-1 items-center justify-between pr-2">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-[#141413]">{module.title}</span>
+                        <span className="text-xs font-normal text-[#87867f]">
+                          ({module.lessons?.length || 0} lessons)
+                        </span>
+                        {reorderingModuleId === module.id && (
+                          <Loader2 className="h-3 w-3 animate-spin text-[#c96442]" />
+                        )}
+                      </div>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7 text-[#b53333] hover:bg-[#f4e3e3] hover:text-[#b53333]"
+                        title={t("instructor.deleteModule") || "Delete module"}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setModuleToDelete({ id: module.id!, title: module.title ?? "" })
+                        }}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
                     </div>
                   </AccordionTrigger>
                   <AccordionContent>
@@ -467,6 +506,31 @@ export default function CourseLessonsPage() {
               disabled={isDeleting}
             >
               {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {t("common.delete") || "Delete"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!moduleToDelete} onOpenChange={(open) => !open && !isDeletingModule && setModuleToDelete(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("instructor.deleteModule") || "Delete module"}</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-[#5e5d59]">
+            {t("instructor.deleteModuleConfirm") || "Are you sure you want to delete this module? All lessons inside will also be deleted."}
+            {moduleToDelete?.title ? ` (${moduleToDelete.title})` : ""}
+          </p>
+          <div className="mt-4 flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setModuleToDelete(null)} disabled={isDeletingModule}>
+              {t("common.cancel") || "Cancel"}
+            </Button>
+            <Button
+              className="bg-[#b53333] text-white hover:bg-[#9e2c2c]"
+              onClick={() => void handleDeleteModule()}
+              disabled={isDeletingModule}
+            >
+              {isDeletingModule && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {t("common.delete") || "Delete"}
             </Button>
           </div>

@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.Optional;
 
 @Repository
@@ -18,4 +19,8 @@ public interface CouponRedemptionRepository extends JpaRepository<CouponRedempti
 
     @Query("SELECT cr FROM CouponRedemption cr WHERE cr.payment.id = :paymentId")
     Optional<CouponRedemption> findByPaymentId(@Param("paymentId") Long paymentId);
+
+    void deleteByCouponId(Long couponId);
+
+    void deleteByCouponIdIn(Collection<Long> couponIds);
 }

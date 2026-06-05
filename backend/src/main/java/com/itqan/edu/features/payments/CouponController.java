@@ -58,6 +58,16 @@ public class CouponController {
         return ResponseEntity.noContent().build();
     }
 
+    @DeleteMapping("/{couponId}")
+    @PreAuthorize("hasRole('INSTRUCTOR') or hasRole('ADMIN')")
+    @Operation(summary = "Delete coupon", description = "Permanently delete a coupon")
+    public ResponseEntity<Void> deleteCoupon(
+            @PathVariable Long couponId,
+            Authentication authentication) {
+        couponService.deleteCoupon(couponId, currentUserService.getCurrentUser(authentication));
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/validate")
     @PreAuthorize("hasRole('STUDENT') or hasRole('ADMIN')")
     @Operation(summary = "Validate coupon", description = "Validate a coupon and return computed pricing")

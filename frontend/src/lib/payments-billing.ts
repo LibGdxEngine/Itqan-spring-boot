@@ -106,6 +106,10 @@ export const paymentsBillingApi = {
     await api.patch(`/api/coupons/${couponId}/deactivate`);
   },
 
+  async deleteCoupon(couponId: number): Promise<void> {
+    await api.delete(`/api/coupons/${couponId}`);
+  },
+
   async validateCoupon(request: ValidateCouponRequest): Promise<CouponPricingResponse> {
     const response = await api.post<CouponPricingResponse>("/api/coupons/validate", request);
     return response.data;

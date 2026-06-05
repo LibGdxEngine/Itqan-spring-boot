@@ -135,6 +135,20 @@ export function CouponManager() {
     }
   };
 
+  const onDeleteCoupon = async (couponId: number) => {
+    try {
+      await paymentsBillingApi.deleteCoupon(couponId);
+      setCoupons((prev) => prev.filter((coupon) => coupon.id !== couponId));
+      toast({ title: "Coupon deleted" });
+    } catch {
+      toast({
+        variant: "destructive",
+        title: "Failed to delete coupon",
+        description: "Please try again.",
+      });
+    }
+  };
+
   if (loadingCourses) {
     return (
       <div className="rounded-xl border border-[#e8e6dc] bg-[#faf9f5] p-6">
@@ -233,6 +247,9 @@ export function CouponManager() {
                           Deactivate
                         </Button>
                       )}
+                      <Button variant="outline" size="sm" className="text-[#b53333] hover:bg-[#f4e3e3] hover:text-[#b53333] border-[#f4e3e3]" onClick={() => onDeleteCoupon(coupon.id)}>
+                        Delete
+                      </Button>
                     </div>
                   </div>
                 ))}

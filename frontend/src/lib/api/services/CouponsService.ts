@@ -63,6 +63,24 @@ export class CouponsService {
         });
     }
     /**
+     * Delete coupon
+     * Permanently delete a coupon
+     * @param couponId
+     * @returns any OK
+     * @throws ApiError
+     */
+    public static deleteCoupon(
+        couponId: number,
+    ): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/coupons/{couponId}',
+            path: {
+                'couponId': couponId,
+            },
+        });
+    }
+    /**
      * Get course coupons
      * Get coupons for a specific course
      * @param courseId

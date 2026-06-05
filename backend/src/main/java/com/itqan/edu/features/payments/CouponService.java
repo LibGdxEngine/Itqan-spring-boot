@@ -83,6 +83,15 @@ public class CouponService {
         couponRepository.save(coupon);
     }
 
+    @Transactional
+    public void deleteCoupon(Long couponId, User currentUser) {
+        Coupon coupon = couponRepository.findById(couponId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.COUPON_INVALID));
+        enforceCouponManagementAccess(currentUser, coupon.getCourse());
+        couponRedemptionRepository.deleteByCouponId(couponId);
+        couponRepository.delete(coupon);
+    }
+
     @Transactional(readOnly = true)
     public CouponPricingResponse validateCouponForCourse(Long courseId, String couponCode, Long studentId) {
         CouponValidationResult result = validateForCheckout(courseId, couponCode, studentId);

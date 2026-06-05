@@ -9,6 +9,11 @@ import com.itqan.edu.features.courses.dto.CourseResponse;
 import com.itqan.edu.features.courses.dto.ThumbnailUploadResponse;
 import com.itqan.edu.features.courses.mapper.CourseMapper;
 import com.itqan.edu.features.courses.search.CourseSearchService;
+import com.itqan.edu.features.enrollments.EnrollmentRepository;
+import com.itqan.edu.features.enrollments.LessonEnrollmentRepository;
+import com.itqan.edu.features.payments.CouponRepository;
+import com.itqan.edu.features.payments.CouponRedemptionRepository;
+import com.itqan.edu.features.payments.EnrollmentCodeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -41,6 +46,11 @@ public class CourseService {
     private final CourseSearchService courseSearchService;
     private final S3Client s3Client;
     private final StorageProperties storageProperties;
+    private final EnrollmentRepository enrollmentRepository;
+    private final LessonEnrollmentRepository lessonEnrollmentRepository;
+    private final CouponRepository couponRepository;
+    private final CouponRedemptionRepository couponRedemptionRepository;
+    private final EnrollmentCodeRepository enrollmentCodeRepository;
 
     @CacheEvict(value = "courses", allEntries = true)
     @Transactional
@@ -136,6 +146,24 @@ public class CourseService {
         Course course = courseRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.COURSE_NOT_FOUND));
         enforceOwnerScopeIfInstructor(currentUser, course);
+
+        List<Long> lessonIds = course.getModules().stream()
+                .flatMap(m -> m.getLessons().stream())
+                .map(Lesson::getId)
+                .collect(Collectors.toList());
+        if (!lessonIds.isEmpty()) {
+            lessonEnrollmentRepository.deleteByLessonIdIn(lessonIds);
+        }
+        enrollmentRepository.deleteByCourseId(id);
+
+        List<Long> couponIds = couponRepository.findByCourseIdOrderByCreatedAtDesc(id)
+                .stream().map(c -> c.getId()).collect(Collectors.toList());
+        if (!couponIds.isEmpty()) {
+            couponRedemptionRepository.deleteByCouponIdIn(couponIds);
+        }
+        couponRepository.deleteByCourseId(id);
+        enrollmentCodeRepository.deleteByCourseId(id);
+
         courseRepository.delete(course);
         courseSearchService.removeCourse(id);
     }

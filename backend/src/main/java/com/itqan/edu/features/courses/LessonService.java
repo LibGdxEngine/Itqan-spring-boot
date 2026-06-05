@@ -5,6 +5,7 @@ import com.itqan.edu.common.exception.ErrorCode;
 import com.itqan.edu.features.courses.dto.LessonRequest;
 import com.itqan.edu.features.courses.dto.LessonResponse;
 import com.itqan.edu.features.courses.mapper.LessonMapper;
+import com.itqan.edu.features.enrollments.LessonEnrollmentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ public class LessonService {
     private final LessonRepository lessonRepository;
     private final ModuleRepository moduleRepository;
     private final LessonMapper lessonMapper;
+    private final LessonEnrollmentRepository lessonEnrollmentRepository;
 
     @CacheEvict(value = "courses", allEntries = true)
     @Transactional
@@ -110,6 +112,7 @@ public class LessonService {
     public void deleteLesson(Long id) {
         Lesson lesson = lessonRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.LESSON_NOT_FOUND));
+        lessonEnrollmentRepository.deleteByLessonId(id);
         lessonRepository.delete(lesson);
     }
 }

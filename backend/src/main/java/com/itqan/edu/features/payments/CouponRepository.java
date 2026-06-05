@@ -14,4 +14,6 @@ public interface CouponRepository extends JpaRepository<Coupon, Long> {
     List<Coupon> findByCourseIdOrderByCreatedAtDesc(Long courseId);
 
     boolean existsByCodeIgnoreCase(String code);
+
+    void deleteByCourseId(Long courseId);
 }

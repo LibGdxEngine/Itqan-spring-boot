@@ -8,7 +8,7 @@ import {
   uploadCourseThumbnail,
   validateThumbnailFile,
 } from "@/lib/courseThumbnail"
-import { ImageIcon, Loader2, Plus, LayoutDashboard, Film } from "lucide-react"
+import { ImageIcon, Loader2, Plus, LayoutDashboard, Film, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -30,6 +30,8 @@ export default function InstructorDashboardPage() {
   const [courses, setCourses] = useState<CourseResponse[]>([])
   const [loading, setLoading] = useState(true)
   const [updatingThumbnailId, setUpdatingThumbnailId] = useState<number | null>(null)
+  const [courseToDelete, setCourseToDelete] = useState<CourseResponse | null>(null)
+  const [isDeletingCourse, setIsDeletingCourse] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const targetCourseIdRef = useRef<number | null>(null)
   const router = useRouter()
@@ -122,6 +124,22 @@ export default function InstructorDashboardPage() {
       })
     } finally {
       setUpdatingThumbnailId(null)
+    }
+  }
+
+  const handleDeleteCourse = async () => {
+    if (courseToDelete?.id == null) return
+    setIsDeletingCourse(true)
+    try {
+      await CoursesService.deleteCourse(courseToDelete.id)
+      setCourses((prev) => prev.filter((c) => c.id !== courseToDelete.id))
+      setCourseToDelete(null)
+      toast({ title: t("instructor.courseDeleted") || "Course deleted" })
+    } catch (error) {
+      console.error("Failed to delete course", error)
+      toast({ variant: "destructive", title: "Error", description: t("instructor.courseDeleteFailed") || "Failed to delete course" })
+    } finally {
+      setIsDeletingCourse(false)
     }
   }
 
@@ -227,12 +245,23 @@ export default function InstructorDashboardPage() {
                    {course.modules?.length || 0} {t("common.modules") || "Modules"}
                 </div>
 
-                <Button variant="outline" size="sm" asChild>
-                  <Link href={`/instructor/courses/${course.id}/lessons`}>
-                    <Film className="w-4 h-4 mr-2" />
-                    {t("instructor.manageContent") || "Manage Content"}
-                  </Link>
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" asChild>
+                    <Link href={`/instructor/courses/${course.id}/lessons`}>
+                      <Film className="w-4 h-4 mr-2" />
+                      {t("instructor.manageContent") || "Manage Content"}
+                    </Link>
+                  </Button>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-8 w-8 text-[#b53333] hover:bg-[#f4e3e3] hover:text-[#b53333]"
+                    title={t("instructor.deleteCourse") || "Delete course"}
+                    onClick={() => setCourseToDelete(course)}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
@@ -264,6 +293,31 @@ export default function InstructorDashboardPage() {
         <CouponManager />
       </div>
     </div>
+
+    <Dialog open={!!courseToDelete} onOpenChange={(open) => !open && !isDeletingCourse && setCourseToDelete(null)}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{t("instructor.deleteCourse") || "Delete course"}</DialogTitle>
+        </DialogHeader>
+        <p className="text-sm text-[#5e5d59]">
+          {t("instructor.deleteCourseConfirm") || "Are you sure you want to delete this course? All modules, lessons, and enrollments will be permanently removed."}
+          {courseToDelete?.title ? ` (${courseToDelete.title})` : ""}
+        </p>
+        <div className="mt-4 flex justify-end gap-2">
+          <Button variant="outline" onClick={() => setCourseToDelete(null)} disabled={isDeletingCourse}>
+            {t("common.cancel") || "Cancel"}
+          </Button>
+          <Button
+            className="bg-[#b53333] text-white hover:bg-[#9e2c2c]"
+            onClick={() => void handleDeleteCourse()}
+            disabled={isDeletingCourse}
+          >
+            {isDeletingCourse && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {t("common.delete") || "Delete"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
     </div>
   )
 }

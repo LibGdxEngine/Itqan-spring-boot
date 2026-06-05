@@ -21,4 +21,6 @@ public interface EnrollmentCodeRepository extends JpaRepository<EnrollmentCode, 
     List<EnrollmentCode> findActiveCoursesCodes(@Param("courseId") Long courseId);
 
     boolean existsByCode(String code);
+
+    void deleteByCourseId(Long courseId);
 }

@@ -46,12 +46,25 @@ export interface LandingTeacher {
   studentsCount: number
 }
 
+export interface LandingArticle {
+  id: number
+  title: string
+  slug: string
+  description: string | null
+  coverImageUrl: string | null
+  readingTimeMinutes: number
+  authorName: string | null
+  category: string | null
+  publishedAt: string | null
+}
+
 export interface LandingPageData {
   hero: LandingHero
   stats: LandingStats
   specializations: LandingSpecialization[]
   featuredCourses: LandingCourse[]
   featuredInstructors: LandingTeacher[]
+  featuredArticles: LandingArticle[]
 }
 
 export interface LandingPageUpdateRequest {
@@ -64,6 +77,7 @@ export interface LandingPageUpdateRequest {
   heroDurationLabelEn?: string | null
   featuredCourseIds?: number[]
   featuredInstructorIds?: number[]
+  featuredArticleIds?: number[]
 }
 
 export interface SpecializationRequest {

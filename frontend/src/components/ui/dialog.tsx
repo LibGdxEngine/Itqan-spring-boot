@@ -82,7 +82,7 @@ export function DialogContent({ className, children, ...props }: DialogContentPr
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <button
         className="absolute inset-0 bg-black/50"
         onClick={() => setOpen(false)}
@@ -92,7 +92,7 @@ export function DialogContent({ className, children, ...props }: DialogContentPr
         role="dialog"
         aria-modal="true"
         className={cn(
-          "relative z-10 w-full max-w-lg rounded-lg border border-[#e8e6dc] bg-[#faf9f5] p-6 shadow-xl",
+          "relative z-10 max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-lg border border-[#e8e6dc] bg-[#faf9f5] p-4 shadow-xl sm:p-6",
           className
         )}
         {...props}

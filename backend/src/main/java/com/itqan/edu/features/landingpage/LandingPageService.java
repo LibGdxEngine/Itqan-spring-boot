@@ -3,12 +3,15 @@ package com.itqan.edu.features.landingpage;
 import com.itqan.edu.common.config.StorageProperties;
 import com.itqan.edu.common.exception.BusinessException;
 import com.itqan.edu.common.exception.ErrorCode;
+import com.itqan.edu.features.articles.Article;
+import com.itqan.edu.features.articles.ArticleRepository;
 import com.itqan.edu.features.auth.AuthRepository;
 import com.itqan.edu.features.auth.User;
 import com.itqan.edu.features.courses.Course;
 import com.itqan.edu.features.courses.CourseRepository;
 import com.itqan.edu.features.enrollments.EnrollmentRepository;
 import com.itqan.edu.features.landingpage.dto.HeroVideoUploadResponse;
+import com.itqan.edu.features.landingpage.dto.LandingArticleDto;
 import com.itqan.edu.features.landingpage.dto.LandingCourseDto;
 import com.itqan.edu.features.landingpage.dto.LandingHeroDto;
 import com.itqan.edu.features.landingpage.dto.LandingPageResponse;
@@ -45,6 +48,7 @@ public class LandingPageService {
 
     private final LandingPageRepository landingPageRepository;
     private final CourseRepository courseRepository;
+    private final ArticleRepository articleRepository;
     private final AuthRepository authRepository;
     private final EnrollmentRepository enrollmentRepository;
     private final SpecializationRepository specializationRepository;
@@ -60,6 +64,7 @@ public class LandingPageService {
 
         List<LandingCourseDto> courses = hydrateCourses(config.getFeaturedCourseIds());
         List<LandingTeacherDto> teachers = hydrateTeachers(config.getFeaturedInstructorIds());
+        List<LandingArticleDto> articles = hydrateArticles(config.getFeaturedArticleIds());
 
         LandingStatsDto stats = LandingStatsDto.builder()
                 .courses(courseRepository.countByActiveTrue())
@@ -84,6 +89,7 @@ public class LandingPageService {
                 .specializations(specializations)
                 .featuredCourses(courses)
                 .featuredInstructors(teachers)
+                .featuredArticles(articles)
                 .build();
     }
 
@@ -113,6 +119,13 @@ public class LandingPageService {
             }
             config.getFeaturedInstructorIds().clear();
             config.getFeaturedInstructorIds().addAll(request.getFeaturedInstructorIds());
+        }
+        if (request.getFeaturedArticleIds() != null) {
+            if (config.getFeaturedArticleIds() == null) {
+                config.setFeaturedArticleIds(new ArrayList<>());
+            }
+            config.getFeaturedArticleIds().clear();
+            config.getFeaturedArticleIds().addAll(request.getFeaturedArticleIds());
         }
         if (currentUser != null) config.setUpdatedByUserId(currentUser.getId());
 
@@ -166,6 +179,7 @@ public class LandingPageService {
                         .id(LandingPageConfig.SINGLETON_ID)
                         .featuredCourseIds(new ArrayList<>())
                         .featuredInstructorIds(new ArrayList<>())
+                        .featuredArticleIds(new ArrayList<>())
                         .build()));
     }
 
@@ -188,6 +202,31 @@ public class LandingPageService {
                     .price(c.getPrice())
                     .thumbnailUrl(c.getThumbnailUrl())
                     .level(c.getLevel())
+                    .build());
+        }
+        return out;
+    }
+
+    private List<LandingArticleDto> hydrateArticles(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) return Collections.emptyList();
+        Map<Long, Article> byId = new HashMap<>();
+        for (Article a : articleRepository.findAllById(ids)) {
+            if (Boolean.TRUE.equals(a.getPublished())) byId.put(a.getId(), a);
+        }
+        List<LandingArticleDto> out = new ArrayList<>();
+        for (Long id : ids) {
+            Article a = byId.get(id);
+            if (a == null) continue;
+            out.add(LandingArticleDto.builder()
+                    .id(a.getId())
+                    .title(a.getTitle())
+                    .slug(a.getSlug())
+                    .description(a.getDescription())
+                    .coverImageUrl(a.getCoverImageUrl())
+                    .readingTimeMinutes(a.getReadingTimeMinutes())
+                    .authorName(a.getAuthorName())
+                    .category(a.getCategory())
+                    .publishedAt(a.getPublishedAt())
                     .build());
         }
         return out;

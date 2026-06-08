@@ -49,6 +49,14 @@ public class LandingPageConfig {
     @Builder.Default
     private List<Long> featuredInstructorIds = new ArrayList<>();
 
+    @ElementCollection
+    @CollectionTable(name = "landing_page_featured_articles",
+            joinColumns = @JoinColumn(name = "landing_page_id"))
+    @OrderColumn(name = "position")
+    @Column(name = "article_id")
+    @Builder.Default
+    private List<Long> featuredArticleIds = new ArrayList<>();
+
     private LocalDateTime updatedAt;
 
     private Long updatedByUserId;

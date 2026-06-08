@@ -1,8 +1,9 @@
 "use client"
 
 import Link from "next/link"
-import { ArrowRight, Play, Star, Clock, Mail, ChevronRight } from "lucide-react"
+import { ArrowRight, Play, Star, Clock, ChevronRight } from "lucide-react"
 import { Navbar } from "@/components/Navbar"
+import { SiteFooter } from "@/components/SiteFooter"
 import { useTranslations, useLocale } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { getYouTubeVideoId } from "@/lib/videoSource"
@@ -16,6 +17,7 @@ import {
   type Variants,
 } from "framer-motion"
 import { useEffect, useRef, useState } from "react"
+import { ArticleCard } from "@/components/articles/ArticleCard"
 import type {
   LandingCourse,
   LandingPageData,
@@ -53,6 +55,7 @@ export default function HomeClient({ data }: HomeClientProps) {
   const specializations = data?.specializations ?? []
   const featuredCourses = data?.featuredCourses ?? []
   const featuredInstructors = data?.featuredInstructors ?? []
+  const featuredArticles = data?.featuredArticles ?? []
 
   return (
     <div className="min-h-screen bg-[#f5f4ed] text-[#141413]">
@@ -358,6 +361,57 @@ export default function HomeClient({ data }: HomeClientProps) {
         </section>
       ) : null}
 
+      {/* ===== 5b. FEATURED ARTICLES ===== */}
+      {featuredArticles.length > 0 ? (
+        <section aria-labelledby="articles-heading" className="py-20 bg-[#faf9f5] border-y border-[#f0eee6]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <motion.div
+              className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10 ltr-flex"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.4 }}
+              variants={staggerParent}
+            >
+              <motion.div variants={fadeUp} className="space-y-3">
+                <h2
+                  id="articles-heading"
+                  className="text-subhead-lg text-[#141413]"
+                  style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
+                >
+                  {t("articles.featuredTitle")}
+                </h2>
+                <p className="text-[#5e5d59] text-[17px] leading-[1.6]">
+                  {t("articles.featuredSubtitle")}
+                </p>
+              </motion.div>
+              <motion.div variants={fadeUp}>
+                <Link
+                  href="/articles"
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-[#c96442] hover:text-[#b55836] transition-colors ltr-flex"
+                >
+                  {t("articles.viewAll")}
+                  <ChevronRight className="w-4 h-4 rtl:rotate-180" />
+                </Link>
+              </motion.div>
+            </motion.div>
+
+            <motion.div
+              className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.15 }}
+              variants={staggerParent}
+            >
+              {featuredArticles.map((article) => (
+                <motion.div key={article.id} variants={fadeUp} className="h-full">
+                  <ArticleCard article={article} />
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+        </section>
+      ) : null}
+
       {/* ===== 6. CTA (dark chapter) ===== */}
       <section aria-labelledby="cta-heading" className="py-24 bg-[#141413]">
         <motion.div
@@ -401,70 +455,7 @@ export default function HomeClient({ data }: HomeClientProps) {
       </section>
 
       {/* ===== 7. FOOTER ===== */}
-      <footer className="bg-[#141413] border-t border-[#30302e] text-[#b0aea5]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
-            {/* Brand */}
-            <div className="space-y-4">
-              <Link href="/" className="inline-flex items-center gap-2 ltr-flex">
-                <span
-                  className="text-lg text-[#faf9f5]"
-                  style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
-                >
-                  {t("nav.brand")}
-                </span>
-              </Link>
-              <p className="text-sm leading-relaxed">{t("footer.tagline")}</p>
-            </div>
-
-            {/* Quick Links */}
-            <div className="space-y-4">
-              <h4 className="text-xs font-medium text-[#faf9f5] uppercase tracking-[0.5px]">
-                {t("footer.quickLinks")}
-              </h4>
-              <ul className="space-y-2.5 text-sm">
-                <li><Link href="/" className="hover:text-[#c96442] transition-colors">{t("footer.linkHome")}</Link></li>
-                <li><Link href="/courses" className="hover:text-[#c96442] transition-colors">{t("footer.linkCourses")}</Link></li>
-                <li><Link href="/instructors" className="hover:text-[#c96442] transition-colors">{t("nav.instructors") || "Instructors"}</Link></li>
-                <li><Link href="/about" className="hover:text-[#c96442] transition-colors">{t("footer.linkAbout")}</Link></li>
-              </ul>
-            </div>
-
-            {/* Platform */}
-            <div className="space-y-4">
-              <h4 className="text-xs font-medium text-[#faf9f5] uppercase tracking-[0.5px]">
-                {t("footer.platform")}
-              </h4>
-              <ul className="space-y-2.5 text-sm">
-                <li><Link href="/login" className="hover:text-[#c96442] transition-colors">{t("footer.linkLogin")}</Link></li>
-                <li><Link href="/register" className="hover:text-[#c96442] transition-colors">{t("footer.linkRegister")}</Link></li>
-                <li><Link href="/dashboard" className="hover:text-[#c96442] transition-colors">{t("footer.linkDashboard")}</Link></li>
-                <li><Link href="/my-courses" className="hover:text-[#c96442] transition-colors">{t("footer.linkMyCourses")}</Link></li>
-              </ul>
-            </div>
-
-            {/* Contact */}
-            <div className="space-y-4">
-              <h4 className="text-xs font-medium text-[#faf9f5] uppercase tracking-[0.5px]">
-                {t("footer.contact")}
-              </h4>
-              <a
-                href={`mailto:${t("footer.email")}`}
-                className="inline-flex items-center gap-2 text-sm hover:text-[#c96442] transition-colors ltr-flex"
-              >
-                <Mail className="w-4 h-4 shrink-0" />
-                {t("footer.email")}
-              </a>
-            </div>
-          </div>
-
-          <div className="border-t border-[#30302e] pt-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-sm">
-            <p>
-              © {new Date().getFullYear()} {t("nav.brand")}. {t("footer.rights")}
-            </p>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   )
 }

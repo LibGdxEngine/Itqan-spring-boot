@@ -21,4 +21,5 @@ public class LandingPageUpdateRequest {
     private String heroDurationLabelEn;
     private List<Long> featuredCourseIds;
     private List<Long> featuredInstructorIds;
+    private List<Long> featuredArticleIds;
 }

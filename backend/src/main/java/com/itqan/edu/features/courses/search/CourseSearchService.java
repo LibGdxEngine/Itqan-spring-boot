@@ -12,6 +12,7 @@ import com.meilisearch.sdk.model.Searchable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -49,6 +50,7 @@ public class CourseSearchService {
         }
     }
 
+    @Transactional(readOnly = true)
     public void reindexAll() {
         try {
             List<Course> courses = courseRepository.findByActiveTrue();

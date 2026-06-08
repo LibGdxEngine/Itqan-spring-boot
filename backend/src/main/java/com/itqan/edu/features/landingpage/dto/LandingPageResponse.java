@@ -18,4 +18,5 @@ public class LandingPageResponse {
     private List<SpecializationResponse> specializations;
     private List<LandingCourseDto> featuredCourses;
     private List<LandingTeacherDto> featuredInstructors;
+    private List<LandingArticleDto> featuredArticles;
 }

@@ -183,7 +183,7 @@ export function CouponManager() {
             </select>
           </div>
 
-          <form onSubmit={onCreateCoupon} className="grid grid-cols-1 gap-3 rounded-lg border border-[#f0eee6] p-4 md:grid-cols-4">
+          <form onSubmit={onCreateCoupon} className="grid grid-cols-1 gap-3 rounded-lg border border-[#f0eee6] p-4 sm:grid-cols-2 md:grid-cols-4">
             <Input
               placeholder="Code (optional)"
               value={formState.code}

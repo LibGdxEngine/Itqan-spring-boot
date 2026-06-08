@@ -11,6 +11,7 @@ import { Navbar } from "@/components/Navbar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { ResponsiveTable } from "@/components/ui/responsive-table"
 import { useToast } from "@/components/ui/use-toast"
 import { getErrorMessage } from "@/lib/api-axios"
 import { CourseResponse, CoursesService, OpenAPI, StudentResponse, StudentsService } from "@/lib/api"
@@ -461,10 +462,10 @@ export default function AdminDashboardPage() {
   return (
     <div className="min-h-screen bg-[#f5f4ed]">
       <Navbar />
-    <div className="container mx-auto max-w-7xl px-4 pt-24 pb-10">
+    <div className="container mx-auto max-w-7xl px-4 sm:px-6 pt-24 pb-10">
       <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="flex items-center gap-2 text-3xl font-bold text-[#141413]">
+          <h1 className="flex items-center gap-2 text-2xl sm:text-3xl font-bold text-[#141413]">
             <ShieldCheck className="h-8 w-8 text-[#c96442]" />
             {t("admin.dashboard")}
           </h1>
@@ -479,7 +480,7 @@ export default function AdminDashboardPage() {
         </Link>
       </div>
 
-      <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <div className="rounded-xl border border-[#f0eee6] bg-[#faf9f5] p-4">
           <p className="text-sm text-[#87867f]">{t("admin.stats.totalAdmins")}</p>
           <p className="mt-2 flex items-center gap-2 text-2xl font-bold text-[#141413]">
@@ -562,7 +563,7 @@ export default function AdminDashboardPage() {
         {!errors.admins && canManageAdmins && (
           <div className="border-b border-[#f0eee6] px-4 py-4">
             <h3 className="mb-3 text-sm font-semibold text-[#141413]">{t("admin.admins.createTitle")}</h3>
-            <form className="grid gap-3 md:grid-cols-2 xl:grid-cols-3" onSubmit={createAdmin}>
+            <form className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3" onSubmit={createAdmin}>
               <div className="space-y-1.5">
                 <Label htmlFor="create-admin-first-name">{t("admin.admins.firstName")}</Label>
                 <Input
@@ -637,7 +638,7 @@ export default function AdminDashboardPage() {
         {!errors.admins && canManageAdmins && editingForm && editingAdminId !== null && (
           <div className="border-b border-[#f0eee6] px-4 py-4">
             <h3 className="mb-3 text-sm font-semibold text-[#141413]">{t("admin.admins.editTitle")}</h3>
-            <form className="grid gap-3 md:grid-cols-2 xl:grid-cols-3" onSubmit={saveAdminChanges}>
+            <form className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3" onSubmit={saveAdminChanges}>
               <div className="space-y-1.5">
                 <Label htmlFor="edit-admin-first-name">{t("admin.admins.firstName")}</Label>
                 <Input
@@ -719,64 +720,61 @@ export default function AdminDashboardPage() {
         {!errors.admins && admins.length === 0 && <div className="px-4 py-6 text-sm text-[#87867f]">{t("admin.states.noAdmins")}</div>}
 
         {!errors.admins && admins.length > 0 && (
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead className="bg-[#f0eee6] text-left text-[#5e5d59]">
-                <tr>
-                  <th className="px-4 py-3">{t("admin.admins.name")}</th>
-                  <th className="px-4 py-3">{t("admin.admins.email")}</th>
-                  <th className="px-4 py-3">{t("admin.admins.createdAt")}</th>
-                  <th className="px-4 py-3">{t("admin.admins.accountType")}</th>
-                  <th className="px-4 py-3">{t("admin.admins.status")}</th>
-                  {canManageAdmins && <th className="px-4 py-3 text-right">{t("admin.admins.actions")}</th>}
-                </tr>
-              </thead>
-              <tbody>
-                {admins.map((admin) => {
-                  const isCurrentRowEditing = editingAdminId === admin.id
-                  return (
-                    <tr key={admin.id} className="border-t border-[#f0eee6]">
-                      <td className="px-4 py-3 font-medium text-[#141413]">
-                        {[admin.firstName, admin.lastName].filter(Boolean).join(" ").trim() || "-"}
-                      </td>
-                      <td className="px-4 py-3 text-[#4d4c48]">{admin.email}</td>
-                      <td className="px-4 py-3 text-[#4d4c48]">{formatDate(admin.createdAt)}</td>
-                      <td className="px-4 py-3">
-                        <span
-                          className={`rounded-full px-2 py-1 text-xs font-medium ${
-                            admin.superAdmin ? "bg-[#c96442] text-[#faf9f5]" : "bg-[#e8e6dc] text-[#4d4c48]"
-                          }`}
-                        >
-                          {admin.superAdmin ? t("admin.admins.superAdmin") : t("admin.admins.admin")}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span
-                          className={`rounded-full px-2 py-1 text-xs font-medium ${
-                            admin.enabled ? "bg-[#e8e6dc] text-[#4d4c48]" : "bg-[#f0eee6] text-[#87867f]"
-                          }`}
-                        >
-                          {admin.enabled ? t("admin.status.active") : t("admin.status.inactive")}
-                        </span>
-                      </td>
-                      {canManageAdmins && (
-                        <td className="px-4 py-3 text-right">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => startEditingAdmin(admin)}
-                            disabled={savingAdmin}
-                          >
-                            {isCurrentRowEditing ? t("admin.actions.editing") : t("admin.actions.edit")}
-                          </Button>
-                        </td>
-                      )}
-                    </tr>
+          <ResponsiveTable
+            rows={admins}
+            getRowKey={(admin, i) => admin.id ?? i}
+            columns={[
+              {
+                header: t("admin.admins.name"),
+                cell: (admin) => (
+                  <span className="font-medium text-[#141413]">
+                    {[admin.firstName, admin.lastName].filter(Boolean).join(" ").trim() || "-"}
+                  </span>
+                ),
+              },
+              { header: t("admin.admins.email"), cell: (admin) => admin.email },
+              { header: t("admin.admins.createdAt"), cell: (admin) => formatDate(admin.createdAt) },
+              {
+                header: t("admin.admins.accountType"),
+                cell: (admin) => (
+                  <span
+                    className={`rounded-full px-2 py-1 text-xs font-medium ${
+                      admin.superAdmin ? "bg-[#c96442] text-[#faf9f5]" : "bg-[#e8e6dc] text-[#4d4c48]"
+                    }`}
+                  >
+                    {admin.superAdmin ? t("admin.admins.superAdmin") : t("admin.admins.admin")}
+                  </span>
+                ),
+              },
+              {
+                header: t("admin.admins.status"),
+                cell: (admin) => (
+                  <span
+                    className={`rounded-full px-2 py-1 text-xs font-medium ${
+                      admin.enabled ? "bg-[#e8e6dc] text-[#4d4c48]" : "bg-[#f0eee6] text-[#87867f]"
+                    }`}
+                  >
+                    {admin.enabled ? t("admin.status.active") : t("admin.status.inactive")}
+                  </span>
+                ),
+              },
+            ]}
+            actionsHeader={canManageAdmins ? t("admin.admins.actions") : undefined}
+            actions={
+              canManageAdmins
+                ? (admin) => (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => startEditingAdmin(admin)}
+                      disabled={savingAdmin}
+                    >
+                      {editingAdminId === admin.id ? t("admin.actions.editing") : t("admin.actions.edit")}
+                    </Button>
                   )
-                })}
-              </tbody>
-            </table>
-          </div>
+                : undefined
+            }
+          />
         )}
       </section>
 
@@ -804,7 +802,7 @@ export default function AdminDashboardPage() {
         {!errors.instructors && canManageAdmins && (
           <div className="border-b border-[#f0eee6] px-4 py-4">
             <h3 className="mb-3 text-sm font-semibold text-[#141413]">{t("admin.instructors.createTitle")}</h3>
-            <form className="grid gap-3 md:grid-cols-2 xl:grid-cols-3" onSubmit={createInstructor}>
+            <form className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3" onSubmit={createInstructor}>
               <div className="space-y-1.5">
                 <Label htmlFor="create-instructor-first-name">{t("admin.instructors.firstName")}</Label>
                 <Input
@@ -871,7 +869,7 @@ export default function AdminDashboardPage() {
         {!errors.instructors && canManageAdmins && instructorEditingForm && editingInstructorId !== null && (
           <div className="border-b border-[#f0eee6] px-4 py-4">
             <h3 className="mb-3 text-sm font-semibold text-[#141413]">{t("admin.instructors.editTitle")}</h3>
-            <form className="grid gap-3 md:grid-cols-2 xl:grid-cols-3" onSubmit={saveInstructorChanges}>
+            <form className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3" onSubmit={saveInstructorChanges}>
               <div className="space-y-1.5">
                 <Label htmlFor="edit-instructor-first-name">{t("admin.instructors.firstName")}</Label>
                 <Input
@@ -953,70 +951,70 @@ export default function AdminDashboardPage() {
         )}
 
         {!errors.instructors && instructors.length > 0 && (
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead className="bg-[#f0eee6] text-left text-[#5e5d59]">
-                <tr>
-                  <th className="px-4 py-3">{t("admin.instructors.name")}</th>
-                  <th className="px-4 py-3">{t("admin.instructors.email")}</th>
-                  <th className="px-4 py-3">{t("admin.instructors.createdAt")}</th>
-                  <th className="px-4 py-3">{t("admin.instructors.status")}</th>
-                  {canManageAdmins && <th className="px-4 py-3 text-right">{t("admin.instructors.actions")}</th>}
-                </tr>
-              </thead>
-              <tbody>
-                {instructors.map((instructor) => {
-                  const isEditing = editingInstructorId === instructor.id
-                  const isDeactivating = deactivatingInstructorIds.has(instructor.id)
-                  return (
-                    <tr key={instructor.id} className="border-t border-[#f0eee6]">
-                      <td className="px-4 py-3 font-medium text-[#141413]">
-                        {[instructor.firstName, instructor.lastName].filter(Boolean).join(" ").trim() || "-"}
-                      </td>
-                      <td className="px-4 py-3 text-[#4d4c48]">{instructor.email}</td>
-                      <td className="px-4 py-3 text-[#4d4c48]">{formatDate(instructor.createdAt)}</td>
-                      <td className="px-4 py-3">
-                        <span
-                          className={`rounded-full px-2 py-1 text-xs font-medium ${
-                            instructor.enabled ? "bg-[#e8e6dc] text-[#4d4c48]" : "bg-[#f0eee6] text-[#87867f]"
-                          }`}
+          <ResponsiveTable
+            rows={instructors}
+            getRowKey={(instructor, i) => instructor.id ?? i}
+            columns={[
+              {
+                header: t("admin.instructors.name"),
+                cell: (instructor) => (
+                  <span className="font-medium text-[#141413]">
+                    {[instructor.firstName, instructor.lastName].filter(Boolean).join(" ").trim() || "-"}
+                  </span>
+                ),
+              },
+              { header: t("admin.instructors.email"), cell: (instructor) => instructor.email },
+              { header: t("admin.instructors.createdAt"), cell: (instructor) => formatDate(instructor.createdAt) },
+              {
+                header: t("admin.instructors.status"),
+                cell: (instructor) => (
+                  <span
+                    className={`rounded-full px-2 py-1 text-xs font-medium ${
+                      instructor.enabled ? "bg-[#e8e6dc] text-[#4d4c48]" : "bg-[#f0eee6] text-[#87867f]"
+                    }`}
+                  >
+                    {instructor.enabled ? t("admin.status.active") : t("admin.status.inactive")}
+                  </span>
+                ),
+              },
+            ]}
+            actionsHeader={canManageAdmins ? t("admin.instructors.actions") : undefined}
+            actions={
+              canManageAdmins
+                ? (instructor) => {
+                    const isEditing = editingInstructorId === instructor.id
+                    const isDeactivating = deactivatingInstructorIds.has(instructor.id)
+                    return (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => startEditingInstructor(instructor)}
+                          disabled={savingInstructor}
                         >
-                          {instructor.enabled ? t("admin.status.active") : t("admin.status.inactive")}
-                        </span>
-                      </td>
-                      {canManageAdmins && (
-                        <td className="flex justify-end gap-2 px-4 py-3 text-right">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => startEditingInstructor(instructor)}
-                            disabled={savingInstructor}
-                          >
-                            {isEditing ? t("admin.actions.editing") : t("admin.actions.edit")}
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            disabled={!instructor.enabled || isDeactivating}
-                            onClick={() => void deactivateInstructor(instructor)}
-                          >
-                            {isDeactivating ? (
-                              <span className="inline-flex items-center gap-2">
-                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                {t("admin.actions.deactivating")}
-                              </span>
-                            ) : (
-                              t("admin.actions.deactivate")
-                            )}
-                          </Button>
-                        </td>
-                      )}
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
+                          {isEditing ? t("admin.actions.editing") : t("admin.actions.edit")}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={!instructor.enabled || isDeactivating}
+                          onClick={() => void deactivateInstructor(instructor)}
+                        >
+                          {isDeactivating ? (
+                            <span className="inline-flex items-center gap-2">
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              {t("admin.actions.deactivating")}
+                            </span>
+                          ) : (
+                            t("admin.actions.deactivate")
+                          )}
+                        </Button>
+                      </>
+                    )
+                  }
+                : undefined
+            }
+          />
         )}
       </section>
 
@@ -1040,63 +1038,58 @@ export default function AdminDashboardPage() {
         )}
 
         {!errors.students && students.length > 0 && (
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead className="bg-[#f0eee6] text-left text-[#5e5d59]">
-                <tr>
-                  <th className="px-4 py-3">{t("admin.students.name")}</th>
-                  <th className="px-4 py-3">{t("admin.students.email")}</th>
-                  <th className="px-4 py-3">{t("admin.students.phone")}</th>
-                  <th className="px-4 py-3">{t("admin.students.createdAt")}</th>
-                  <th className="px-4 py-3">{t("admin.students.status")}</th>
-                  <th className="px-4 py-3 text-right">{t("admin.students.actions")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {students.map((student, index) => {
-                  const studentId = student.id
-                  const isDeactivating = typeof studentId === "number" && deactivatingStudentIds.has(studentId)
-                  const isActive = !!student.active
-                  return (
-                    <tr key={studentId ?? student.email ?? `student-${index}`} className="border-t border-[#f0eee6]">
-                      <td className="px-4 py-3 font-medium text-[#141413]">
-                        {[student.firstName, student.lastName].filter(Boolean).join(" ").trim() || "-"}
-                      </td>
-                      <td className="px-4 py-3 text-[#4d4c48]">{student.email || "-"}</td>
-                      <td className="px-4 py-3 text-[#4d4c48]">{student.phoneNumber || "-"}</td>
-                      <td className="px-4 py-3 text-[#4d4c48]">{formatDate(student.createdAt)}</td>
-                      <td className="px-4 py-3">
-                        <span
-                          className={`rounded-full px-2 py-1 text-xs font-medium ${
-                            isActive ? "bg-[#e8e6dc] text-[#4d4c48]" : "bg-[#f0eee6] text-[#87867f]"
-                          }`}
-                        >
-                          {isActive ? t("admin.status.active") : t("admin.status.inactive")}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          disabled={!studentId || !isActive || isDeactivating}
-                          onClick={() => void deactivateStudent(student)}
-                        >
-                          {isDeactivating ? (
-                            <span className="inline-flex items-center gap-2">
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                              {t("admin.actions.deactivating")}
-                            </span>
-                          ) : (
-                            t("admin.actions.deactivate")
-                          )}
-                        </Button>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
+          <ResponsiveTable
+            rows={students}
+            getRowKey={(student, index) => student.id ?? student.email ?? `student-${index}`}
+            columns={[
+              {
+                header: t("admin.students.name"),
+                cell: (student) => (
+                  <span className="font-medium text-[#141413]">
+                    {[student.firstName, student.lastName].filter(Boolean).join(" ").trim() || "-"}
+                  </span>
+                ),
+              },
+              { header: t("admin.students.email"), cell: (student) => student.email || "-" },
+              { header: t("admin.students.phone"), cell: (student) => student.phoneNumber || "-" },
+              { header: t("admin.students.createdAt"), cell: (student) => formatDate(student.createdAt) },
+              {
+                header: t("admin.students.status"),
+                cell: (student) => (
+                  <span
+                    className={`rounded-full px-2 py-1 text-xs font-medium ${
+                      student.active ? "bg-[#e8e6dc] text-[#4d4c48]" : "bg-[#f0eee6] text-[#87867f]"
+                    }`}
+                  >
+                    {student.active ? t("admin.status.active") : t("admin.status.inactive")}
+                  </span>
+                ),
+              },
+            ]}
+            actionsHeader={t("admin.students.actions")}
+            actions={(student) => {
+              const studentId = student.id
+              const isDeactivating = typeof studentId === "number" && deactivatingStudentIds.has(studentId)
+              const isActive = !!student.active
+              return (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={!studentId || !isActive || isDeactivating}
+                  onClick={() => void deactivateStudent(student)}
+                >
+                  {isDeactivating ? (
+                    <span className="inline-flex items-center gap-2">
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      {t("admin.actions.deactivating")}
+                    </span>
+                  ) : (
+                    t("admin.actions.deactivate")
+                  )}
+                </Button>
+              )
+            }}
+          />
         )}
       </section>
 
@@ -1120,61 +1113,54 @@ export default function AdminDashboardPage() {
         )}
 
         {!errors.courses && courses.length > 0 && (
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead className="bg-[#f0eee6] text-left text-[#5e5d59]">
-                <tr>
-                  <th className="px-4 py-3">{t("admin.courses.titleCol")}</th>
-                  <th className="px-4 py-3">{t("admin.courses.instructor")}</th>
-                  <th className="px-4 py-3">{t("admin.courses.price")}</th>
-                  <th className="px-4 py-3">{t("admin.courses.createdAt")}</th>
-                  <th className="px-4 py-3">{t("admin.courses.status")}</th>
-                  <th className="px-4 py-3 text-right">{t("admin.courses.actions")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {courses.map((course, index) => {
-                  const courseId = course.id
-                  const isDeactivating = typeof courseId === "number" && deactivatingCourseIds.has(courseId)
-                  const isActive = !!course.active
-                  return (
-                    <tr key={courseId ?? course.title ?? `course-${index}`} className="border-t border-[#f0eee6]">
-                      <td className="px-4 py-3 font-medium text-[#141413]">{course.title || "-"}</td>
-                      <td className="px-4 py-3 text-[#4d4c48]">{course.instructor || "-"}</td>
-                      <td className="px-4 py-3 text-[#4d4c48]">{formatPrice(course.price)}</td>
-                      <td className="px-4 py-3 text-[#4d4c48]">{formatDate(course.createdAt)}</td>
-                      <td className="px-4 py-3">
-                        <span
-                          className={`rounded-full px-2 py-1 text-xs font-medium ${
-                            isActive ? "bg-[#e8e6dc] text-[#4d4c48]" : "bg-[#f0eee6] text-[#87867f]"
-                          }`}
-                        >
-                          {isActive ? t("admin.status.active") : t("admin.status.inactive")}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          disabled={!courseId || !isActive || isDeactivating}
-                          onClick={() => void deactivateCourse(course)}
-                        >
-                          {isDeactivating ? (
-                            <span className="inline-flex items-center gap-2">
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                              {t("admin.actions.deactivating")}
-                            </span>
-                          ) : (
-                            t("admin.actions.deactivate")
-                          )}
-                        </Button>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
+          <ResponsiveTable
+            rows={courses}
+            getRowKey={(course, index) => course.id ?? course.title ?? `course-${index}`}
+            columns={[
+              {
+                header: t("admin.courses.titleCol"),
+                cell: (course) => <span className="font-medium text-[#141413]">{course.title || "-"}</span>,
+              },
+              { header: t("admin.courses.instructor"), cell: (course) => course.instructor || "-" },
+              { header: t("admin.courses.price"), cell: (course) => formatPrice(course.price) },
+              { header: t("admin.courses.createdAt"), cell: (course) => formatDate(course.createdAt) },
+              {
+                header: t("admin.courses.status"),
+                cell: (course) => (
+                  <span
+                    className={`rounded-full px-2 py-1 text-xs font-medium ${
+                      course.active ? "bg-[#e8e6dc] text-[#4d4c48]" : "bg-[#f0eee6] text-[#87867f]"
+                    }`}
+                  >
+                    {course.active ? t("admin.status.active") : t("admin.status.inactive")}
+                  </span>
+                ),
+              },
+            ]}
+            actionsHeader={t("admin.courses.actions")}
+            actions={(course) => {
+              const courseId = course.id
+              const isDeactivating = typeof courseId === "number" && deactivatingCourseIds.has(courseId)
+              const isActive = !!course.active
+              return (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={!courseId || !isActive || isDeactivating}
+                  onClick={() => void deactivateCourse(course)}
+                >
+                  {isDeactivating ? (
+                    <span className="inline-flex items-center gap-2">
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      {t("admin.actions.deactivating")}
+                    </span>
+                  ) : (
+                    t("admin.actions.deactivate")
+                  )}
+                </Button>
+              )
+            }}
+          />
         )}
       </section>
 

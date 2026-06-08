@@ -311,3 +311,41 @@ h1, h2, h3 {
   background-image: radial-gradient(circle, var(--border-strong) 1px, transparent 1px);
   background-size: 24px 24px;
 }
+
+/* ===== Services page motion ===== */
+
+/* Smooth anchor scrolling (e.g. "اعرف المزيد" → detail row), motion-safe */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Periodic light sweep across a button (apply with `relative overflow-hidden btn-shimmer`) */
+@keyframes btnShimmer {
+  0%        { transform: translateX(-160%) skewX(-20deg); }
+  60%, 100% { transform: translateX(260%) skewX(-20deg); }
+}
+
+.btn-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 45%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transform: translateX(-160%) skewX(-20deg);
+  animation: btnShimmer 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-shimmer::after {
+    animation: none;
+    opacity: 0;
+  }
+}

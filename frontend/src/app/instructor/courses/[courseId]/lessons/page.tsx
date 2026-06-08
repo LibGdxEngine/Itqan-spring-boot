@@ -250,7 +250,7 @@ export default function CourseLessonsPage() {
   if (!course) return null
 
   return (
-    <div className="container mx-auto max-w-5xl px-4 py-8">
+    <div className="container mx-auto max-w-5xl px-4 sm:px-6 py-8">
       <div className="mb-8">
         <Button variant="ghost" className="mb-4 pl-0 transition-all hover:pl-2" asChild>
           <Link href="/instructor">
@@ -259,13 +259,13 @@ export default function CourseLessonsPage() {
           </Link>
         </Button>
 
-        <h1 className="mb-2 text-3xl text-[#141413]" style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}>{course.title}</h1>
+        <h1 className="mb-2 text-2xl sm:text-3xl text-[#141413]" style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}>{course.title}</h1>
         <p className="text-[#87867f]">
           {t("instructor.manageContentDesc") || "Manage modules and lessons for this course."}
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 lg:gap-8 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           <div className="rounded-xl border border-[#f0eee6] bg-[#faf9f5] p-6 shadow-[0_0_0_1px_#f0eee6]">
             <div className="mb-6 flex items-center justify-between">
@@ -327,7 +327,7 @@ export default function CourseLessonsPage() {
                         return (
                           <div
                             key={lesson.id}
-                            className={`group flex items-center justify-between rounded-lg p-3 ${
+                            className={`group flex flex-col gap-2 rounded-lg p-3 sm:flex-row sm:items-center sm:justify-between ${
                               isDragged ? "bg-[#e8e6dc]" : "bg-[#f0eee6]"
                             }`}
                             draggable
@@ -339,8 +339,8 @@ export default function CourseLessonsPage() {
                               void handleLessonDrop(module.id!, lesson.id!)
                             }}
                           >
-                            <div className="flex items-center gap-3">
-                              <Video className="h-4 w-4 text-[#87867f]" />
+                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                              <Video className="h-4 w-4 shrink-0 text-[#87867f]" />
                               <span className="text-sm font-medium text-[#4d4c48]">{lesson.title}</span>
                               {lesson.type === "VIDEO" && lesson.videoStatus === "READY" && (
                                 <span className="inline-flex items-center gap-1 rounded-full bg-[#e3f1e6] px-2 py-0.5 text-[11px] text-[#1f7a3a]">
@@ -367,7 +367,7 @@ export default function CourseLessonsPage() {
                                 </span>
                               )}
                             </div>
-                            <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                            <div className="flex gap-1 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 md:focus-within:opacity-100">
                               <Dialog>
                                 <DialogTrigger asChild>
                                   <Button
@@ -457,7 +457,7 @@ export default function CourseLessonsPage() {
         </div>
 
         <div className="lg:col-span-1">
-          <div className="sticky top-24 rounded-xl border border-[#f0eee6] bg-[#faf9f5] p-6">
+          <div className="lg:sticky lg:top-24 rounded-xl border border-[#f0eee6] bg-[#faf9f5] p-6">
             <h3 className="mb-2 text-[#141413]" style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}>
               {t("instructor.courseStatus") || "Course Status"}
             </h3>

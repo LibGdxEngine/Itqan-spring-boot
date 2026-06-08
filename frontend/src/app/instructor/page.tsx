@@ -8,7 +8,7 @@ import {
   uploadCourseThumbnail,
   validateThumbnailFile,
 } from "@/lib/courseThumbnail"
-import { ImageIcon, Loader2, Plus, LayoutDashboard, Film, Trash2 } from "lucide-react"
+import { ImageIcon, Loader2, Plus, LayoutDashboard, Film, Trash2, Newspaper } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -165,9 +165,9 @@ export default function InstructorDashboardPage() {
         onChange={onThumbnailFilePicked}
       />
     <div className="container max-w-7xl mx-auto px-4 pt-24 pb-10">
-      <div className="flex items-center justify-between mb-8">
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-semibold text-[#141413] flex items-center gap-2" style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}>
+          <h1 className="text-2xl sm:text-3xl font-semibold text-[#141413] flex items-center gap-2" style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}>
             <LayoutDashboard className="w-8 h-8 text-[#c96442]" />
             {t("instructor.dashboard") || "Instructor Dashboard"}
           </h1>
@@ -176,23 +176,32 @@ export default function InstructorDashboardPage() {
           </p>
         </div>
 
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button className="gap-2">
-              <Plus className="w-4 h-4" />
-              {t("instructor.createCourse") || "Create New Course"}
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>{t("instructor.createCourse") || "Create New Course"}</DialogTitle>
-            </DialogHeader>
-            <CourseCreatorForm />
-          </DialogContent>
-        </Dialog>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="outline" className="gap-2" asChild>
+            <Link href="/instructor/articles">
+              <Newspaper className="w-4 h-4" />
+              {t("articles.manageArticles")}
+            </Link>
+          </Button>
+
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button className="gap-2">
+                <Plus className="w-4 h-4" />
+                {t("instructor.createCourse") || "Create New Course"}
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[600px]">
+              <DialogHeader>
+                <DialogTitle>{t("instructor.createCourse") || "Create New Course"}</DialogTitle>
+              </DialogHeader>
+              <CourseCreatorForm />
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {courses.map((course) => {
           const isUpdating = updatingThumbnailId === course.id
           return (
@@ -215,7 +224,7 @@ export default function InstructorDashboardPage() {
                 size="sm"
                 disabled={isUpdating || course.id == null}
                 onClick={() => course.id != null && startThumbnailChange(course.id)}
-                className="absolute bottom-2 right-2 gap-1 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
+                className="absolute bottom-2 right-2 gap-1 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 md:focus:opacity-100"
               >
                 {isUpdating ? (
                   <Loader2 className="w-3 h-3 animate-spin" />
@@ -278,7 +287,7 @@ export default function InstructorDashboardPage() {
                       {t("instructor.createFirstCourse") || "Create Your First Course"}
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+                  <DialogContent className="sm:max-w-[600px]">
                      <DialogHeader>
                        <DialogTitle>{t("instructor.createCourse") || "Create New Course"}</DialogTitle>
                      </DialogHeader>

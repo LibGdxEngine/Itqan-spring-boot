@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { ArrowRight, User, LogOut, Menu, X } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
@@ -28,11 +29,16 @@ export function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-[#f0eee6] bg-[#f5f4ed]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 ltr-flex">
-          {/* Logo — Amiri wordmark */}
+          {/* Logo — Image */}
           <Link href="/" className="flex items-center gap-2 group ltr-flex">
-            <span className="text-xl font-serif-ar text-[#141413] tracking-normal" style={{ fontFamily: "var(--font-serif-ar)" }}>
-              {t("nav.brand")}
-            </span>
+            <Image
+              src="/itqan_logo.png"
+              alt={t("nav.brand")}
+              width={40}
+              height={40}
+              className="h-10 w-10 object-contain"
+              priority
+            />
           </Link>
 
           {/* Desktop Links */}
@@ -40,8 +46,14 @@ export function Navbar() {
             <Link href="/courses" className="hover:text-[#141413] transition-colors">
               {t("nav.publicCourses")}
             </Link>
+            <Link href="/services" className="hover:text-[#141413] transition-colors">
+              {t("nav.services")}
+            </Link>
             <Link href="/muqtatafat" className="hover:text-[#141413] transition-colors">
               {t("nav.muqtatafat")}
+            </Link>
+            <Link href="/articles" className="hover:text-[#141413] transition-colors">
+              {t("nav.articles")}
             </Link>
             <Link href="/instructors" className="hover:text-[#141413] transition-colors">
               {t("nav.instructors") || "Instructors"}
@@ -147,11 +159,25 @@ export function Navbar() {
               {t("nav.publicCourses")}
             </Link>
             <Link
+              href="/services"
+              onClick={closeMobileMenu}
+              className="px-4 py-2.5 rounded-lg text-sm font-medium text-[#4d4c48] hover:bg-[#e8e6dc] hover:text-[#141413] transition-colors"
+            >
+              {t("nav.services")}
+            </Link>
+            <Link
               href="/muqtatafat"
               onClick={closeMobileMenu}
               className="px-4 py-2.5 rounded-lg text-sm font-medium text-[#4d4c48] hover:bg-[#e8e6dc] hover:text-[#141413] transition-colors"
             >
               {t("nav.muqtatafat")}
+            </Link>
+            <Link
+              href="/articles"
+              onClick={closeMobileMenu}
+              className="px-4 py-2.5 rounded-lg text-sm font-medium text-[#4d4c48] hover:bg-[#e8e6dc] hover:text-[#141413] transition-colors"
+            >
+              {t("nav.articles")}
             </Link>
             <Link
               href="/instructors"

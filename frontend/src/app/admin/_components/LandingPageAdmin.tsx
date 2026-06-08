@@ -6,6 +6,7 @@ import { Loader2, Trash2, ChevronUp, ChevronDown, Upload } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { ResponsiveTable } from "@/components/ui/responsive-table"
 import { useToast } from "@/components/ui/use-toast"
 import { getErrorMessage } from "@/lib/api-axios"
 import {
@@ -18,6 +19,7 @@ import {
 } from "@/lib/landingPage"
 import { instructorsApi, type InstructorUser } from "@/lib/instructors"
 import { CoursesService, type CourseResponse } from "@/lib/api"
+import { articlesApi, type ArticleSummary } from "@/lib/articles"
 
 const emptySpecForm: SpecializationRequest = {
   nameAr: "",
@@ -35,6 +37,7 @@ export function LandingPageAdmin() {
   const [specializations, setSpecializations] = useState<LandingSpecialization[]>([])
   const [allCourses, setAllCourses] = useState<CourseResponse[]>([])
   const [allInstructors, setAllInstructors] = useState<InstructorUser[]>([])
+  const [allArticles, setAllArticles] = useState<ArticleSummary[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -48,6 +51,7 @@ export function LandingPageAdmin() {
   const [heroDurationEn, setHeroDurationEn] = useState("")
   const [featuredCourseIds, setFeaturedCourseIds] = useState<number[]>([])
   const [featuredInstructorIds, setFeaturedInstructorIds] = useState<number[]>([])
+  const [featuredArticleIds, setFeaturedArticleIds] = useState<number[]>([])
 
   const [specForm, setSpecForm] = useState<SpecializationRequest>(emptySpecForm)
   const [editingSpecId, setEditingSpecId] = useState<number | null>(null)
@@ -55,16 +59,18 @@ export function LandingPageAdmin() {
   const fetchAll = useCallback(async () => {
     setLoading(true)
     try {
-      const [landing, specs, courses, instructors] = await Promise.all([
+      const [landing, specs, courses, instructors, articles] = await Promise.all([
         landingPageApi.getPublic(),
         specializationsApi.getAll(),
         CoursesService.getAllCourses({ page: 0, size: 200 }),
         instructorsApi.getAll(),
+        articlesApi.list(0, 200),
       ])
       setData(landing)
       setSpecializations(specs)
       setAllCourses(courses.content ?? [])
       setAllInstructors(instructors)
+      setAllArticles(articles.content ?? [])
 
       setHeroVideoUrl(landing.hero.videoUrl ?? "")
       setHeroTitleAr(landing.hero.titleAr ?? "")
@@ -75,6 +81,7 @@ export function LandingPageAdmin() {
       setHeroDurationEn(landing.hero.durationLabelEn ?? "")
       setFeaturedCourseIds(landing.featuredCourses.map((c) => c.id))
       setFeaturedInstructorIds(landing.featuredInstructors.map((t) => t.id))
+      setFeaturedArticleIds((landing.featuredArticles ?? []).map((a) => a.id))
     } catch (error) {
       toast({
         title: "Failed to load landing page",
@@ -120,6 +127,7 @@ export function LandingPageAdmin() {
         heroDurationLabelEn: heroDurationEn.trim() || null,
         featuredCourseIds,
         featuredInstructorIds,
+        featuredArticleIds,
       }
       const updated = await landingPageApi.update(payload)
       setData(updated)
@@ -275,11 +283,22 @@ export function LandingPageAdmin() {
           onChange={setFeaturedInstructorIds}
         />
 
+        {/* Featured articles */}
+        <OrderedPicker
+          title="Featured articles"
+          options={allArticles.map((a) => ({
+            id: a.id,
+            label: a.authorName ? `${a.title} — ${a.authorName}` : a.title,
+          }))}
+          selected={featuredArticleIds}
+          onChange={setFeaturedArticleIds}
+        />
+
         {/* Specializations */}
         <div className="space-y-3">
           <h3 className="font-medium text-[#141413]">Specializations (chips)</h3>
 
-          <div className="grid gap-2 md:grid-cols-6 items-end">
+          <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-6 items-end">
             <div className="md:col-span-2">
               <Label>Name (AR)</Label>
               <Input value={specForm.nameAr} onChange={(e) => setSpecForm({ ...specForm, nameAr: e.target.value })} />
@@ -319,60 +338,48 @@ export function LandingPageAdmin() {
             ) : null}
           </div>
 
-          <div className="overflow-x-auto rounded-lg border border-[#f0eee6]">
-            <table className="min-w-full text-sm">
-              <thead className="bg-[#f0eee6] text-left text-[#5e5d59]">
-                <tr>
-                  <th className="px-3 py-2">Order</th>
-                  <th className="px-3 py-2">Name (AR)</th>
-                  <th className="px-3 py-2">Name (EN)</th>
-                  <th className="px-3 py-2">Slug</th>
-                  <th className="px-3 py-2">Active</th>
-                  <th className="px-3 py-2 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {specializations.map((s) => (
-                  <tr key={s.id} className="border-t border-[#f0eee6]">
-                    <td className="px-3 py-2 text-[#4d4c48]">{s.displayOrder}</td>
-                    <td className="px-3 py-2 text-[#141413]">{s.nameAr}</td>
-                    <td className="px-3 py-2 text-[#4d4c48]">{s.nameEn}</td>
-                    <td className="px-3 py-2 font-mono text-xs text-[#87867f]">{s.slug}</td>
-                    <td className="px-3 py-2">{s.active ? "Yes" : "No"}</td>
-                    <td className="px-3 py-2 text-right">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setEditingSpecId(s.id)
-                          setSpecForm({
-                            nameAr: s.nameAr,
-                            nameEn: s.nameEn,
-                            slug: s.slug,
-                            icon: s.icon ?? "",
-                            displayOrder: s.displayOrder,
-                            active: s.active,
-                          })
-                        }}
-                      >
-                        Edit
-                      </Button>
-                      <Button variant="outline" size="sm" className="ml-2" onClick={() => void deleteSpec(s.id)}>
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-                {specializations.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="px-3 py-4 text-center text-[#87867f]">
-                      No specializations yet
-                    </td>
-                  </tr>
-                ) : null}
-              </tbody>
-            </table>
-          </div>
+          <ResponsiveTable
+            rows={specializations}
+            getRowKey={(s, i) => s.id ?? i}
+            bordered
+            emptyState={
+              <p className="rounded-lg border border-[#f0eee6] px-3 py-4 text-center text-sm text-[#87867f]">
+                No specializations yet
+              </p>
+            }
+            columns={[
+              { header: "Order", cell: (s) => s.displayOrder },
+              { header: "Name (AR)", cell: (s) => <span className="text-[#141413]">{s.nameAr}</span> },
+              { header: "Name (EN)", cell: (s) => s.nameEn },
+              { header: "Slug", cell: (s) => <span className="font-mono text-xs text-[#87867f]">{s.slug}</span> },
+              { header: "Active", cell: (s) => (s.active ? "Yes" : "No") },
+            ]}
+            actionsHeader="Actions"
+            actions={(s) => (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setEditingSpecId(s.id)
+                    setSpecForm({
+                      nameAr: s.nameAr,
+                      nameEn: s.nameEn,
+                      slug: s.slug,
+                      icon: s.icon ?? "",
+                      displayOrder: s.displayOrder,
+                      active: s.active,
+                    })
+                  }}
+                >
+                  Edit
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => void deleteSpec(s.id)}>
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </>
+            )}
+          />
         </div>
       </div>
     </section>

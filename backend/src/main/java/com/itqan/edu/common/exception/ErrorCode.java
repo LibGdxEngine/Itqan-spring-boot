@@ -23,6 +23,7 @@ public enum ErrorCode {
     MODULE_NOT_FOUND(404, "CRS_002", "Module not found"),
     LESSON_NOT_FOUND(404, "CRS_003", "Lesson not found"),
     CLIP_NOT_FOUND(404, "CLP_001", "Clip not found"),
+    ARTICLE_NOT_FOUND(404, "ART_001", "Article not found"),
 
     ENROLLMENT_NOT_FOUND(404, "ENR_001", "Enrollment not found"),
 

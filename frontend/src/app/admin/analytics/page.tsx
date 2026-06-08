@@ -28,6 +28,7 @@ import { useAuth } from "@/components/auth-context"
 import { Navbar } from "@/components/Navbar"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
+import { ResponsiveTable } from "@/components/ui/responsive-table"
 import { getErrorMessage } from "@/lib/api-axios"
 import {
   AnalyticsOverview,
@@ -156,8 +157,8 @@ export default function AnalyticsPage() {
   return (
     <div className="min-h-screen bg-[#f5f4ed]">
       <Navbar />
-      <div className="container mx-auto max-w-7xl px-4 pt-24 pb-10">
-        <div className="mb-6 flex items-center justify-between">
+      <div className="container mx-auto max-w-7xl px-4 sm:px-6 pt-24 pb-10">
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <Link
               href="/admin"
@@ -166,7 +167,7 @@ export default function AnalyticsPage() {
               <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
               {t("admin.analytics.backToDashboard")}
             </Link>
-            <h1 className="flex items-center gap-2 text-3xl font-bold text-[#141413]">
+            <h1 className="flex items-center gap-2 text-2xl sm:text-3xl font-bold text-[#141413]">
               <BarChart3 className="h-8 w-8 text-[#c96442]" />
               {t("admin.analytics.title")}
             </h1>
@@ -183,7 +184,7 @@ export default function AnalyticsPage() {
           </div>
         )}
 
-        <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatCard
             label={t("admin.analytics.cards.revenue")}
             icon={<DollarSign className="h-5 w-5 text-[#c96442]" />}
@@ -231,11 +232,11 @@ export default function AnalyticsPage() {
             </span>
           </div>
           {chart.series.length === 0 ? (
-            <div className="flex h-72 items-center justify-center text-sm text-[#87867f]">
+            <div className="flex h-64 sm:h-72 items-center justify-center text-sm text-[#87867f]">
               {t("admin.analytics.revenueTrend.empty")}
             </div>
           ) : (
-            <div className="h-72 w-full" dir="ltr">
+            <div className="h-64 sm:h-72 w-full" dir="ltr">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chart.series} margin={{ top: 8, right: 16, left: 8, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e8e6dc" />
@@ -273,40 +274,31 @@ export default function AnalyticsPage() {
               {t("admin.analytics.topCourses.title")}
             </h2>
           </div>
-          {topCourses.length === 0 ? (
-            <p className="px-4 py-6 text-sm text-[#87867f]">
-              {t("admin.analytics.topCourses.empty")}
-            </p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-start text-sm">
-                <thead className="bg-[#f0eee6] text-[#5e5d59]">
-                  <tr>
-                    <th className="px-4 py-2 text-start">{t("admin.analytics.topCourses.courseTitle")}</th>
-                    <th className="px-4 py-2 text-start">{t("admin.analytics.topCourses.enrollments")}</th>
-                    <th className="px-4 py-2 text-start">{t("admin.analytics.topCourses.completionRate")}</th>
-                    <th className="px-4 py-2 text-start">{t("admin.analytics.topCourses.averageProgress")}</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#f0eee6]">
-                  {topCourses.map((course) => (
-                    <tr key={course.courseId}>
-                      <td className="px-4 py-2 text-[#141413]">{course.title}</td>
-                      <td className="px-4 py-2 text-[#4d4c48]">
-                        {formatNumber(course.enrollmentCount, locale)}
-                      </td>
-                      <td className="px-4 py-2 text-[#4d4c48]">
-                        {course.completionRate.toFixed(1)}%
-                      </td>
-                      <td className="px-4 py-2 text-[#4d4c48]">
-                        {course.averageProgress.toFixed(1)}%
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+          <ResponsiveTable
+            rows={topCourses}
+            getRowKey={(course, i) => course.courseId ?? i}
+            emptyState={
+              <p className="px-4 py-6 text-sm text-[#87867f]">{t("admin.analytics.topCourses.empty")}</p>
+            }
+            columns={[
+              {
+                header: t("admin.analytics.topCourses.courseTitle"),
+                cell: (course) => <span className="text-[#141413]">{course.title}</span>,
+              },
+              {
+                header: t("admin.analytics.topCourses.enrollments"),
+                cell: (course) => formatNumber(course.enrollmentCount, locale),
+              },
+              {
+                header: t("admin.analytics.topCourses.completionRate"),
+                cell: (course) => `${course.completionRate.toFixed(1)}%`,
+              },
+              {
+                header: t("admin.analytics.topCourses.averageProgress"),
+                cell: (course) => `${course.averageProgress.toFixed(1)}%`,
+              },
+            ]}
+          />
         </section>
       </div>
     </div>

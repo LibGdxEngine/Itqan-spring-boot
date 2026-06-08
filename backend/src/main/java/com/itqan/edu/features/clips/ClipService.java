@@ -4,6 +4,7 @@ import com.itqan.edu.common.config.StorageProperties;
 import com.itqan.edu.common.exception.BusinessException;
 import com.itqan.edu.common.exception.ErrorCode;
 import com.itqan.edu.features.clips.dto.ClipResponse;
+import com.itqan.edu.features.clips.dto.ClipUpdateRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -118,17 +119,17 @@ public class ClipService {
         }
 
         boolean hasSearch = search != null && !search.isBlank();
-        Page<Clip> page;
-        if (hasSearch && clipType != null) {
-            page = clipRepository.findByTitleContainingIgnoreCaseAndTypeAndActiveTrueOrderByCreatedAtDesc(search, clipType, pageable);
-        } else if (hasSearch) {
-            page = clipRepository.findByTitleContainingIgnoreCaseAndActiveTrueOrderByCreatedAtDesc(search, pageable);
-        } else if (clipType != null) {
-            page = clipRepository.findByTypeAndActiveTrueOrderByCreatedAtDesc(clipType, pageable);
-        } else {
-            page = clipRepository.findByActiveTrueOrderByCreatedAtDesc(pageable);
-        }
+        Page<Clip> page = clipRepository.search(hasSearch ? search : "", clipType, pageable);
         return page.map(this::toResponse);
+    }
+
+    @Transactional
+    public ClipResponse updateClip(Long id, ClipUpdateRequest req) {
+        Clip clip = clipRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(ErrorCode.CLIP_NOT_FOUND));
+        clip.setTitle(req.getTitle().trim());
+        clip.setDescription(req.getDescription() != null ? req.getDescription().trim() : null);
+        return toResponse(clipRepository.save(clip));
     }
 
     @Transactional
@@ -183,6 +184,7 @@ public class ClipService {
                 // The stored file_url can go stale if the public endpoint changes (it did:
                 // old rows kept a "/media" prefix that 404s); object_key is always correct.
                 .fileUrl(buildPublicUrl(clip.getObjectKey()))
+                .description(clip.getDescription())
                 .mimeType(clip.getMimeType())
                 .sizeBytes(clip.getSizeBytes())
                 .createdAt(clip.getCreatedAt())

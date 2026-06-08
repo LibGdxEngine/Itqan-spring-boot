@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 public class ClipResponse {
     private Long id;
     private String title;
+    private String description;
     private ClipType type;
     private String fileUrl;
     private String mimeType;

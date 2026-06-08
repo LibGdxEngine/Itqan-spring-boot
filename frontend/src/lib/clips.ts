@@ -5,6 +5,7 @@ export type ClipType = "VIDEO" | "AUDIO"
 export interface ClipResponse {
   id: number
   title: string
+  description: string | null
   type: ClipType
   fileUrl: string
   mimeType: string | null
@@ -40,6 +41,11 @@ export const clipsApi = {
       headers: { "Content-Type": "multipart/form-data" },
     })
     return data
+  },
+
+  async update(id: number, data: { title: string; description?: string | null }): Promise<ClipResponse> {
+    const { data: resp } = await axios.patch<ClipResponse>(`/api/admin/clips/${id}`, data)
+    return resp
   },
 
   async delete(id: number): Promise<void> {

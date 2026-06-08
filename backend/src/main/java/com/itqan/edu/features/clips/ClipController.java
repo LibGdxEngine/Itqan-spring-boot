@@ -1,6 +1,8 @@
 package com.itqan.edu.features.clips;
 
 import com.itqan.edu.features.clips.dto.ClipResponse;
+import com.itqan.edu.features.clips.dto.ClipUpdateRequest;
+import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -35,6 +37,14 @@ public class ClipController {
     public ResponseEntity<List<ClipResponse>> bulkUpload(
             @RequestParam("files") List<MultipartFile> files) {
         return ResponseEntity.status(HttpStatus.CREATED).body(clipService.bulkUpload(files));
+    }
+
+    @PatchMapping("/admin/clips/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ClipResponse> updateClip(
+            @PathVariable Long id,
+            @RequestBody @Valid ClipUpdateRequest req) {
+        return ResponseEntity.ok(clipService.updateClip(id, req));
     }
 
     @DeleteMapping("/admin/clips/{id}")

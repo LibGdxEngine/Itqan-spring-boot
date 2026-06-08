@@ -33,6 +33,9 @@ public class Clip {
     @Column(nullable = false, length = 512)
     private String objectKey;
 
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
     private String mimeType;
 
     private Long sizeBytes;

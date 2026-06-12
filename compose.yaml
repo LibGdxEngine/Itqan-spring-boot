@@ -138,7 +138,7 @@ services:
           echo 'Waiting for MinIO...'; sleep 2;
         done
         mc mb --ignore-existing "local/$$BUCKET"
-        printf '%s' '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":["*"]},"Action":["s3:GetObject"],"Resource":["arn:aws:s3:::'"$$BUCKET"'/courses/thumbnails/*","arn:aws:s3:::'"$$BUCKET"'/clips/*"]}]}' > /tmp/policy.json
+        printf '%s' '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":["*"]},"Action":["s3:GetObject"],"Resource":["arn:aws:s3:::'"$$BUCKET"'/courses/thumbnails/*","arn:aws:s3:::'"$$BUCKET"'/clips/*","arn:aws:s3:::'"$$BUCKET"'/articles/covers/*"]}]}' > /tmp/policy.json
         mc anonymous set-json /tmp/policy.json "local/$$BUCKET"
     networks:
       - itqan-network

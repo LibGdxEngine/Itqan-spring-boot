@@ -1,47 +1,49 @@
-# Ralph Progress — Articles Feature
+# Ralph Progress — UI Polish + Arabic SEO
 
-## Project
-Itqan Education Platform. Backend: Spring Boot 3 (Java 21), pkg com.itqan.edu, Vertical Slice under features/.
-Frontend: Next.js 16 app-router, next-intl (en/ar, default ar, RTL), Tailwind 4, axios.
-Branch: feature/articles (from master).
+## Task
+Auth redesign w/ real logo; fancy/animated courses, course-details, learn pages (same theme); Arabic-first SEO (articles priority: server metadata, Article JSON-LD, og:image cover photo in link previews, sitemap/robots; branded OG image w/ logo; manifest icons).
 
 ## Toolchain
-- Backend build/test requires Java 21. Installed locally at ~/.jdks/jdk-21.0.11+10 (system java is 17 — MUST set JAVA_HOME).
-  Build:  cd backend && JAVA_HOME=~/.jdks/jdk-21.0.11+10 ./mvnw -q -DskipTests compile
-  Test:   cd backend && JAVA_HOME=~/.jdks/jdk-21.0.11+10 ./mvnw test
-- Frontend: cd frontend && npm run lint ; npm run build. node v20, npm 11.
-- Tests use H2 (ddl-auto=create-drop) -> Hibernate builds schema from ENTITIES, Flyway V14 is Postgres-only (prod). Entity correctness is what tests rely on.
+- Frontend only. cd frontend && npm run lint ; npm run build ; npx tsc --noEmit. node v20.
+- framer-motion v12 installed. Tailwind 4. next-intl cookie-based locale (default ar, RTL).
+- Backend untouched this run.
 
-## Key patterns (verified by exploration)
-- Entity: @Entity @Table @Data @Builder @NoArgsConstructor @AllArgsConstructor; id IDENTITY; @PrePersist/@PreUpdate timestamps. See features/courses/Course.java.
-- Repo: extends JpaRepository<E,Long>, derived queries + @Query.
-- Service: @Service @RequiredArgsConstructor; BusinessException(ErrorCode.X); CurrentUserService.getCurrentUser(auth).
-- Controller: @RestController @RequestMapping("/api/..."); @PreAuthorize("hasRole('INSTRUCTOR') or hasRole('ADMIN')"); ResponseEntity.
-- Roles: User.Role { STUDENT, INSTRUCTOR, ADMIN }; authorities ROLE_*.
-- Mapper: MapStruct @Mapper(componentModel="spring").
-- S3 image upload: CourseService.uploadThumbnail (jpeg/png/webp, 5MB), key courses/thumbnails/{uuid}-{name}, public URL via StorageProperties.getPublicEndpoint().
-- Search: use DB JPQL LIKE (no Meilisearch dependency) — robust, always works.
-- Security permitAll: SecurityConfig.java ~line 50-64; courses uses /api/courses/** permitAll + method @PreAuthorize.
-- Landing: LandingPageConfig singleton (id=1) holds featuredCourseIds/featuredInstructorIds element collections; LandingPageService.getPublic/update; served /api/landing-page, admin PATCH /api/admin/landing-page.
-- Highest Flyway migration: V13 -> next is V14.
-- Frontend API style: src/lib/landingPage.ts hand-writes interfaces + axios (src/lib/api-axios). Articles lib mirrors this (no codegen needed).
-- Navbar: src/components/Navbar.tsx (desktop links + mobile drawer). Landing: src/app/page.tsx + _components/HomeClient.tsx. Admin: src/app/admin/_components/LandingPageAdmin.tsx. Instructor: src/app/instructor + components/instructor/CourseCreatorForm.tsx. CourseCard: src/components/courses/CourseCard.tsx. Upload util: src/lib/courseThumbnail.ts.
-- Markdown: none installed -> add react-markdown + remark-gfm (no raw HTML => safe). Custom MarkdownEditor (toolbar+preview tabs) + MarkdownRenderer.
-- cn util: src/lib/utils.ts. Design tokens: #c96442 accent, #141413 dark, #f5f4ed/#faf9f5 bg, #f0eee6/#e8e6dc borders, #5e5d59/#87867f text.
+## Pre-work DONE (orchestrator)
+- Old Articles-feature PRD archived: .omc/prd-articles-feature-DONE.json (that feature is committed; backend suite was 55 tests green).
+- Icons generated from public/itqan_logo.png (1254x1254 RGBA): public/icon-192.png, icon-512.png, apple-touch-icon.png (180, parchment bg).
+- i18n keys added to messages/en.json + ar.json (agents must NOT edit these files):
+  lesson.yourProgress, lesson.progressOf ({completed}/{total}), lesson.courseContent,
+  seo.articles.{title,description,keywords}, seo.articleFallback.{notFound,description}, seo.muqtatafat.{title,description,keywords}.
+
+## Key facts for implementation
+- Canonical animation patterns: src/app/_components/HomeClient.tsx — fadeUp {opacity:0,y:16}->{opacity:1,y:0,dur:0.6}, staggerParent (staggerChildren:0.08, delayChildren:0.05), useReducedMotion respected, StatItem count-up.
+- globals.css utilities: .pattern-islamic, .pattern-dots, .hover-lift, .transition-smooth, .shadow-whisper, .skeleton (shimmer), .animate-fade-in/.animate-scale-in, .text-display/.text-section/...; tokens #f5f4ed/#faf9f5/#141413/#c96442/#d97757/#b55836/#e8e6dc/#f0eee6/#5e5d59/#87867f/#30302e. DO NOT edit globals.css.
+- Auth: (auth)/layout.tsx split-screen (dark panel uses BookOpen icon -> must become real logo Image), pages: login, register, forgot-password, reset-password (react-hook-form+zod+GoogleAuthButton).
+- Courses list: app/courses/page.tsx (client, CoursesService.getActiveCourses), CourseCard at components/courses/CourseCard.tsx.
+- Details: app/courses/[id]/page.tsx (dark hero + sticky enroll card), components/courses/CourseCurriculum.tsx (static expand).
+- Learn: app/learn/[courseId]/layout.tsx (BROKEN mobile: fixed w-80 sidebar + hard ml-80, not RTL-aware), components/learning/LearningSidebar.tsx (dark #141413), learn-context exposes course/orderedModules/orderedLessons/completedLessonIds/markComplete, lesson page app/learn/[courseId]/[lessonId]/page.tsx.
+- SEO existing: root layout generateMetadata (locale-aware, metadataBase SITE_URL=NEXT_PUBLIC_SITE_URL, Organization+WebSite JSON-LD), courses/layout.tsx + courses/[id]/layout.tsx + instructors/layout.tsx have generateMetadata+JSON-LD (CollectionPage/Course). GOOD reference patterns.
+- SEO gaps to fix: articles list+detail are bare client pages (no metadata/JSON-LD), sitemap.ts missing articles, robots.ts doesn't allow /articles, manifest icons[], muqtatafat no metadata, OG image text-only (no logo).
+- Server-side fetch pattern: BACKEND_INTERNAL_URL || NEXT_PUBLIC_API_URL || http://localhost:8080, cache:'no-store' (see src/lib/landingPage.ts fetchLandingPageServerSide). Public articles API: GET /api/articles?page&size (Page<ArticleSummary>), GET /api/articles/{slug} (404 if draft).
+- Dockerfile copies public/ into standalone image -> fs read of public/itqan_logo.png works at runtime for opengraph-image.tsx (still wrap in try/catch).
 
 ## Status
-- [x] US-001..005 backend DONE + verified: full suite `./mvnw test` => Tests run: 46, Failures: 0, Errors: 0, BUILD SUCCESS.
-- [ ] US-006..010 frontend (executor running in background)
-- [ ] US-011 full verification (backend half done; frontend pending)
+- [x] US-001 auth redesign — logo in layout+AuthBrandPanel, 0 physical-dir classes in (auth)/, BookOpen gone
+- [x] US-002 courses list — animated hero, skeleton grid, stagger via motion grid wrapper, CourseCard hover zoom/gradient/lift
+- [x] US-003 course details — hero glows+pattern+stagger, animated enroll card, AnimatePresence curriculum
+- [x] US-004 learn — progress bar (lesson.yourProgress/progressOf/courseContent), drawer + ms-80 (ml-80 gone), direction-aware nav
+- [x] US-005 SEO — articles server pages w/ generateMetadata + Article/Breadcrumb/CollectionPage JSON-LD; sitemap+robots include articles+muqtatafat; fallback noindex verified at runtime
+- [x] US-006 OG image — REQUIRED EXTRA RUNTIME FIXES (see Learnings); renders ar+en w/ logo, icons wired (favicon/192/512/apple on home HTML)
+- [x] US-007 full verification — tsc 0 errors; build green; eslint changed files 0 errors (2 pre-existing warnings, down from 4); architect (Opus, thorough) APPROVED with 0 blocking findings; deslop pass removed dead useRouter in login+register, declined motion-variant consolidation (idiomatic per-file pattern) with reasons; post-deslop regression: build+lint+smoke all green (login/register/courses/articles/og-image 200, logo on auth).
 
 ## Learnings
-- Backend compile/test needs MAVEN_OPTS="-Xmx2g" (default heap OOMs on compile) + JAVA_HOME=~/.jdks/jdk-21.0.11+10.
-- PRE-EXISTING TEST BUG (NOT articles): 6 integration tests call authRepository.deleteAll() in setUp; RefreshToken has @ManyToOne User (FK user_id, no cascade), so leftover refresh tokens from a prior test method tripped a refresh_tokens->users FK violation. FIXED centrally + test-only in BaseIntegrationTest via @AfterEach refreshTokenRepository.deleteAll() (no production change, no assertions weakened). This is what turned 22 errors -> 0.
-- Backend files all created & reviewed: Article entity/repo/service/controller, dto x4, mapper, V14 migration, ArticleServiceTest (3 tests), ErrorCode.ARTICLE_NOT_FOUND, SecurityConfig permitAll /api/articles[/**], landing integration (config featuredArticleIds, LandingArticleDto, response+request fields, service hydrateArticles published-only).
-- Slug is unicode-aware (Arabic ok); reading time = max(1, ceil(len/1000)). Controller route precedence: literal /search,/mine,/id/{id} resolve before /{slug} (Spring).
-
-## Post-review fixes (from /review local)
-- 🟡 Reserved-slug guard: ArticleService now has RESERVED_SLUGS={search,mine,id,cover-image}; generateUniqueSlug uses isSlugAvailable() so a generated slug can never equal a literal /api/articles sub-route (e.g. title "Search" -> "search-2"). Prevents the public /{slug} detail route being shadowed. +1 unit test.
-- 🟡 ArticleControllerIntegrationTest added (8 tests): public list/search anonymous (200), anonymous create rejected (401/403), instructor publish + public read-by-slug (reading time + author asserted), draft hidden publicly (404), instructor owner-scope on PUT (403), reserved-title no-shadow, Arabic-title slug round-trip.
-- Full backend suite now: Tests run: 55, Failures: 0, Errors: 0, BUILD SUCCESS.
-- Frontend earlier verified: npm run build exit 0 (Compiled successfully, 5 article routes), tsc --noEmit 0 errors, eslint clean on feature files.
+- npm run lint exits 0 but reports 1289 PRE-EXISTING errors (only in src/app/[locale]/video-demo + VideoPlayer.tsx + generated lib warnings) — none in our files; gate on per-file eslint instead.
+- OG IMAGE / SATORI PITFALLS (route was crashing in prod BEFORE this task — 'failed to pipe response'):
+  1. satori cannot parse full Arabic font TTFs (Noto Kufi/Noto Sans Arabic/Amiri all throw 'lookupType: 5 - substFormat: 3'). Working families as Google subsets: IBM Plex Sans Arabic, Cairo, Tajawal.
+  2. Google css2 'text=' subsets are served as woff2 to ANY browser UA (satori can't read woff2). UA-LESS request => format('truetype'). Magic 00010000 verified.
+  3. satori has NO bidi: dir attr and CSS direction are ignored; multi-word Arabic renders in reversed word order. Fix: rtlWords() pre-reverse + whiteSpace:nowrap + short single-line copy (wrap would scramble order).
+  4. Render errors surface when the Response STREAMS, after headers — consume via image.arrayBuffer() inside try/catch (renderToPng) to enable per-family fallback, final fallback = Latin-only card (bundled default font).
+  5. Module-level fontCache Map: 1.3s cold -> 0.48s warm.
+- next-server renames its process title ('next-server (v1...)') so pkill -f standalone/server.js NEVER matches — use fuser -k PORT/tcp. Also pkill -f self-matches the Claude bash wrapper (exit 144) — use [b]racket patterns.
+- Standalone smoke test recipe: npm run build; cp -r public .next/standalone/; cp -r .next/static .next/standalone/.next/; PORT=X node .next/standalone/server.js. Backend down => articles fetch fails gracefully (empty JSON-LD list, fallback metadata w/ noindex) as designed.
+- Tailwind v4 logical utilities (ms-/ps-/start-) used throughout; CourseCard stagger lives in the parent motion grid (courses/page.tsx), not the card file.

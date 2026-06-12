@@ -128,12 +128,12 @@ export default function ForgotPasswordPage() {
         <div className="space-y-2">
           <Label htmlFor="email">{t("auth.forgotPassword.email")}</Label>
           <div className="relative">
-            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
+            <Mail className="absolute start-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
             <Input
               id="email"
               type="email"
               placeholder={t("auth.forgotPassword.emailPlaceholder")}
-              className="pl-11"
+              className="ps-11"
               {...register("email")}
             />
           </div>

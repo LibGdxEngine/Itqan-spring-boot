@@ -1,16 +1,25 @@
-import { Loader2 } from "lucide-react"
+import Image from "next/image"
 
 export default function AuthLoading() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+    <div className="flex flex-col items-center justify-center min-h-[400px] gap-5 bg-[#f5f4ed]">
       <div className="relative">
-        <div className="relative p-4 bg-[#faf9f5] rounded-full shadow-xl">
-          <Loader2 className="w-8 h-8 text-[#c96442] animate-spin" />
+        {/* Terracotta pulse ring */}
+        <span className="absolute inset-0 rounded-full bg-[#c96442]/20 animate-ping" />
+        <div className="relative p-4 bg-[#faf9f5] rounded-2xl shadow-whisper animate-pulse">
+          <Image
+            src="/itqan_logo.png"
+            alt=""
+            width={40}
+            height={40}
+            className="h-10 w-10 object-contain"
+            priority
+          />
         </div>
       </div>
-      <p className="text-sm text-[#87867f] animate-pulse">
-        Loading...
-      </p>
+      <span className="h-1.5 w-24 overflow-hidden rounded-full bg-[#e8e6dc]">
+        <span className="block h-full w-1/2 rounded-full bg-[#c96442] animate-pulse" />
+      </span>
     </div>
   )
 }

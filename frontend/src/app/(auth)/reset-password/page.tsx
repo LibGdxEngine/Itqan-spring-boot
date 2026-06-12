@@ -163,7 +163,10 @@ function ResetPasswordContent() {
     <div className="space-y-8">
       {/* Header */}
       <div className="space-y-2 text-center">
-        <h1 className="text-3xl font-bold tracking-tight text-[#141413]">
+        <h1
+          className="text-3xl tracking-tight text-[#141413]"
+          style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
+        >
           {t("auth.resetPassword.title")}
         </h1>
         <p className="text-[#87867f]">
@@ -180,12 +183,12 @@ function ResetPasswordContent() {
         <div className="space-y-2">
           <Label htmlFor="otp">{t("auth.resetPassword.otpLabel")}</Label>
           <div className="relative">
-            <KeyRound className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
+            <KeyRound className="absolute start-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
             <Input
               id="otp"
               type="text"
               placeholder={t("auth.resetPassword.otpPlaceholder")}
-              className="pl-11 text-center tracking-widest font-mono text-lg"
+              className="ps-11 text-center tracking-widest font-mono text-lg"
               maxLength={6}
               {...register("otp")}
             />
@@ -199,18 +202,18 @@ function ResetPasswordContent() {
         <div className="space-y-2">
           <Label htmlFor="password">{t("auth.resetPassword.newPassword")}</Label>
           <div className="relative">
-            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
+            <Lock className="absolute start-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
             <Input
               id="password"
               type={showPassword ? "text" : "password"}
               placeholder={t("auth.resetPassword.passwordPlaceholder")}
-              className="pl-11 pr-11"
+              className="ps-11 pe-11"
               {...register("password")}
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#87867f] hover:text-[#5e5d59] transition-colors"
+              className="absolute end-3.5 top-1/2 -translate-y-1/2 text-[#87867f] hover:text-[#5e5d59] transition-colors"
             >
               {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
@@ -246,18 +249,18 @@ function ResetPasswordContent() {
         <div className="space-y-2">
           <Label htmlFor="confirmPassword">{t("auth.resetPassword.confirmNewPassword")}</Label>
           <div className="relative">
-            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
+            <Lock className="absolute start-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
             <Input
               id="confirmPassword"
               type={showConfirmPassword ? "text" : "password"}
               placeholder={t("auth.resetPassword.confirmPlaceholder")}
-              className="pl-11 pr-11"
+              className="ps-11 pe-11"
               {...register("confirmPassword")}
             />
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#87867f] hover:text-[#5e5d59] transition-colors"
+              className="absolute end-3.5 top-1/2 -translate-y-1/2 text-[#87867f] hover:text-[#5e5d59] transition-colors"
             >
               {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>

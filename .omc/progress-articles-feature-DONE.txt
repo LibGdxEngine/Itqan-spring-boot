@@ -1,0 +1,47 @@
+# Ralph Progress — Articles Feature
+
+## Project
+Itqan Education Platform. Backend: Spring Boot 3 (Java 21), pkg com.itqan.edu, Vertical Slice under features/.
+Frontend: Next.js 16 app-router, next-intl (en/ar, default ar, RTL), Tailwind 4, axios.
+Branch: feature/articles (from master).
+
+## Toolchain
+- Backend build/test requires Java 21. Installed locally at ~/.jdks/jdk-21.0.11+10 (system java is 17 — MUST set JAVA_HOME).
+  Build:  cd backend && JAVA_HOME=~/.jdks/jdk-21.0.11+10 ./mvnw -q -DskipTests compile
+  Test:   cd backend && JAVA_HOME=~/.jdks/jdk-21.0.11+10 ./mvnw test
+- Frontend: cd frontend && npm run lint ; npm run build. node v20, npm 11.
+- Tests use H2 (ddl-auto=create-drop) -> Hibernate builds schema from ENTITIES, Flyway V14 is Postgres-only (prod). Entity correctness is what tests rely on.
+
+## Key patterns (verified by exploration)
+- Entity: @Entity @Table @Data @Builder @NoArgsConstructor @AllArgsConstructor; id IDENTITY; @PrePersist/@PreUpdate timestamps. See features/courses/Course.java.
+- Repo: extends JpaRepository<E,Long>, derived queries + @Query.
+- Service: @Service @RequiredArgsConstructor; BusinessException(ErrorCode.X); CurrentUserService.getCurrentUser(auth).
+- Controller: @RestController @RequestMapping("/api/..."); @PreAuthorize("hasRole('INSTRUCTOR') or hasRole('ADMIN')"); ResponseEntity.
+- Roles: User.Role { STUDENT, INSTRUCTOR, ADMIN }; authorities ROLE_*.
+- Mapper: MapStruct @Mapper(componentModel="spring").
+- S3 image upload: CourseService.uploadThumbnail (jpeg/png/webp, 5MB), key courses/thumbnails/{uuid}-{name}, public URL via StorageProperties.getPublicEndpoint().
+- Search: use DB JPQL LIKE (no Meilisearch dependency) — robust, always works.
+- Security permitAll: SecurityConfig.java ~line 50-64; courses uses /api/courses/** permitAll + method @PreAuthorize.
+- Landing: LandingPageConfig singleton (id=1) holds featuredCourseIds/featuredInstructorIds element collections; LandingPageService.getPublic/update; served /api/landing-page, admin PATCH /api/admin/landing-page.
+- Highest Flyway migration: V13 -> next is V14.
+- Frontend API style: src/lib/landingPage.ts hand-writes interfaces + axios (src/lib/api-axios). Articles lib mirrors this (no codegen needed).
+- Navbar: src/components/Navbar.tsx (desktop links + mobile drawer). Landing: src/app/page.tsx + _components/HomeClient.tsx. Admin: src/app/admin/_components/LandingPageAdmin.tsx. Instructor: src/app/instructor + components/instructor/CourseCreatorForm.tsx. CourseCard: src/components/courses/CourseCard.tsx. Upload util: src/lib/courseThumbnail.ts.
+- Markdown: none installed -> add react-markdown + remark-gfm (no raw HTML => safe). Custom MarkdownEditor (toolbar+preview tabs) + MarkdownRenderer.
+- cn util: src/lib/utils.ts. Design tokens: #c96442 accent, #141413 dark, #f5f4ed/#faf9f5 bg, #f0eee6/#e8e6dc borders, #5e5d59/#87867f text.
+
+## Status
+- [x] US-001..005 backend DONE + verified: full suite `./mvnw test` => Tests run: 46, Failures: 0, Errors: 0, BUILD SUCCESS.
+- [ ] US-006..010 frontend (executor running in background)
+- [ ] US-011 full verification (backend half done; frontend pending)
+
+## Learnings
+- Backend compile/test needs MAVEN_OPTS="-Xmx2g" (default heap OOMs on compile) + JAVA_HOME=~/.jdks/jdk-21.0.11+10.
+- PRE-EXISTING TEST BUG (NOT articles): 6 integration tests call authRepository.deleteAll() in setUp; RefreshToken has @ManyToOne User (FK user_id, no cascade), so leftover refresh tokens from a prior test method tripped a refresh_tokens->users FK violation. FIXED centrally + test-only in BaseIntegrationTest via @AfterEach refreshTokenRepository.deleteAll() (no production change, no assertions weakened). This is what turned 22 errors -> 0.
+- Backend files all created & reviewed: Article entity/repo/service/controller, dto x4, mapper, V14 migration, ArticleServiceTest (3 tests), ErrorCode.ARTICLE_NOT_FOUND, SecurityConfig permitAll /api/articles[/**], landing integration (config featuredArticleIds, LandingArticleDto, response+request fields, service hydrateArticles published-only).
+- Slug is unicode-aware (Arabic ok); reading time = max(1, ceil(len/1000)). Controller route precedence: literal /search,/mine,/id/{id} resolve before /{slug} (Spring).
+
+## Post-review fixes (from /review local)
+- 🟡 Reserved-slug guard: ArticleService now has RESERVED_SLUGS={search,mine,id,cover-image}; generateUniqueSlug uses isSlugAvailable() so a generated slug can never equal a literal /api/articles sub-route (e.g. title "Search" -> "search-2"). Prevents the public /{slug} detail route being shadowed. +1 unit test.
+- 🟡 ArticleControllerIntegrationTest added (8 tests): public list/search anonymous (200), anonymous create rejected (401/403), instructor publish + public read-by-slug (reading time + author asserted), draft hidden publicly (404), instructor owner-scope on PUT (403), reserved-title no-shadow, Arabic-title slug round-trip.
+- Full backend suite now: Tests run: 55, Failures: 0, Errors: 0, BUILD SUCCESS.
+- Frontend earlier verified: npm run build exit 0 (Compiled successfully, 5 article routes), tsc --noEmit 0 errors, eslint clean on feature files.

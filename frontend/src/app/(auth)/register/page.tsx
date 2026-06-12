@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { Eye, EyeOff, Mail, Lock, User, ArrowRight, Loader2, Check, X } from "lucide-react"
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -24,7 +23,6 @@ import { getErrorMessage } from "@/lib/api-axios"
 
 export default function RegisterPage() {
   const t = useTranslations()
-  const router = useRouter()
   const { showToast } = useToast()
   const { register: registerUser } = useAuth()
   const [showPassword, setShowPassword] = React.useState(false)
@@ -101,7 +99,10 @@ export default function RegisterPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="space-y-2 text-center">
-        <h1 className="text-3xl font-bold tracking-tight text-[#141413]">
+        <h1
+          className="text-3xl tracking-tight text-[#141413]"
+          style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
+        >
           {t("auth.register.title")}
         </h1>
         <p className="text-[#87867f]">
@@ -132,12 +133,12 @@ export default function RegisterPage() {
         <div className="space-y-2">
           <Label htmlFor="name">{t("auth.register.fullName")}</Label>
           <div className="relative">
-            <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
+            <User className="absolute start-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
             <Input
               id="name"
               type="text"
               placeholder={t("auth.register.namePlaceholder")}
-              className="pl-11"
+              className="ps-11"
               {...register("name")}
             />
           </div>
@@ -150,12 +151,12 @@ export default function RegisterPage() {
         <div className="space-y-2">
           <Label htmlFor="email">{t("auth.register.email")}</Label>
           <div className="relative">
-            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
+            <Mail className="absolute start-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
             <Input
               id="email"
               type="email"
               placeholder={t("auth.register.emailPlaceholder")}
-              className="pl-11"
+              className="ps-11"
               {...register("email")}
             />
           </div>
@@ -168,18 +169,18 @@ export default function RegisterPage() {
         <div className="space-y-2">
           <Label htmlFor="password">{t("auth.register.password")}</Label>
           <div className="relative">
-            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
+            <Lock className="absolute start-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
             <Input
               id="password"
               type={showPassword ? "text" : "password"}
               placeholder={t("auth.register.passwordPlaceholder")}
-              className="pl-11 pr-11"
+              className="ps-11 pe-11"
               {...register("password")}
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#87867f] hover:text-[#5e5d59] transition-colors"
+              className="absolute end-3.5 top-1/2 -translate-y-1/2 text-[#87867f] hover:text-[#5e5d59] transition-colors"
             >
               {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
@@ -215,18 +216,18 @@ export default function RegisterPage() {
         <div className="space-y-2">
           <Label htmlFor="confirmPassword">{t("auth.register.confirmPassword")}</Label>
           <div className="relative">
-            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
+            <Lock className="absolute start-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
             <Input
               id="confirmPassword"
               type={showConfirmPassword ? "text" : "password"}
               placeholder={t("auth.register.confirmPasswordPlaceholder")}
-              className="pl-11 pr-11"
+              className="ps-11 pe-11"
               {...register("confirmPassword")}
             />
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#87867f] hover:text-[#5e5d59] transition-colors"
+              className="absolute end-3.5 top-1/2 -translate-y-1/2 text-[#87867f] hover:text-[#5e5d59] transition-colors"
             >
               {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>

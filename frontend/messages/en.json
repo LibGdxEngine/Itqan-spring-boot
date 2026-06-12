@@ -436,6 +436,20 @@
       "registerTitle": "Create account | Itqan",
       "forgotTitle": "Forgot password | Itqan",
       "resetTitle": "Reset password | Itqan"
+    },
+    "articles": {
+      "title": "Articles & Research",
+      "description": "Articles and research in Quranic studies and Islamic sciences by distinguished scholars — read the latest articles on Itqan platform.",
+      "keywords": "islamic articles|quranic studies|islamic sciences|tajweed|fiqh|research|Itqan"
+    },
+    "articleFallback": {
+      "notFound": "Article not found",
+      "description": "The article you are looking for is unavailable or has been removed."
+    },
+    "muqtatafat": {
+      "title": "Muqtatafat — Selected Audio Clips",
+      "description": "Selected audio excerpts from lessons and lectures by scholars on Itqan, the Islamic sciences platform.",
+      "keywords": "audio clips|islamic lectures|quran recitation|lessons|Itqan"
     }
   },
   "quiz": {
@@ -635,7 +649,10 @@
       "transcript": "Transcript",
       "pictureInPicture": "Picture-in-Picture",
       "fullscreen": "Fullscreen (F)"
-    }
+    },
+    "yourProgress": "Your progress",
+    "progressOf": "{completed} of {total} lessons completed",
+    "courseContent": "Course content"
   },
   "checkout": {
     "success": {

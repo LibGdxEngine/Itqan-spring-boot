@@ -10,6 +10,11 @@ type CourseItem = {
     updatedAt?: string;
 };
 
+type ArticleItem = {
+    slug?: string;
+    publishedAt?: string | null;
+};
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const staticPages: MetadataRoute.Sitemap = [
         {
@@ -29,6 +34,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             lastModified: new Date(),
             changeFrequency: "weekly",
             priority: 0.7,
+        },
+        {
+            url: `${SITE_URL}/articles`,
+            lastModified: new Date(),
+            changeFrequency: "daily",
+            priority: 0.8,
+        },
+        {
+            url: `${SITE_URL}/muqtatafat`,
+            lastModified: new Date(),
+            changeFrequency: "weekly",
+            priority: 0.6,
         },
     ];
 
@@ -52,5 +69,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         // If API is unavailable, return static pages only
     }
 
-    return [...staticPages, ...coursePages];
+    let articlePages: MetadataRoute.Sitemap = [];
+    try {
+        const res = await fetch(`${API_URL}/api/articles?page=0&size=100`, {
+            next: { revalidate: 3600 },
+        });
+        if (res.ok) {
+            const data = await res.json();
+            const articles: ArticleItem[] = Array.isArray(data)
+                ? data
+                : (data.content ?? []);
+            articlePages = articles.map((article) => ({
+                url: `${SITE_URL}/articles/${encodeURIComponent(
+                    article.slug ?? "",
+                )}`,
+                lastModified: article.publishedAt
+                    ? new Date(article.publishedAt)
+                    : undefined,
+                changeFrequency: "weekly" as const,
+                priority: 0.7,
+            }));
+        }
+    } catch {
+        // If API is unavailable, return static pages only
+    }
+
+    return [...staticPages, ...coursePages, ...articlePages];
 }

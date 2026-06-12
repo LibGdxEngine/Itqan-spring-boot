@@ -1,175 +1,107 @@
 {
-  "title": "Articles Feature — public articles with instructor authoring, markdown editor, admin featured control, and landing-page integration",
-  "task": "Add an Articles tab in the landing-page navbar; a featured-articles control in /admin to select articles shown on the landing page; instructor-authored articles publicly viewable; advanced markdown editor with preview-before-publish; each article has image, title, description, auto reading-time from char count, and slug; backend + frontend for list/detail pages with search.",
-  "apiContract": {
-    "ArticleRequest": "{ title:string(req), description:string, content:string(req markdown), coverImageUrl:string, category:string, published:boolean }",
-    "ArticleResponse": "{ id, title, slug, description, content, coverImageUrl, readingTimeMinutes, published, authorUserId, authorName, category, createdAt, updatedAt, publishedAt }",
-    "ArticleSummaryResponse": "{ id, title, slug, description, coverImageUrl, readingTimeMinutes, authorName, category, published, publishedAt }",
-    "endpoints": [
-      "GET /api/articles?page&size -> Page<ArticleSummaryResponse> (published only, newest first) [PUBLIC]",
-      "GET /api/articles/search?query -> List<ArticleSummaryResponse> (published) [PUBLIC]",
-      "GET /api/articles/{slug} -> ArticleResponse (published only, 404 if draft/missing) [PUBLIC]",
-      "GET /api/articles/mine -> List<ArticleResponse> (own incl drafts; ADMIN sees all) [INSTRUCTOR|ADMIN]",
-      "GET /api/articles/id/{id} -> ArticleResponse (owner or ADMIN, for editing) [INSTRUCTOR|ADMIN]",
-      "POST /api/articles -> ArticleResponse 201 [INSTRUCTOR|ADMIN]",
-      "PUT /api/articles/{id} -> ArticleResponse (owner scope) [INSTRUCTOR|ADMIN]",
-      "PATCH /api/articles/{id}/publish?published=bool -> ArticleResponse [INSTRUCTOR|ADMIN]",
-      "DELETE /api/articles/{id} -> 204 [INSTRUCTOR|ADMIN]",
-      "POST /api/articles/cover-image (multipart file) -> {url,objectKey} [INSTRUCTOR|ADMIN]",
-      "GET /api/landing-page now includes featuredArticles:LandingArticleDto[] [PUBLIC]",
-      "PATCH /api/admin/landing-page accepts featuredArticleIds:number[] [ADMIN]"
-    ],
-    "readingTime": "readingTimeMinutes = max(1, ceil(contentCharCount / 1000.0))",
-    "slug": "auto-generated from title, unicode-aware (supports Arabic), unique (append -2,-3 on collision); client slug ignored"
-  },
+  "title": "UI Polish + Arabic SEO — auth redesign with logo, fancy animated courses/learn pages, articles SEO with OG images",
+  "task": "1) Redesign auth pages (login/register/forgot/reset + layout) to match site visual language and use the real itqan_logo.png. 2) Enhance courses list, course details, and learn (video list/lesson) pages: fancier, animated, cool — same warm parchment/terracotta theme. 3) Enhance SEO, Arabic-first: articles pages get server metadata + Article JSON-LD + per-article og:image (cover photo in link previews), sitemap/robots coverage, branded OG image with real logo, manifest icons.",
+  "constraints": [
+    "Theme locked: #f5f4ed bg, #faf9f5 card, #141413 dark, #c96442 primary, #d97757 accent, #b55836 hover, #e8e6dc sand, #f0eee6 border, #5e5d59/#87867f text, #30302e dark surface",
+    "framer-motion v12 installed; HomeClient.tsx fadeUp/staggerParent are the canonical animation patterns; respect prefers-reduced-motion",
+    "RTL: default locale ar; new spacing must use logical props (ms-/me-/ps-/pe-/start-/end-); .ltr-flex utility exists",
+    "No backend changes; keep all existing data fetching, forms, auth logic intact",
+    "messages/en.json + ar.json already contain all needed keys (lesson.yourProgress, lesson.progressOf, lesson.courseContent, seo.articles, seo.articleFallback, seo.muqtatafat) — agents must NOT edit message files",
+    "Icons already generated: public/icon-192.png, icon-512.png, apple-touch-icon.png"
+  ],
   "stories": [
     {
       "id": "US-001",
-      "title": "Backend: Article entity, repository, DTOs, MapStruct mapper, Flyway migration V14",
+      "title": "Auth pages: real logo + landing-page visual language + animations",
       "priority": 1,
       "passes": true,
       "acceptanceCriteria": [
-        "Article.java exists at backend/src/main/java/com/itqan/edu/features/articles/Article.java as a JPA @Entity(@Table name=articles) with Lombok @Data/@Builder/@NoArgsConstructor/@AllArgsConstructor",
-        "Article has fields: Long id (IDENTITY), String title, String slug (unique), String description, String content (columnDefinition TEXT), String coverImageUrl, String coverImageObjectKey, Integer readingTimeMinutes, Boolean published (default false), Long authorUserId, String authorName, String category, LocalDateTime createdAt, updatedAt, publishedAt; with @PrePersist/@PreUpdate setting timestamps",
-        "ArticleRepository.java extends JpaRepository<Article,Long> with: Optional<Article> findBySlug(String); boolean existsBySlug(String); Page<Article> findByPublishedTrue(Pageable); List<Article> findByPublishedTrueOrderByPublishedAtDesc(); List<Article> findByAuthorUserIdOrderByCreatedAtDesc(Long); a @Query search method over title/description/content for published=true",
-        "dto/ArticleRequest.java (@Data, jakarta validation: @NotBlank title, @NotBlank content), dto/ArticleResponse.java and dto/ArticleSummaryResponse.java (@Data @Builder @NoArgsConstructor @AllArgsConstructor) match the apiContract shapes",
-        "dto/ArticleImageUploadResponse.java with url and objectKey fields exists",
-        "mapper/ArticleMapper.java is a @Mapper(componentModel=spring) with toEntity(request) (ignoring id,slug,readingTimeMinutes,published,authorUserId,authorName,coverImageObjectKey,timestamps), toResponse(article), toSummary(article)",
-        "Flyway migration backend/src/main/resources/db/migration/V14__add_articles.sql creates articles table (BIGSERIAL pk, slug UNIQUE NOT NULL, content TEXT NOT NULL, etc.) with indexes on slug, published, author_user_id, and creates landing_page_featured_articles (landing_page_id BIGINT, article_id BIGINT, position INT) table",
-        "Backend compiles: cd backend && JAVA_HOME=~/.jdks/jdk-21.0.11+10 ./mvnw -q -DskipTests compile succeeds"
+        "(auth)/layout.tsx renders next/image with src=/itqan_logo.png (not BookOpen icon) in BOTH the desktop dark panel and the mobile header",
+        "Dark branding panel has the landing hero's visual language: terracotta radial glow + pattern overlay (pattern-islamic or equivalent) + framer-motion staggered entrance (fadeUp pattern) on tagline/description/stats",
+        "Form column inputs use RTL-safe logical positioning (ps-/pe-/start-/end- instead of pl-/pr-/left-/right-) in login, register, forgot-password, reset-password pages",
+        "All four auth forms keep react-hook-form + zod + GoogleAuthButton + toast logic unchanged (only presentation changed)",
+        "Auth pages have entrance animations consistent with site (framer-motion or existing animate-fade-in), with reduced-motion respected for new framer-motion code",
+        "npx tsc --noEmit passes; eslint on changed files passes"
       ]
     },
     {
       "id": "US-002",
-      "title": "Backend: ArticleService (slug gen, reading time, CRUD, publish, owner-scope, search, cover upload)",
+      "title": "Courses list page: animated hero, skeleton loading, fancy CourseCard",
       "priority": 2,
       "passes": true,
       "acceptanceCriteria": [
-        "ArticleService.java @Service @RequiredArgsConstructor with constructor-injected ArticleRepository, ArticleMapper, S3Client, StorageProperties",
-        "createArticle(ArticleRequest, User): generates a unique unicode-aware slug from title, computes readingTimeMinutes=max(1,ceil(len(content)/1000.0)), sets authorUserId=currentUser.id and authorName from instructor first+last name (fallback email), sets published from request, sets publishedAt when published, saves and returns ArticleResponse",
-        "updateArticle(id, ArticleRequest, User): enforces owner-scope for INSTRUCTOR (BusinessException FORBIDDEN if not owner), regenerates slug only if title changed (keeping uniqueness), recomputes readingTime, updates publishedAt transition, returns ArticleResponse",
-        "getBySlug(slug): returns published article as ArticleResponse or throws BusinessException(ARTICLE_NOT_FOUND/NOT_FOUND) if missing or not published",
-        "getByIdForEdit(id, User): owner or ADMIN only; returns ArticleResponse including drafts",
-        "listPublished(Pageable): Page<ArticleSummaryResponse> newest first; searchPublished(query): List<ArticleSummaryResponse>; listMine(User): own (or all for ADMIN) as List<ArticleResponse>",
-        "setPublished(id, boolean, User): owner/admin toggles published + publishedAt",
-        "deleteArticle(id, User): owner/admin deletes",
-        "uploadCoverImage(MultipartFile): validates type (jpeg/png/webp) and size (<=5MB), puts to S3 under articles/covers/{uuid}-{name}, returns ArticleImageUploadResponse(url,objectKey); mirrors CourseService.uploadThumbnail",
-        "A new ErrorCode for article-not-found is added to common/exception/ErrorCode.java (e.g. ARTICLE_NOT_FOUND) OR an existing suitable 404 code is reused consistently",
-        "Backend compiles with JAVA_HOME=~/.jdks/jdk-21.0.11+10 ./mvnw -q -DskipTests compile"
+        "courses/page.tsx has a hero/header section with brand accents (pattern or radial glow + badge or decorated heading) animated with framer-motion fadeUp/stagger",
+        "Loading state shows shimmer skeleton cards (grid of placeholder cards using .skeleton or equivalent), not a lone spinner",
+        "Course cards animate in with stagger (motion variants) and respect useReducedMotion",
+        "CourseCard.tsx enhanced: thumbnail zoom on hover (group-hover scale), gradient overlay on image, hover lift + terracotta border/shadow accent, polished level badge; Link/navigation behavior unchanged",
+        "Empty and error states styled consistently with theme (icon + message, not bare text)",
+        "npx tsc --noEmit passes; eslint on changed files passes"
       ]
     },
     {
       "id": "US-003",
-      "title": "Backend: ArticleController endpoints + SecurityConfig public access",
+      "title": "Course details page: animated dark hero, polished enroll card, animated curriculum",
       "priority": 3,
       "passes": true,
       "acceptanceCriteria": [
-        "ArticleController.java @RestController @RequestMapping(/api/articles) implements all endpoints from apiContract with correct verbs/paths",
-        "Public endpoints (GET list, GET search, GET /{slug}) have NO @PreAuthorize; write endpoints (POST, PUT, PATCH publish, DELETE, POST cover-image) and GET /mine, GET /id/{id} use @PreAuthorize(\"hasRole('INSTRUCTOR') or hasRole('ADMIN')\") and obtain the user via currentUserService.getCurrentUser(authentication)",
-        "Literal routes /api/articles/search, /api/articles/mine, /api/articles/id/{id} are declared so they do not collide with /api/articles/{slug}",
-        "SecurityConfig.java permitAll list includes \"/api/articles\" and \"/api/articles/**\"",
-        "Backend compiles with JAVA_HOME=~/.jdks/jdk-21.0.11+10 ./mvnw -q -DskipTests compile"
+        "courses/[id]/page.tsx dark hero gains radial terracotta glow + subtle pattern overlay + staggered fadeUp entrance on title/description/meta; meta rendered as styled chips/pills",
+        "Sticky enroll card has entrance animation, thumbnail hover zoom, emphasized price, and polished feature list; EnrollButton logic unchanged",
+        "CourseCurriculum.tsx modules expand/collapse with animated height (framer-motion AnimatePresence) and rotating chevron; lesson rows have hover transition; works in RTL",
+        "Mobile enroll section remains functional and styled to match",
+        "npx tsc --noEmit passes; eslint on changed files passes"
       ]
     },
     {
       "id": "US-004",
-      "title": "Backend: Landing-page featured-articles integration",
+      "title": "Learn experience: progress sidebar, mobile drawer, animated lesson page",
       "priority": 4,
       "passes": true,
       "acceptanceCriteria": [
-        "LandingPageConfig.java gains featuredArticleIds @ElementCollection (table landing_page_featured_articles, @OrderColumn position, column article_id) defaulting to empty list",
-        "dto/LandingArticleDto.java exists (id,title,slug,description,coverImageUrl,readingTimeMinutes,authorName,category,publishedAt)",
-        "LandingPageResponse gains List<LandingArticleDto> featuredArticles; LandingPageUpdateRequest gains List<Long> featuredArticleIds",
-        "LandingPageService injects ArticleRepository, hydrateArticles(ids) returns only published articles in selected order, getPublic() populates featuredArticles, update() replaces featuredArticleIds like featuredCourseIds",
-        "Backend compiles with JAVA_HOME=~/.jdks/jdk-21.0.11+10 ./mvnw -q -DskipTests compile"
+        "LearningSidebar shows a course progress block using lesson.yourProgress + lesson.progressOf i18n keys with an animated progress bar driven by completedLessonIds/orderedLessons from learn-context",
+        "Sidebar modules expand/collapse with animation; active lesson visibly highlighted with accent treatment; completed lessons show distinct check styling",
+        "learn/[courseId]/layout.tsx is responsive: sidebar hidden behind a toggle (drawer + overlay) below lg breakpoint, content margin uses logical class (ms-80 or RTL-aware equivalent) so RTL is not broken; desktop behavior preserved",
+        "Lesson page ([lessonId]/page.tsx) has entrance animations, polished quiz/mark-complete buttons, and direction-aware prev/next navigation buttons; markComplete/navigation/VideoPlayer logic unchanged",
+        "npx tsc --noEmit passes; eslint on changed files passes"
       ]
     },
     {
       "id": "US-005",
-      "title": "Backend: ArticleService unit tests",
+      "title": "Articles + muqtatafat SEO: server metadata, Article JSON-LD, og:image from cover, sitemap, robots",
       "priority": 5,
       "passes": true,
       "acceptanceCriteria": [
-        "ArticleServiceTest.java at backend/src/test/java/com/itqan/edu/features/articles/ uses @ExtendWith(MockitoExtension.class) with @Mock repo/mapper and @InjectMocks service",
-        "Test: createArticle computes readingTimeMinutes correctly for a known content length (e.g. 2500 chars -> 3)",
-        "Test: createArticle generates a slug from the title and appends a suffix when existsBySlug returns true for the base slug",
-        "Test: updateArticle throws BusinessException(FORBIDDEN) when an INSTRUCTOR edits an article they do not own",
-        "Full backend test suite passes: cd backend && JAVA_HOME=~/.jdks/jdk-21.0.11+10 ./mvnw test (BUILD SUCCESS, 0 failures/errors)"
+        "/articles/page.tsx is a server component exporting generateMetadata (seo.articles i18n: title/description/keywords, canonical SITE_URL/articles, openGraph + twitter, locale-aware ar_SA/en_US) rendering the existing UI from a new client component file; CollectionPage JSON-LD with ItemList of published articles fetched server-side (pattern: courses/layout.tsx)",
+        "/articles/[slug]/page.tsx is a server component whose generateMetadata fetches the article server-side (BACKEND_INTERNAL_URL||NEXT_PUBLIC_API_URL pattern) and emits: title=article title, description (article description or stripped content excerpt <=160 chars), openGraph type=article with publishedTime/modifiedTime/authors and og:image=coverImageUrl (absolute) with default OG fallback when no cover, twitter summary_large_image; falls back to seo.articleFallback + noindex when article missing",
+        "Article detail page injects Article JSON-LD (headline, description, image, datePublished, dateModified, author Person, publisher Organization with logo, mainEntityOfPage, inLanguage) AND BreadcrumbList JSON-LD (home > articles > article)",
+        "Existing client-side articles UI (search, rendering, markdown) still works unchanged after the server/client split",
+        "sitemap.ts includes /articles and per-article /articles/{slug} entries (lastModified from publishedAt) fetched from the public API; robots.ts allows /articles and /articles/*",
+        "muqtatafat gets a layout.tsx with generateMetadata using seo.muqtatafat keys (canonical, openGraph, twitter, locale-aware)",
+        "npx tsc --noEmit passes; eslint on changed files passes"
       ]
     },
     {
       "id": "US-006",
-      "title": "Frontend: markdown deps, articles API lib, navbar Articles link, i18n messages",
+      "title": "Branded OG image with real logo + manifest/app icons metadata",
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
-        "react-markdown and remark-gfm are added to frontend/package.json dependencies and installed",
-        "frontend/src/lib/articles.ts exports TS interfaces (Article, ArticleSummary, ArticleRequest) and an articlesApi object with axios calls (list, search, getBySlug, getById, listMine, create, update, setPublished, remove, uploadCoverImage) mirroring src/lib/landingPage.ts and using src/lib/api-axios",
-        "Navbar.tsx has an Articles link (href=/articles) in both desktop links and mobile drawer, using t(\"nav.articles\")",
-        "messages/en.json and messages/ar.json both gain nav.articles and an articles.* namespace (exploreTitle, exploreSubtitle, readMore, searchPlaceholder, noArticles, readingTime, by, etc.) with correct Arabic translations in ar.json",
-        "Frontend typechecks/lints: cd frontend && npm run lint passes (no new errors) for changed files"
+        "opengraph-image.tsx embeds the real logo (fs read of public/itqan_logo.png -> base64 data URL, wrapped in try/catch with graceful text-only fallback) in a redesigned 1200x630 brand card using theme colors, Arabic-first per locale; twitter-image keeps re-exporting it",
+        "manifest.ts icons array lists icon-192.png and icon-512.png with correct sizes/types/purpose",
+        "Root layout metadata exports icons (icon + apple: /apple-touch-icon.png) so favicon/apple touch icons resolve",
+        "npx tsc --noEmit passes; eslint on changed files passes"
       ]
     },
     {
       "id": "US-007",
-      "title": "Frontend: shared MarkdownRenderer + ArticleCard components",
+      "title": "Full verification: lint + production build green, criteria sweep",
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
-        "frontend/src/components/articles/MarkdownRenderer.tsx renders markdown via react-markdown + remark-gfm with custom Tailwind-styled element components (h1-h3, p, ul/ol/li, a, blockquote, code, pre, img, table); does NOT enable raw HTML (safe by default)",
-        "frontend/src/components/articles/ArticleCard.tsx mirrors CourseCard: cover image (fallback icon), title, description (line-clamp), reading time, author; links to /articles/{slug}; uses design tokens (#c96442 etc.) and cn util",
-        "Frontend lint passes for changed files"
-      ]
-    },
-    {
-      "id": "US-008",
-      "title": "Frontend: Articles list page with search + article detail page",
-      "priority": 8,
-      "passes": false,
-      "acceptanceCriteria": [
-        "frontend/src/app/articles/page.tsx (client) renders Navbar, a heading, a search input (debounced; calls articlesApi.search when query present else list), and a responsive grid of ArticleCard with loading/empty/error states mirroring /app/courses/page.tsx",
-        "frontend/src/app/articles/[slug]/page.tsx (client) fetches articlesApi.getBySlug(slug), renders Navbar, cover image, title, description, author + reading time meta, and the content via MarkdownRenderer; shows not-found state on 404",
-        "Both pages are locale/RTL-aware (useTranslations/useLocale) and use existing design tokens",
-        "Frontend lint passes for changed files"
-      ]
-    },
-    {
-      "id": "US-009",
-      "title": "Frontend: Advanced MarkdownEditor with preview + instructor article authoring (create/edit, preview-before-publish, cover upload)",
-      "priority": 9,
-      "passes": false,
-      "acceptanceCriteria": [
-        "frontend/src/components/articles/MarkdownEditor.tsx is a client component with a formatting toolbar (bold, italic, headings, link, image, list, quote, inline code, code block) that inserts/wraps markdown at the textarea selection, Write/Preview tabs (Preview uses MarkdownRenderer), and a live char-count + estimated reading time display",
-        "frontend/src/components/articles/ArticleEditorForm.tsx provides create AND edit modes: fields title, description, category, cover image upload (validate+preview, reuse upload util), MarkdownEditor for content; a full-article Preview toggle (cover+title+description+rendered content) shown before publishing; Save Draft and Publish actions calling articlesApi.create/update with published=false/true",
-        "frontend/src/app/instructor/articles/page.tsx lists the instructor's own articles (articlesApi.listMine) with Active/Draft badges and Create/Edit/Delete actions, mirroring instructor course dashboard; gated to INSTRUCTOR/ADMIN",
-        "frontend/src/app/instructor/articles/[id]/edit/page.tsx loads the article via articlesApi.getById and renders ArticleEditorForm in edit mode",
-        "An entry point to the instructor articles area exists (link from /instructor dashboard or navbar instructor area)",
-        "Frontend lint passes for changed files"
-      ]
-    },
-    {
-      "id": "US-010",
-      "title": "Frontend: Admin featured-articles control + landing-page featured-articles section",
-      "priority": 10,
-      "passes": false,
-      "acceptanceCriteria": [
-        "The admin landing-page control (src/app/admin/_components/LandingPageAdmin.tsx or a new ArticlesAdmin component surfaced in /admin) lets an ADMIN multi-select which published articles are featured, persisting via landingPageApi.update({featuredArticleIds}) and pre-loading current selection from landing data",
-        "src/lib/landingPage.ts LandingPageData/Update types gain featuredArticles/featuredArticleIds and a LandingArticle interface",
-        "src/app/_components/HomeClient.tsx renders a Featured Articles section (only when featuredArticles non-empty) using ArticleCard/FeaturedArticleCard, placed sensibly among existing sections, locale-aware with i18n heading",
-        "src/lib/landingPage.ts fetchLandingPageServerSide and page.tsx pass featuredArticles through to HomeClient",
-        "Frontend lint passes for changed files"
-      ]
-    },
-    {
-      "id": "US-011",
-      "title": "Full verification: backend build+tests, frontend lint+build green",
-      "priority": 11,
-      "passes": false,
-      "acceptanceCriteria": [
-        "cd backend && JAVA_HOME=~/.jdks/jdk-21.0.11+10 ./mvnw test -> BUILD SUCCESS, 0 failures, 0 errors",
-        "cd frontend && npm run lint -> no errors",
-        "cd frontend && npm run build -> compiled successfully (no type errors)",
-        "All original task requirements present: navbar Articles tab, admin featured control, public viewing, instructor authoring with markdown editor + preview, image+title+description, auto reading time from char count, slug, list/detail pages, search"
+        "cd frontend && npm run lint -> exits 0 (no errors)",
+        "cd frontend && npm run build -> Compiled successfully, all routes build (articles routes now server-rendered with metadata)",
+        "git diff confirms zero backend file changes",
+        "Spot-check rendered metadata: built .next output or build log shows /articles and /articles/[slug] as dynamic server routes; sitemap.ts/robots.ts compile",
+        "All original ask items covered: auth matches site + real logo; courses/details/learn pages animated and polished within theme; Arabic SEO with article og:image (photo in link preview) and articles-page focus"
       ]
     }
   ]

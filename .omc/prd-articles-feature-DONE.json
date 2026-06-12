@@ -1,0 +1,176 @@
+{
+  "title": "Articles Feature — public articles with instructor authoring, markdown editor, admin featured control, and landing-page integration",
+  "task": "Add an Articles tab in the landing-page navbar; a featured-articles control in /admin to select articles shown on the landing page; instructor-authored articles publicly viewable; advanced markdown editor with preview-before-publish; each article has image, title, description, auto reading-time from char count, and slug; backend + frontend for list/detail pages with search.",
+  "apiContract": {
+    "ArticleRequest": "{ title:string(req), description:string, content:string(req markdown), coverImageUrl:string, category:string, published:boolean }",
+    "ArticleResponse": "{ id, title, slug, description, content, coverImageUrl, readingTimeMinutes, published, authorUserId, authorName, category, createdAt, updatedAt, publishedAt }",
+    "ArticleSummaryResponse": "{ id, title, slug, description, coverImageUrl, readingTimeMinutes, authorName, category, published, publishedAt }",
+    "endpoints": [
+      "GET /api/articles?page&size -> Page<ArticleSummaryResponse> (published only, newest first) [PUBLIC]",
+      "GET /api/articles/search?query -> List<ArticleSummaryResponse> (published) [PUBLIC]",
+      "GET /api/articles/{slug} -> ArticleResponse (published only, 404 if draft/missing) [PUBLIC]",
+      "GET /api/articles/mine -> List<ArticleResponse> (own incl drafts; ADMIN sees all) [INSTRUCTOR|ADMIN]",
+      "GET /api/articles/id/{id} -> ArticleResponse (owner or ADMIN, for editing) [INSTRUCTOR|ADMIN]",
+      "POST /api/articles -> ArticleResponse 201 [INSTRUCTOR|ADMIN]",
+      "PUT /api/articles/{id} -> ArticleResponse (owner scope) [INSTRUCTOR|ADMIN]",
+      "PATCH /api/articles/{id}/publish?published=bool -> ArticleResponse [INSTRUCTOR|ADMIN]",
+      "DELETE /api/articles/{id} -> 204 [INSTRUCTOR|ADMIN]",
+      "POST /api/articles/cover-image (multipart file) -> {url,objectKey} [INSTRUCTOR|ADMIN]",
+      "GET /api/landing-page now includes featuredArticles:LandingArticleDto[] [PUBLIC]",
+      "PATCH /api/admin/landing-page accepts featuredArticleIds:number[] [ADMIN]"
+    ],
+    "readingTime": "readingTimeMinutes = max(1, ceil(contentCharCount / 1000.0))",
+    "slug": "auto-generated from title, unicode-aware (supports Arabic), unique (append -2,-3 on collision); client slug ignored"
+  },
+  "stories": [
+    {
+      "id": "US-001",
+      "title": "Backend: Article entity, repository, DTOs, MapStruct mapper, Flyway migration V14",
+      "priority": 1,
+      "passes": true,
+      "acceptanceCriteria": [
+        "Article.java exists at backend/src/main/java/com/itqan/edu/features/articles/Article.java as a JPA @Entity(@Table name=articles) with Lombok @Data/@Builder/@NoArgsConstructor/@AllArgsConstructor",
+        "Article has fields: Long id (IDENTITY), String title, String slug (unique), String description, String content (columnDefinition TEXT), String coverImageUrl, String coverImageObjectKey, Integer readingTimeMinutes, Boolean published (default false), Long authorUserId, String authorName, String category, LocalDateTime createdAt, updatedAt, publishedAt; with @PrePersist/@PreUpdate setting timestamps",
+        "ArticleRepository.java extends JpaRepository<Article,Long> with: Optional<Article> findBySlug(String); boolean existsBySlug(String); Page<Article> findByPublishedTrue(Pageable); List<Article> findByPublishedTrueOrderByPublishedAtDesc(); List<Article> findByAuthorUserIdOrderByCreatedAtDesc(Long); a @Query search method over title/description/content for published=true",
+        "dto/ArticleRequest.java (@Data, jakarta validation: @NotBlank title, @NotBlank content), dto/ArticleResponse.java and dto/ArticleSummaryResponse.java (@Data @Builder @NoArgsConstructor @AllArgsConstructor) match the apiContract shapes",
+        "dto/ArticleImageUploadResponse.java with url and objectKey fields exists",
+        "mapper/ArticleMapper.java is a @Mapper(componentModel=spring) with toEntity(request) (ignoring id,slug,readingTimeMinutes,published,authorUserId,authorName,coverImageObjectKey,timestamps), toResponse(article), toSummary(article)",
+        "Flyway migration backend/src/main/resources/db/migration/V14__add_articles.sql creates articles table (BIGSERIAL pk, slug UNIQUE NOT NULL, content TEXT NOT NULL, etc.) with indexes on slug, published, author_user_id, and creates landing_page_featured_articles (landing_page_id BIGINT, article_id BIGINT, position INT) table",
+        "Backend compiles: cd backend && JAVA_HOME=~/.jdks/jdk-21.0.11+10 ./mvnw -q -DskipTests compile succeeds"
+      ]
+    },
+    {
+      "id": "US-002",
+      "title": "Backend: ArticleService (slug gen, reading time, CRUD, publish, owner-scope, search, cover upload)",
+      "priority": 2,
+      "passes": true,
+      "acceptanceCriteria": [
+        "ArticleService.java @Service @RequiredArgsConstructor with constructor-injected ArticleRepository, ArticleMapper, S3Client, StorageProperties",
+        "createArticle(ArticleRequest, User): generates a unique unicode-aware slug from title, computes readingTimeMinutes=max(1,ceil(len(content)/1000.0)), sets authorUserId=currentUser.id and authorName from instructor first+last name (fallback email), sets published from request, sets publishedAt when published, saves and returns ArticleResponse",
+        "updateArticle(id, ArticleRequest, User): enforces owner-scope for INSTRUCTOR (BusinessException FORBIDDEN if not owner), regenerates slug only if title changed (keeping uniqueness), recomputes readingTime, updates publishedAt transition, returns ArticleResponse",
+        "getBySlug(slug): returns published article as ArticleResponse or throws BusinessException(ARTICLE_NOT_FOUND/NOT_FOUND) if missing or not published",
+        "getByIdForEdit(id, User): owner or ADMIN only; returns ArticleResponse including drafts",
+        "listPublished(Pageable): Page<ArticleSummaryResponse> newest first; searchPublished(query): List<ArticleSummaryResponse>; listMine(User): own (or all for ADMIN) as List<ArticleResponse>",
+        "setPublished(id, boolean, User): owner/admin toggles published + publishedAt",
+        "deleteArticle(id, User): owner/admin deletes",
+        "uploadCoverImage(MultipartFile): validates type (jpeg/png/webp) and size (<=5MB), puts to S3 under articles/covers/{uuid}-{name}, returns ArticleImageUploadResponse(url,objectKey); mirrors CourseService.uploadThumbnail",
+        "A new ErrorCode for article-not-found is added to common/exception/ErrorCode.java (e.g. ARTICLE_NOT_FOUND) OR an existing suitable 404 code is reused consistently",
+        "Backend compiles with JAVA_HOME=~/.jdks/jdk-21.0.11+10 ./mvnw -q -DskipTests compile"
+      ]
+    },
+    {
+      "id": "US-003",
+      "title": "Backend: ArticleController endpoints + SecurityConfig public access",
+      "priority": 3,
+      "passes": true,
+      "acceptanceCriteria": [
+        "ArticleController.java @RestController @RequestMapping(/api/articles) implements all endpoints from apiContract with correct verbs/paths",
+        "Public endpoints (GET list, GET search, GET /{slug}) have NO @PreAuthorize; write endpoints (POST, PUT, PATCH publish, DELETE, POST cover-image) and GET /mine, GET /id/{id} use @PreAuthorize(\"hasRole('INSTRUCTOR') or hasRole('ADMIN')\") and obtain the user via currentUserService.getCurrentUser(authentication)",
+        "Literal routes /api/articles/search, /api/articles/mine, /api/articles/id/{id} are declared so they do not collide with /api/articles/{slug}",
+        "SecurityConfig.java permitAll list includes \"/api/articles\" and \"/api/articles/**\"",
+        "Backend compiles with JAVA_HOME=~/.jdks/jdk-21.0.11+10 ./mvnw -q -DskipTests compile"
+      ]
+    },
+    {
+      "id": "US-004",
+      "title": "Backend: Landing-page featured-articles integration",
+      "priority": 4,
+      "passes": true,
+      "acceptanceCriteria": [
+        "LandingPageConfig.java gains featuredArticleIds @ElementCollection (table landing_page_featured_articles, @OrderColumn position, column article_id) defaulting to empty list",
+        "dto/LandingArticleDto.java exists (id,title,slug,description,coverImageUrl,readingTimeMinutes,authorName,category,publishedAt)",
+        "LandingPageResponse gains List<LandingArticleDto> featuredArticles; LandingPageUpdateRequest gains List<Long> featuredArticleIds",
+        "LandingPageService injects ArticleRepository, hydrateArticles(ids) returns only published articles in selected order, getPublic() populates featuredArticles, update() replaces featuredArticleIds like featuredCourseIds",
+        "Backend compiles with JAVA_HOME=~/.jdks/jdk-21.0.11+10 ./mvnw -q -DskipTests compile"
+      ]
+    },
+    {
+      "id": "US-005",
+      "title": "Backend: ArticleService unit tests",
+      "priority": 5,
+      "passes": true,
+      "acceptanceCriteria": [
+        "ArticleServiceTest.java at backend/src/test/java/com/itqan/edu/features/articles/ uses @ExtendWith(MockitoExtension.class) with @Mock repo/mapper and @InjectMocks service",
+        "Test: createArticle computes readingTimeMinutes correctly for a known content length (e.g. 2500 chars -> 3)",
+        "Test: createArticle generates a slug from the title and appends a suffix when existsBySlug returns true for the base slug",
+        "Test: updateArticle throws BusinessException(FORBIDDEN) when an INSTRUCTOR edits an article they do not own",
+        "Full backend test suite passes: cd backend && JAVA_HOME=~/.jdks/jdk-21.0.11+10 ./mvnw test (BUILD SUCCESS, 0 failures/errors)"
+      ]
+    },
+    {
+      "id": "US-006",
+      "title": "Frontend: markdown deps, articles API lib, navbar Articles link, i18n messages",
+      "priority": 6,
+      "passes": false,
+      "acceptanceCriteria": [
+        "react-markdown and remark-gfm are added to frontend/package.json dependencies and installed",
+        "frontend/src/lib/articles.ts exports TS interfaces (Article, ArticleSummary, ArticleRequest) and an articlesApi object with axios calls (list, search, getBySlug, getById, listMine, create, update, setPublished, remove, uploadCoverImage) mirroring src/lib/landingPage.ts and using src/lib/api-axios",
+        "Navbar.tsx has an Articles link (href=/articles) in both desktop links and mobile drawer, using t(\"nav.articles\")",
+        "messages/en.json and messages/ar.json both gain nav.articles and an articles.* namespace (exploreTitle, exploreSubtitle, readMore, searchPlaceholder, noArticles, readingTime, by, etc.) with correct Arabic translations in ar.json",
+        "Frontend typechecks/lints: cd frontend && npm run lint passes (no new errors) for changed files"
+      ]
+    },
+    {
+      "id": "US-007",
+      "title": "Frontend: shared MarkdownRenderer + ArticleCard components",
+      "priority": 7,
+      "passes": false,
+      "acceptanceCriteria": [
+        "frontend/src/components/articles/MarkdownRenderer.tsx renders markdown via react-markdown + remark-gfm with custom Tailwind-styled element components (h1-h3, p, ul/ol/li, a, blockquote, code, pre, img, table); does NOT enable raw HTML (safe by default)",
+        "frontend/src/components/articles/ArticleCard.tsx mirrors CourseCard: cover image (fallback icon), title, description (line-clamp), reading time, author; links to /articles/{slug}; uses design tokens (#c96442 etc.) and cn util",
+        "Frontend lint passes for changed files"
+      ]
+    },
+    {
+      "id": "US-008",
+      "title": "Frontend: Articles list page with search + article detail page",
+      "priority": 8,
+      "passes": false,
+      "acceptanceCriteria": [
+        "frontend/src/app/articles/page.tsx (client) renders Navbar, a heading, a search input (debounced; calls articlesApi.search when query present else list), and a responsive grid of ArticleCard with loading/empty/error states mirroring /app/courses/page.tsx",
+        "frontend/src/app/articles/[slug]/page.tsx (client) fetches articlesApi.getBySlug(slug), renders Navbar, cover image, title, description, author + reading time meta, and the content via MarkdownRenderer; shows not-found state on 404",
+        "Both pages are locale/RTL-aware (useTranslations/useLocale) and use existing design tokens",
+        "Frontend lint passes for changed files"
+      ]
+    },
+    {
+      "id": "US-009",
+      "title": "Frontend: Advanced MarkdownEditor with preview + instructor article authoring (create/edit, preview-before-publish, cover upload)",
+      "priority": 9,
+      "passes": false,
+      "acceptanceCriteria": [
+        "frontend/src/components/articles/MarkdownEditor.tsx is a client component with a formatting toolbar (bold, italic, headings, link, image, list, quote, inline code, code block) that inserts/wraps markdown at the textarea selection, Write/Preview tabs (Preview uses MarkdownRenderer), and a live char-count + estimated reading time display",
+        "frontend/src/components/articles/ArticleEditorForm.tsx provides create AND edit modes: fields title, description, category, cover image upload (validate+preview, reuse upload util), MarkdownEditor for content; a full-article Preview toggle (cover+title+description+rendered content) shown before publishing; Save Draft and Publish actions calling articlesApi.create/update with published=false/true",
+        "frontend/src/app/instructor/articles/page.tsx lists the instructor's own articles (articlesApi.listMine) with Active/Draft badges and Create/Edit/Delete actions, mirroring instructor course dashboard; gated to INSTRUCTOR/ADMIN",
+        "frontend/src/app/instructor/articles/[id]/edit/page.tsx loads the article via articlesApi.getById and renders ArticleEditorForm in edit mode",
+        "An entry point to the instructor articles area exists (link from /instructor dashboard or navbar instructor area)",
+        "Frontend lint passes for changed files"
+      ]
+    },
+    {
+      "id": "US-010",
+      "title": "Frontend: Admin featured-articles control + landing-page featured-articles section",
+      "priority": 10,
+      "passes": false,
+      "acceptanceCriteria": [
+        "The admin landing-page control (src/app/admin/_components/LandingPageAdmin.tsx or a new ArticlesAdmin component surfaced in /admin) lets an ADMIN multi-select which published articles are featured, persisting via landingPageApi.update({featuredArticleIds}) and pre-loading current selection from landing data",
+        "src/lib/landingPage.ts LandingPageData/Update types gain featuredArticles/featuredArticleIds and a LandingArticle interface",
+        "src/app/_components/HomeClient.tsx renders a Featured Articles section (only when featuredArticles non-empty) using ArticleCard/FeaturedArticleCard, placed sensibly among existing sections, locale-aware with i18n heading",
+        "src/lib/landingPage.ts fetchLandingPageServerSide and page.tsx pass featuredArticles through to HomeClient",
+        "Frontend lint passes for changed files"
+      ]
+    },
+    {
+      "id": "US-011",
+      "title": "Full verification: backend build+tests, frontend lint+build green",
+      "priority": 11,
+      "passes": false,
+      "acceptanceCriteria": [
+        "cd backend && JAVA_HOME=~/.jdks/jdk-21.0.11+10 ./mvnw test -> BUILD SUCCESS, 0 failures, 0 errors",
+        "cd frontend && npm run lint -> no errors",
+        "cd frontend && npm run build -> compiled successfully (no type errors)",
+        "All original task requirements present: navbar Articles tab, admin featured control, public viewing, instructor authoring with markdown editor + preview, image+title+description, auto reading time from char count, slug, list/detail pages, search"
+      ]
+    }
+  ]
+}

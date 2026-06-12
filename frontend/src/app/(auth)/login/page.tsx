@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { Eye, EyeOff, Mail, Lock, ArrowRight, Loader2 } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -23,7 +22,6 @@ const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
 
 export default function LoginPage() {
   const t = useTranslations()
-  const router = useRouter()
   const { login } = useAuth()
   const { showToast } = useToast()
   const [showPassword, setShowPassword] = React.useState(false)
@@ -66,7 +64,10 @@ export default function LoginPage() {
     <div className="space-y-8">
       {/* Header */}
       <div className="space-y-2 text-center">
-        <h1 className="text-3xl font-bold tracking-tight text-[#141413]">
+        <h1
+          className="text-3xl tracking-tight text-[#141413]"
+          style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
+        >
           {t("auth.login.title")}
         </h1>
         <p className="text-[#87867f]">
@@ -98,12 +99,12 @@ export default function LoginPage() {
         <div className="space-y-2">
           <Label htmlFor="email">{t("auth.login.email")}</Label>
           <div className="relative">
-            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
+            <Mail className="absolute start-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
             <Input
               id="email"
               type="email"
               placeholder={t("auth.login.emailPlaceholder")}
-              className="pl-11"
+              className="ps-11"
               {...register("email")}
             />
           </div>
@@ -124,18 +125,18 @@ export default function LoginPage() {
             </Link>
           </div>
           <div className="relative">
-            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
+            <Lock className="absolute start-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
             <Input
               id="password"
               type={showPassword ? "text" : "password"}
               placeholder={t("auth.login.passwordPlaceholder")}
-              className="pl-11 pr-11"
+              className="ps-11 pe-11"
               {...register("password")}
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#87867f] hover:text-[#5e5d59] transition-colors"
+              className="absolute end-3.5 top-1/2 -translate-y-1/2 text-[#87867f] hover:text-[#5e5d59] transition-colors"
             >
               {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>

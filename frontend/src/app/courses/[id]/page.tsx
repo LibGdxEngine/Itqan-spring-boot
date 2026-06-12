@@ -146,21 +146,22 @@ export default function CourseDetailPage() {
         <div className="min-h-screen bg-[#f5f4ed]">
             <Navbar />
 
-            {/* Hero Section */}
-            <div className="relative overflow-hidden bg-[#141413] text-[#faf9f5] pt-24 pb-12">
-                {/* Soft terracotta radial glow */}
-                <div
-                    aria-hidden
-                    className="pointer-events-none absolute -top-32 end-[-8%] h-[520px] w-[520px] opacity-30 blur-3xl"
-                    style={{ background: "radial-gradient(circle at 50% 50%, #d97757 0%, transparent 60%)" }}
-                />
-                <div
-                    aria-hidden
-                    className="pointer-events-none absolute -bottom-40 start-[-12%] h-[420px] w-[420px] opacity-20 blur-3xl"
-                    style={{ background: "radial-gradient(circle at 50% 50%, #c96442 0%, transparent 65%)" }}
-                />
-                {/* Subtle light pattern/texture overlay */}
-                <div aria-hidden className="pointer-events-none absolute inset-0 pattern-islamic opacity-[0.06]" />
+            {/* Hero Section — z-10 (not overflow-hidden) so the floating card can
+                hang below the hero and still paint above the content section */}
+            <div className="relative z-10 bg-[#141413] text-[#faf9f5] pt-24 pb-12">
+                {/* Decorative layer clips the glows so the hero itself doesn't have to */}
+                <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+                    <div
+                        className="absolute -top-32 end-[-8%] h-[520px] w-[520px] opacity-30 blur-3xl"
+                        style={{ background: "radial-gradient(circle at 50% 50%, #d97757 0%, transparent 60%)" }}
+                    />
+                    <div
+                        className="absolute -bottom-40 start-[-12%] h-[420px] w-[420px] opacity-20 blur-3xl"
+                        style={{ background: "radial-gradient(circle at 50% 50%, #c96442 0%, transparent 65%)" }}
+                    />
+                    {/* Subtle light pattern/texture overlay */}
+                    <div className="absolute inset-0 pattern-islamic opacity-[0.06]" />
+                </div>
 
                 <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

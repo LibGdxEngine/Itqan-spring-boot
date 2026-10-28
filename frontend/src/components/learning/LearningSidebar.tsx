@@ -14,8 +14,8 @@ import {
     useReducedMotion,
     type Variants,
 } from 'framer-motion';
+import { EASE } from '@/lib/motion';
 
-const EASE = [0.22, 1, 0.36, 1] as const;
 
 const lessonStagger: Variants = {
     hidden: {},
@@ -47,48 +47,48 @@ export function LearningSidebar({ onNavigate }: { onNavigate?: () => void } = {}
     const percent = total > 0 ? Math.round((completedCount / total) * 100) : 0;
 
     return (
-        <div className="h-full flex flex-col bg-[#141413] text-[#faf9f5] overflow-y-auto">
+        <div className="h-full flex flex-col bg-night text-on-night overflow-y-auto">
             {/* Header */}
-            <div className="p-5 border-b border-[#30302e]">
+            <div className="p-5 border-b border-night-2">
                 <Link
                     href={`/courses/${courseId}`}
                     onClick={onNavigate}
-                    className="group inline-flex items-center gap-1.5 text-xs text-[#87867f] hover:text-[#faf9f5] mb-3 transition-colors ltr-flex"
+                    className="group inline-flex items-center gap-1.5 text-xs text-ink-3 hover:text-on-night mb-3 transition-colors ltr-flex"
                 >
                     <ArrowLeft className="h-3.5 w-3.5 rtl:rotate-180 transition-transform group-hover:-translate-x-0.5 rtl:group-hover:translate-x-0.5" />
                     {t('backToCourse')}
                 </Link>
-                <h1 className="font-bold text-lg leading-snug text-[#faf9f5]">
+                <h1 className="font-bold text-lg leading-snug text-on-night">
                     {course?.title || 'Course'}
                 </h1>
             </div>
 
             {/* Progress block */}
-            <div className="px-5 py-5 border-b border-[#30302e]">
+            <div className="px-5 py-5 border-b border-night-2">
                 <div className="flex items-baseline justify-between mb-2.5 ltr-flex">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-[#b0aea5]">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-on-night-2">
                         {t('yourProgress')}
                     </span>
-                    <span className="text-sm font-bold text-[#d97757] tabular-nums">{percent}%</span>
+                    <span className="text-sm font-bold text-coral tabular-nums">{percent}%</span>
                 </div>
 
-                <div className="h-2 w-full rounded-full bg-[#30302e] overflow-hidden">
+                <div className="h-2 w-full rounded-full bg-night-2 overflow-hidden">
                     <motion.div
-                        className="h-full rounded-full bg-gradient-to-r from-[#c96442] to-[#d97757]"
+                        className="h-full rounded-full bg-gradient-to-r from-brand to-coral"
                         initial={reduced ? false : { width: 0 }}
                         animate={{ width: `${percent}%` }}
                         transition={{ duration: 0.9, ease: EASE, delay: reduced ? 0 : 0.15 }}
                     />
                 </div>
 
-                <p className="mt-2.5 text-xs text-[#87867f]">
+                <p className="mt-2.5 text-xs text-ink-3">
                     {t('progressOf', { completed: completedCount, total })}
                 </p>
             </div>
 
             {/* Course content section */}
             <div className="px-5 pt-5 pb-2">
-                <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#87867f]">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-3">
                     {t('courseContent')}
                 </span>
             </div>
@@ -134,22 +134,22 @@ function ModuleSection({
         module.lessons?.filter((l) => l.id != null && completedLessonIds.has(l.id)).length ?? 0;
 
     return (
-        <div className="border-b border-[#30302e]/70">
+        <div className="border-b border-night-2/70">
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 aria-expanded={isOpen}
-                className="w-full px-5 py-4 flex items-center justify-between gap-3 text-start hover:bg-[#30302e]/60 transition-colors ltr-flex"
+                className="w-full px-5 py-4 flex items-center justify-between gap-3 text-start hover:bg-night-2/60 transition-colors ltr-flex"
             >
                 <div className="min-w-0">
-                    <span className="text-[11px] text-[#87867f] font-semibold uppercase tracking-wider block mb-1">
+                    <span className="text-[11px] text-ink-3 font-semibold uppercase tracking-wider block mb-1">
                         {t('module', { number: index + 1 })}
                         {lessonCount > 0 && (
-                            <span className="ms-2 text-[#5e5d59] tabular-nums normal-case font-normal tracking-normal">
+                            <span className="ms-2 text-ink-2 tabular-nums normal-case font-normal tracking-normal">
                                 {completedInModule}/{lessonCount}
                             </span>
                         )}
                     </span>
-                    <span className="text-sm font-medium text-[#b0aea5] line-clamp-2">
+                    <span className="text-sm font-medium text-on-night-2 line-clamp-2">
                         {module.title}
                     </span>
                 </div>
@@ -158,7 +158,7 @@ function ModuleSection({
                     transition={{ duration: 0.25, ease: EASE }}
                     className="shrink-0"
                 >
-                    <ChevronDown className="h-4 w-4 text-[#87867f]" />
+                    <ChevronDown className="h-4 w-4 text-ink-3" />
                 </motion.span>
             </button>
 
@@ -173,7 +173,7 @@ function ModuleSection({
                         className="overflow-hidden"
                     >
                         <motion.div
-                            className="bg-[#141413] pb-2"
+                            className="bg-night pb-2"
                             variants={lessonStagger}
                             initial={reduced ? false : 'hidden'}
                             animate="visible"
@@ -191,8 +191,8 @@ function ModuleSection({
                                             className={cn(
                                                 'group flex items-center gap-3 ps-5 pe-4 py-2.5 border-s-2 text-sm transition-all duration-200 ltr-flex',
                                                 isActive
-                                                    ? 'border-[#c96442] bg-[#30302e] text-[#d97757] font-medium'
-                                                    : 'border-transparent text-[#87867f] hover:text-[#faf9f5] hover:bg-[#30302e]/50 hover:ps-6',
+                                                    ? 'border-brand bg-night-2 text-coral font-medium'
+                                                    : 'border-transparent text-ink-3 hover:text-on-night hover:bg-night-2/50 hover:ps-6',
                                             )}
                                         >
                                             {lesson.type === 'VIDEO' ? (
@@ -200,8 +200,8 @@ function ModuleSection({
                                                     className={cn(
                                                         'h-4 w-4 shrink-0 transition-colors',
                                                         isActive
-                                                            ? 'text-[#d97757]'
-                                                            : 'text-[#5e5d59] group-hover:text-[#b0aea5]',
+                                                            ? 'text-coral'
+                                                            : 'text-ink-2 group-hover:text-on-night-2',
                                                     )}
                                                 />
                                             ) : (
@@ -209,8 +209,8 @@ function ModuleSection({
                                                     className={cn(
                                                         'h-4 w-4 shrink-0 transition-colors',
                                                         isActive
-                                                            ? 'text-[#d97757]'
-                                                            : 'text-[#5e5d59] group-hover:text-[#b0aea5]',
+                                                            ? 'text-coral'
+                                                            : 'text-ink-2 group-hover:text-on-night-2',
                                                     )}
                                                 />
                                             )}
@@ -230,7 +230,7 @@ function ModuleSection({
                                                         }}
                                                         className="shrink-0"
                                                     >
-                                                        <CheckCircle className="h-4 w-4 text-emerald-400" />
+                                                        <CheckCircle className="h-4 w-4 text-success" />
                                                     </motion.span>
                                                 )}
                                             </AnimatePresence>

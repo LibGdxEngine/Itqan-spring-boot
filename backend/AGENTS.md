@@ -12,7 +12,6 @@ Spring Boot 3.5.7 REST API (Java 21) for the Itqan education platform. Provides 
 |------|-------------|
 | `pom.xml` | Maven project descriptor — Spring Boot 3.5.7, Java 21, all dependencies |
 | `Dockerfile` | Multi-stage build: development (devtools), build (Maven), production (JRE Alpine) |
-| `mvnw` / `mvnw.cmd` | Maven wrapper scripts |
 
 ## Subdirectories
 
@@ -24,8 +23,10 @@ Spring Boot 3.5.7 REST API (Java 21) for the Itqan education platform. Provides 
 ## For AI Agents
 
 ### Working In This Directory
-- Use `./mvnw spring-boot:run` to run locally (requires Postgres, MinIO, Meilisearch running)
-- Use `./mvnw test` to run tests (uses H2 in-memory DB)
+- Use `mvn spring-boot:run` to run locally (requires Postgres, MinIO, Meilisearch running)
+- Use `mvn test` to run tests (uses H2 in-memory DB), and `mvn -Ppostgres test` to run them on
+  PostgreSQL 16 via Testcontainers with Flyway + Hibernate `validate` (needs Docker)
+- Schema changes need a new Flyway migration in `src/main/resources/db/migration`
 - Java code uses 4-space indentation
 - Follow Spring naming: `*Controller`, `*Service`, `*Repository` suffixes
 - DTOs go in `dto/` sub-packages, mappers in `mapper/`

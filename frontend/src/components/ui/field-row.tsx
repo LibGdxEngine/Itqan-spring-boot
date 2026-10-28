@@ -16,8 +16,8 @@ interface FieldProps {
 export function Field({ label, children, className }: FieldProps) {
   return (
     <div className={cn("flex justify-between gap-3 py-1", className)}>
-      <span className="shrink-0 text-[#87867f]">{label}</span>
-      <span className="text-end text-[#141413]">{children}</span>
+      <span className="shrink-0 text-ink-3">{label}</span>
+      <span className="text-end text-ink">{children}</span>
     </div>
   );
 }

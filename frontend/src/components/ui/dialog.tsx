@@ -3,12 +3,15 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { X } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
+import { useFocusTrap } from "@/lib/use-focus-trap";
 
 interface DialogContextValue {
   open: boolean;
   setOpen: (open: boolean) => void;
+  titleId: string;
 }
 
 const DialogContext = React.createContext<DialogContextValue | null>(null);
@@ -42,8 +45,10 @@ export function Dialog({ children, open: openProp, onOpenChange }: DialogProps) 
     [isControlled, onOpenChange]
   );
 
+  const titleId = React.useId();
+
   return (
-    <DialogContext.Provider value={{ open, setOpen }}>
+    <DialogContext.Provider value={{ open, setOpen, titleId }}>
       {children}
     </DialogContext.Provider>
   );
@@ -75,7 +80,10 @@ interface DialogContentProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export function DialogContent({ className, children, ...props }: DialogContentProps) {
-  const { open, setOpen } = useDialogContext();
+  const { open, setOpen, titleId } = useDialogContext();
+  const t = useTranslations("common");
+  const panelRef = React.useRef<HTMLDivElement>(null);
+  useFocusTrap(panelRef, open, () => setOpen(false));
 
   if (!open) {
     return null;
@@ -86,22 +94,26 @@ export function DialogContent({ className, children, ...props }: DialogContentPr
       <button
         className="absolute inset-0 bg-black/50"
         onClick={() => setOpen(false)}
-        aria-label="Close dialog"
+        aria-label={t("close")}
+        tabIndex={-1}
       />
       <div
+        ref={panelRef}
         role="dialog"
         aria-modal="true"
+        aria-labelledby={titleId}
+        tabIndex={-1}
         className={cn(
-          "relative z-10 max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-lg border border-[#e8e6dc] bg-[#faf9f5] p-4 shadow-xl sm:p-6",
+          "relative z-10 max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-lg outline-none border border-line-strong bg-surface p-4 shadow-xl sm:p-6",
           className
         )}
         {...props}
       >
         <button
           type="button"
-          className="absolute right-3 top-3 rounded-md p-1 text-[#87867f] hover:bg-[#f0eee6]"
+          className="absolute end-3 top-3 rounded-md p-1 text-ink-3 hover:bg-subtle"
           onClick={() => setOpen(false)}
-          aria-label="Close"
+          aria-label={t("close")}
         >
           <X className="h-4 w-4" />
         </button>
@@ -116,7 +128,8 @@ export function DialogHeader({ className, ...props }: React.HTMLAttributes<HTMLD
 }
 
 export function DialogTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
+  const { titleId } = useDialogContext();
   return (
-    <h2 className={cn("text-lg font-semibold leading-none tracking-tight", className)} {...props} />
+    <h2 id={titleId} className={cn("text-lg font-semibold leading-none tracking-tight", className)} {...props} />
   );
 }

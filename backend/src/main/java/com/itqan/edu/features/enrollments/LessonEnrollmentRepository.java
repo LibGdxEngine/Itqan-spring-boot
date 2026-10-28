@@ -31,4 +31,18 @@ public interface LessonEnrollmentRepository extends JpaRepository<LessonEnrollme
     void deleteByLessonId(Long lessonId);
 
     void deleteByLessonIdIn(Collection<Long> lessonIds);
+
+    @Query("SELECT le.lesson.id, COUNT(le) FROM LessonEnrollment le " +
+           "WHERE le.isCompleted = true AND le.lesson.module.course.id = :courseId GROUP BY le.lesson.id")
+    List<Object[]> countCompletionsPerLesson(@Param("courseId") Long courseId);
+
+    List<LessonEnrollment> findByStudent_IdAndLesson_Module_Course_Id(Long studentId, Long courseId);
+
+    Optional<LessonEnrollment> findByStudent_IdAndLesson_Id(Long studentId, Long lessonId);
+
+    /** Completion timestamps for a student, newest first (streaks and weekly activity). */
+    @Query("SELECT le.completedAt FROM LessonEnrollment le " +
+           "WHERE le.student.id = :studentId AND le.isCompleted = true AND le.completedAt IS NOT NULL " +
+           "ORDER BY le.completedAt DESC")
+    List<java.time.LocalDateTime> completionTimes(@Param("studentId") Long studentId);
 }

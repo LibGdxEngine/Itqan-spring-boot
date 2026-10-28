@@ -283,4 +283,29 @@ class PasswordResetIntegrationTest extends BaseIntegrationTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
+
+    @Test
+    @DisplayName("OTP is burned after 5 wrong guesses - even the correct code then fails")
+    void testVerifyOtp_BurnedAfterTooManyWrongAttempts() {
+        registerUser("bruteforce@test.com");
+        restTemplate.postForEntity(BASE_URL + "/forgot-password",
+                ForgotPasswordRequest.builder().email("bruteforce@test.com").build(), Map.class);
+        String wrongOtp = "000000".equals(capturedOtp) ? "111111" : "000000";
+
+        for (int i = 0; i < 5; i++) {
+            ResponseEntity<Map> wrong = restTemplate.postForEntity(BASE_URL + "/verify-otp",
+                    VerifyOtpRequest.builder().email("bruteforce@test.com").otp(wrongOtp).build(), Map.class);
+            assertThat(wrong.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        }
+
+        ResponseEntity<Map> response = restTemplate.postForEntity(BASE_URL + "/reset-password",
+                ResetPasswordRequest.builder()
+                        .email("bruteforce@test.com")
+                        .otp(capturedOtp)
+                        .newPassword("newpassword123")
+                        .build(),
+                Map.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
 }

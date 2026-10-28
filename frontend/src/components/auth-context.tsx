@@ -3,12 +3,15 @@
 import * as React from "react"
 import { useRouter } from "next/navigation"
 import { authApi, AuthResponse } from "@/lib/auth"
-import { getErrorMessage } from "@/lib/api-axios"
+import api, { getErrorMessage } from "@/lib/api-axios"
 import { OpenAPI } from "@/lib/api/core/OpenAPI"
+import { clearTokens, getAccessToken, getValidAccessToken, setTokens } from "@/lib/token-store"
 
-// Initialize OpenAPI configuration
+// Initialize OpenAPI configuration. TOKEN is a resolver so every generated-client call
+// picks up the latest (silently refreshed) access token.
 if (typeof window !== "undefined") {
   OpenAPI.BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+  OpenAPI.TOKEN = async () => (await getValidAccessToken()) ?? "";
 }
 
 interface User {
@@ -49,15 +52,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     if (storedToken && storedUser) {
       setToken(storedToken)
-      // Set the token for the generated API client
-      OpenAPI.TOKEN = storedToken;
       try {
         setUser(JSON.parse(storedUser))
       } catch {
         // Invalid stored user, clear auth state
-        localStorage.removeItem('auth_token')
-        localStorage.removeItem('auth_user')
-        OpenAPI.TOKEN = undefined;
+        clearTokens()
       }
     }
     setIsLoading(false)
@@ -75,9 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     setToken(response.token)
     setUser(userData)
-    // Update OpenAPI token
-    OpenAPI.TOKEN = response.token;
-    localStorage.setItem('auth_token', response.token)
+    setTokens(response.token, response.refreshToken)
     localStorage.setItem('auth_user', JSON.stringify(userData))
   }
 
@@ -112,12 +109,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const logout = () => {
+    // Revoke refresh tokens server-side; local logout proceeds even if this fails.
+    const accessToken = getAccessToken()
+    if (accessToken) {
+      api.post('/api/auth/logout', null, { headers: { Authorization: `Bearer ${accessToken}` } }).catch(() => {})
+    }
     setToken(null)
     setUser(null)
-    // Clear OpenAPI token
-    OpenAPI.TOKEN = undefined;
-    localStorage.removeItem('auth_token')
-    localStorage.removeItem('auth_user')
+    clearTokens()
     router.push('/login')
   }
 

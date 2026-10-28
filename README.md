@@ -1,282 +1,141 @@
 # Itqan Education Platform
 
-منصة تعليمية احترافية مبنية على Spring Boot + Next.js باستخدام أفضل الممارسات في التطوير.
+منصة تعليمية ثنائية اللغة (العربية والإنجليزية) مبنية على Spring Boot و Next.js: كورسات بالفيديو والمقالات والاختبارات، شهادات قابلة للتحقق، تقييمات، لوحة إدارة، واستوديو للمدرّسين.
 
-## 🏗️ البنية المعمارية
+## 🏗️ البنية
 
-المشروع يستخدم **Monorepo** مع **Vertical Slice Architecture**:
+المشروع **Monorepo** يستخدم **Vertical Slice Architecture** في الـ Backend:
 
 ```
-itqan/
-├── backend/          # Spring Boot Application
-├── frontend/         # Next.js Application
-├── compose.yaml      # Docker Compose للبيئة المحلية
-└── README.md
+Itqan-spring-boot/
+├── backend/        # Spring Boot 3.5 (Java 21) — REST API
+├── frontend/       # Next.js 16 (React 19) — الواجهة
+├── monitoring/     # إعدادات Prometheus و Grafana
+├── scripts/        # النشر، النسخ الاحتياطي والاستعادة
+├── compose.yaml    # كل الخدمات مع Profiles
+├── Caddyfile       # Reverse proxy مع HTTPS تلقائي (production)
+└── .env.example    # قالب الإعدادات
 ```
 
 ## 🚀 البدء السريع
 
-### المتطلبات الأساسية
+### المتطلبات
 
-- Java 21+ (للاستفادة من Virtual Threads)
-- Node.js 18+
-- Maven 3.8+
-- Docker & Docker Compose
+- Docker و Docker Compose
+- للتطوير بدون Docker: Java 21، Maven 3.9، Node.js 20
 
-### 1. إعداد Backend و Frontend (Docker)
+### التشغيل للتطوير
 
 ```bash
-# إنشاء ملف .env من المثال
 cp .env.example .env
-
-# عدّل ملف .env حسب البيئة (development/production)
-# للتطوير: اترك القيم الافتراضية
-# للإنتاج: غيّر PASSWORDS, SECRETS, و JPA_HIBERNATE_DDL_AUTO=validate
-
-# تشغيل جميع الخدمات
-docker compose up --build -d
-
-# أو للتشغيل في المقدمة (لرؤية السجلات)
-docker compose up --build
+COMPOSE_PROFILES=dev docker compose up --build
 ```
 
-**جميع الخدمات تعمل الآن في Docker containers:**
-- Backend API: `http://localhost:8080`
-- Frontend: `http://localhost:3000`
-- PostgreSQL: `localhost:5433` (أو حسب POSTGRES_PORT في .env)
-- pgAdmin: `http://localhost:5050` (إذا كان ENABLE_PGADMIN=true)
+| الخدمة | العنوان |
+|---|---|
+| Frontend | `http://localhost:3000` |
+| Backend API | `http://localhost:8080` |
+| Swagger UI | `http://localhost:8080/swagger-ui.html` |
+| PostgreSQL | `localhost:5433` |
+| MinIO (تخزين الفيديو) | `http://localhost:9000` (Console على `9001`) |
+| Meilisearch | `http://localhost:7700` |
 
-**لتشغيل pgAdmin (اختياري):**
-```bash
-docker compose --profile pgadmin up -d pgadmin
-```
+> العربية هي اللغة الافتراضية على الرابط العادي، والإنجليزية بإضافة `?lang=en`.
 
-**للتطوير المحلي (بدون Docker):**
-```bash
-cd backend
-# تأكد أن PostgreSQL يعمل أولاً
-docker compose up -d postgres
+أوامر مختصرة موجودة في `Makefile`: `make dev-build`، `make dev-logs`، `make dev-down`، `make prod-build`.
 
-# تشغيل Backend محلياً
-./mvnw spring-boot:run
-
-# في terminal آخر - تشغيل Frontend
-cd frontend
-npm run dev
-```
-
-- Swagger UI: `http://localhost:8080/swagger-ui.html`
-- API Docs: `http://localhost:8080/v3/api-docs`
-
-### 2. إعداد Frontend
+### التشغيل في Production
 
 ```bash
-cd frontend
-
-# تثبيت التبعيات
-npm install
-
-# توليد APIs تلقائياً من Backend
-# تأكد أن Backend يعمل أولاً
-npm run generate-api
-
-# تشغيل التطبيق
-npm run dev
+cp .env.example .env.production
+# غيّر كل كلمات المرور والأسرار، واضبط DOMAIN و NEXT_PUBLIC_SITE_URL
+COMPOSE_PROFILES=prod docker compose --env-file .env.production up -d --build
 ```
 
-Frontend سيعمل على: `http://localhost:3000`
+- الـ Backend يرفض التشغيل في `prod` إذا كانت بيانات الدخول الافتراضية مستخدمة.
+- Flyway يدير قاعدة البيانات، و Hibernate يتحقق فقط (`ddl-auto=validate`).
+- Caddy يصدر شهادة HTTPS تلقائياً ويحجب `/actuator` عن الإنترنت.
 
-## 📦 الميزات الرئيسية
+> ⚠️ صور MinIO على `quay.io/minio` لم تعد متاحة للتحميل العام. الصور الموجودة محلياً تعمل، لكن أي سيرفر جديد يحتاج مصدراً آخر للصورة أو بديلاً متوافقاً مع S3.
 
-### Backend (Spring Boot)
-
-- ✅ **Docker Compose Support**: Spring Boot يشغل PostgreSQL تلقائياً
-- ✅ **DevTools**: إعادة تشغيل تلقائية عند التعديل
-- ✅ **JWT Authentication**: نظام مصادقة آمن
-- ✅ **Global Exception Handling**: معالجة موحدة للأخطاء باستخدام ProblemDetails (RFC 7807)
-- ✅ **Validation**: تحقق تلقائي من المدخلات
-- ✅ **MapStruct**: تحويل Entity ↔ DTO تلقائياً
-- ✅ **OpenAPI/Swagger**: توثيق APIs تلقائياً
-- ✅ **Vertical Slice Architecture**: هيكلية قابلة للتوسع
-
-### Frontend (Next.js)
-
-- ✅ **TypeScript**: نوع آمن للكود
-- ✅ **Tailwind CSS**: تصميم سريع وحديث
-- ✅ **OpenAPI Generation**: توليد APIs تلقائياً من Backend
-- ✅ **App Router**: أحدث ميزات Next.js
-
-## 🗂️ هيكلية المشروع
-
-### Backend Structure
-
-```
-backend/src/main/java/com/itqan/edu/
-├── common/                    # Shared Kernel
-│   ├── config/                # Security, OpenAPI, etc.
-│   ├── exception/             # Global Exception Handler
-│   ├── security/              # JWT Authentication
-│   └── utils/
-│
-├── features/                   # Vertical Slices
-│   ├── auth/                  # Authentication Feature
-│   ├── courses/               # Courses Feature
-│   └── students/              # Students Feature
-│
-└── Application.java
-```
-
-### Frontend Structure
-
-```
-frontend/src/
-├── app/                       # Next.js App Router
-├── components/                # React Components
-├── lib/
-│   └── api/                   # Generated API Client
-└── hooks/                     # Custom Hooks
-```
-
-## 🔐 المصادقة (Authentication)
-
-المشروع يستخدم JWT Authentication:
-
-1. **التسجيل**: `POST /api/auth/register`
-2. **تسجيل الدخول**: `POST /api/auth/login`
-3. **استخدام Token**: أضف `Authorization: Bearer <token>` في Header
-
-## 🗄️ قاعدة البيانات
-
-- **PostgreSQL**: قاعدة البيانات الرئيسية
-- **pgAdmin**: واجهة إدارة قاعدة البيانات على `http://localhost:5050`
-  - Email: `admin@itqan.edu`
-  - Password: `admin`
-
-### الاتصال بقاعدة البيانات
-
-```properties
-Host: localhost
-Port: 5432
-Database: itqan_edu
-Username: postgres
-Password: postgres
-```
-
-## 📝 APIs
-
-### Authentication APIs
-
-- `POST /api/auth/register` - تسجيل مستخدم جديد
-- `POST /api/auth/login` - تسجيل الدخول
-
-### Courses APIs
-
-- `GET /api/courses` - جلب جميع الكورسات
-- `GET /api/courses/{id}` - جلب كورس محدد
-- `POST /api/courses` - إنشاء كورس جديد
-- `PUT /api/courses/{id}` - تحديث كورس
-- `DELETE /api/courses/{id}` - حذف كورس
-
-### Students APIs
-
-- `GET /api/students` - جلب جميع الطلاب
-- `GET /api/students/{id}` - جلب طالب محدد
-- `POST /api/students` - إنشاء طالب جديد
-- `PUT /api/students/{id}` - تحديث طالب
-- `DELETE /api/students/{id}` - حذف طالب
-
-## 🔧 التطوير
-
-### توليد APIs في Frontend
-
-بعد تعديل أي Controller في Backend:
-
-```bash
-cd frontend
-npm run generate-api
-```
-
-هذا سيقوم بـ:
-1. جلب `openapi.json` من Backend
-2. توليد TypeScript Client & Types تلقائياً
-
-### إعدادات التطوير
-
-- **Backend**: DevTools يعيد التشغيل تلقائياً عند التعديل
-- **Frontend**: Hot Reload يعمل تلقائياً
-
-## 🐳 Docker Compose
-
-المشروع يستخدم ملف Docker Compose واحد (`compose.yaml`) مع ملف `.env` واحد للتحكم في جميع الإعدادات.
-
-### الإعداد:
-
-```bash
-# إنشاء ملف .env من المثال
-cp .env.example .env
-
-# عدّل .env حسب البيئة:
-# - للتطوير: اترك القيم الافتراضية
-# - للإنتاج: غيّر PASSWORDS, SECRETS, JPA_HIBERNATE_DDL_AUTO=validate, RESTART_POLICY=always
-```
-
-### الأوامر المفيدة:
-
-```bash
-# تشغيل جميع الخدمات
-docker compose up -d
-
-# إيقاف جميع الخدمات
-docker compose down
-
-# رؤية السجلات
-docker logs itqan-backend -f
-docker logs itqan-frontend -f
-
-# إعادة بناء service محدد
-docker compose up -d --build backend
-
-# تشغيل pgAdmin (اختياري)
-docker compose --profile pgadmin up -d pgadmin
-```
-
-## 📚 التقنيات المستخدمة
+## 🧪 الاختبارات
 
 ### Backend
-- Spring Boot 3.2.0
-- Java 21 (with Virtual Threads support)
-- Spring Security
-- Spring Data JPA
-- PostgreSQL
-- JWT (jjwt)
-- MapStruct
-- Lombok
-- Springdoc OpenAPI
+
+```bash
+cd backend
+mvn test                # سريع، على H2
+mvn -Ppostgres test     # على PostgreSQL 16 حقيقي عبر Testcontainers (يحتاج Docker)
+```
+
+الوضع `-Ppostgres` يطبّق كل Flyway migrations ثم يتحقق أن الـ Entities تطابق الجداول، فيكشف أي migration ناقصة قبل النشر.
 
 ### Frontend
-- Next.js 16
-- React 19
-- TypeScript
-- Tailwind CSS
-- Axios
-- OpenAPI TypeScript Codegen
 
-## 🤝 المساهمة
+```bash
+cd frontend
+npm run lint
+npm run typecheck
+npm run test:run        # Vitest + Testing Library
+npm run build
+```
 
-1. Fork المشروع
-2. أنشئ Branch للميزة (`git checkout -b feature/AmazingFeature`)
-3. Commit التغييرات (`git commit -m 'Add some AmazingFeature'`)
-4. Push إلى Branch (`git push origin feature/AmazingFeature`)
-5. افتح Pull Request
+### اختبارات End-to-End (Playwright)
+
+تحتاج Backend و Frontend شغّالين، وحساب الـ super admin الخاص بالـ Backend:
+
+```bash
+cd frontend
+npx playwright install chromium
+E2E_ADMIN_EMAIL=... E2E_ADMIN_PASSWORD=... npm run test:e2e
+```
+
+تنشئ الاختبارات كورساً مجانياً خاصاً بها، ثم تتحقق من الصفحات العامة ومن رحلة الطالب كاملة: تسجيل الدخول ← الاشتراك ← إكمال الدرس ← الحصول على الشهادة.
+
+## 🛠️ التشغيل والمراقبة
+
+### النسخ الاحتياطي
+
+يعمل تلقائياً مع `prod` (أو وحده بـ `COMPOSE_PROFILES=backup`):
+
+- **قاعدة البيانات**: نسخة يومية مضغوطة الساعة `BACKUP_DB_TIME` (افتراضياً 02:00)، ويُحذف ما هو أقدم من `BACKUP_RETENTION_DAYS` يوماً.
+- **الفيديوهات والملفات**: نسخة يومية من الـ bucket الساعة `BACKUP_FILES_TIME` (افتراضياً 03:00) باستخدام rclone.
+- **نسخة خارجية (اختيارية)**: عند ضبط `BACKUP_S3_*` تُرفع النسختان إلى أي تخزين متوافق مع S3.
+
+كل النسخ محفوظة في الـ volume `backup_data`. للاستعادة (أوقف الـ Backend أولاً):
+
+```bash
+scripts/db-restore.sh itqan_edu_20260101_020000.sql.gz
+```
+
+### المراقبة (Prometheus + Grafana)
+
+```bash
+# في .env.production: METRICS_SCRAPE_TOKEN و GRAFANA_ADMIN_PASSWORD (قيم عشوائية طويلة)
+COMPOSE_PROFILES=prod,monitoring docker compose --env-file .env.production up -d
+```
+
+- Prometheus على `127.0.0.1:9090`، و Grafana على `127.0.0.1:3001` مع مصدر بيانات جاهز.
+- تنبيهات جاهزة في `monitoring/alerts.yml`: توقف الـ Backend، ونسبة أخطاء 5xx عالية، وبطء الـ API، وامتلاء اتصالات قاعدة البيانات، وامتلاء الذاكرة.
+- الـ Backend يعرض المقاييس على `/actuator/prometheus` (يحتاج `METRICS_SCRAPE_TOKEN` أو حساب مدير).
+
+### تتبع الأخطاء (Sentry)
+
+اختياري ومعطّل افتراضياً. اضبط `SENTRY_DSN` للـ Backend و `SENTRY_DSN_FRONTEND` للواجهة. الأخير يُضمَّن وقت البناء، لذا أعد بناء الـ frontend بعد تغييره.
+
+## 🔧 ملاحظات للتطوير
+
+- بعد تعديل أي Controller، أعد توليد الـ API client: `cd frontend && npm run generate-api` (يحتاج Backend شغّالاً).
+- أي تغيير في قاعدة البيانات يحتاج migration جديدة في `backend/src/main/resources/db/migration` (مثل `V7__...sql`).
+- النصوص في `frontend/messages/ar.json` و `en.json`، ويجب إضافة أي مفتاح جديد في الملفين.
+- دليل تفصيلي للمطوّرين وأدوات الذكاء الاصطناعي في `AGENTS.md`.
+
+## 📚 التقنيات
+
+**Backend:** Spring Boot 3.5، Java 21، Spring Security + JWT، JPA/Hibernate، Flyway، PostgreSQL 16، Redis، MinIO/S3، Meilisearch، Stripe، Micrometer، Sentry
+
+**Frontend:** Next.js 16، React 19، TypeScript، Tailwind CSS 4، Radix UI، next-intl، Recharts، dnd-kit، Vitest، Playwright
 
 ## 📄 الترخيص
 
 هذا المشروع مرخص تحت MIT License.
-
-## 👥 الفريق
-
-Itqan Education Platform Team
-
----
-
-**ملاحظة**: هذا المشروع مبني باستخدام أفضل الممارسات في التطوير لضمان سرعة التطوير (High Velocity) وقابلية التوسع (Scalability).

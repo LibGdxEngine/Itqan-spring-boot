@@ -22,5 +22,8 @@ public interface EnrollmentCodeRepository extends JpaRepository<EnrollmentCode, 
 
     boolean existsByCode(String code);
 
+    org.springframework.data.domain.Page<EnrollmentCode> findByCourseId(
+            Long courseId, org.springframework.data.domain.Pageable pageable);
+
     void deleteByCourseId(Long courseId);
 }

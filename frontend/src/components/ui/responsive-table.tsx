@@ -52,11 +52,11 @@ export function ResponsiveTable<T>({
       <div
         className={cn(
           "hidden overflow-x-auto md:block",
-          bordered && "rounded-lg border border-[#f0eee6]",
+          bordered && "rounded-lg border border-line",
         )}
       >
         <table className="min-w-full text-sm">
-          <thead className="bg-[#f0eee6] text-start text-[#5e5d59]">
+          <thead className="bg-subtle text-start text-ink-2">
             <tr>
               {columns.map((col, i) => (
                 <th key={i} className={cn("px-4 py-3", col.alignEnd && "text-end")}>
@@ -68,9 +68,9 @@ export function ResponsiveTable<T>({
           </thead>
           <tbody>
             {rows.map((row, idx) => (
-              <tr key={getRowKey(row, idx)} className="border-t border-[#f0eee6]">
+              <tr key={getRowKey(row, idx)} className="border-t border-line">
                 {columns.map((col, i) => (
-                  <td key={i} className={cn("px-4 py-3 text-[#4d4c48]", col.alignEnd && "text-end")}>
+                  <td key={i} className={cn("px-4 py-3 text-ink-button", col.alignEnd && "text-end")}>
                     {col.cell(row)}
                   </td>
                 ))}
@@ -90,7 +90,7 @@ export function ResponsiveTable<T>({
         {rows.map((row, idx) => (
           <div
             key={getRowKey(row, idx)}
-            className={cn("rounded-lg border border-[#f0eee6] bg-white p-4 text-sm", mobileCardClassName)}
+            className={cn("rounded-lg border border-line bg-paper p-4 text-sm", mobileCardClassName)}
           >
             {columns.map((col, i) => (
               <Field key={i} label={col.header}>

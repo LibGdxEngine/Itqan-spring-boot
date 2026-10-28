@@ -34,6 +34,7 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final UserDetailsService userDetailsService;
     private final SecurityHeadersFilter securityHeadersFilter;
+    private final MetricsScrapeRequestMatcher metricsScrapeRequestMatcher;
 
     @org.springframework.beans.factory.annotation.Value("${spring.web.cors.allowed-origins:http://localhost:3000}")
     private String allowedOrigins;
@@ -56,6 +57,10 @@ public class SecurityConfig {
                                 "/api/clips/**",
                                 "/api/specializations",
                                 "/api/landing-page",
+                                "/api/settings",
+                                "/api/catalog",
+                                "/api/catalog/**",
+                                "/api/certificates/verify/**",
                                 "/api/payments/webhook/stripe",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
@@ -64,6 +69,7 @@ public class SecurityConfig {
                                 "/actuator/health/**",
                                 "/actuator/info")
                         .permitAll()
+                        .requestMatchers(metricsScrapeRequestMatcher).permitAll()
                         .requestMatchers("/actuator/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session

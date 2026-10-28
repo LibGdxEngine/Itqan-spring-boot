@@ -38,16 +38,16 @@ export function QuestionCard({
   }
 
   return (
-    <div className="rounded-xl border border-[#f0eee6] bg-[#faf9f5] p-5">
-      <div className="mb-3 flex items-center gap-2 text-xs font-medium text-[#87867f]">
+    <div className="rounded-xl border border-line bg-surface p-5">
+      <div className="mb-3 flex items-center gap-2 text-xs font-medium text-ink-3">
         <span>{t("quiz.player.questionLabel", { index: index + 1, total })}</span>
         {typeof question.points === "number" && question.points > 0 && (
-          <span className="rounded-full bg-[#f0eee6] px-2 py-0.5 text-[#5e5d59]">
+          <span className="rounded-full bg-subtle px-2 py-0.5 text-ink-2">
             {t("quiz.player.points", { count: question.points })}
           </span>
         )}
       </div>
-      <p className="mb-4 text-base font-medium text-[#141413]">{question.questionText}</p>
+      <p className="mb-4 text-base font-medium text-ink">{question.questionText}</p>
 
       {(type === "MULTIPLE_CHOICE" || type === "TRUE_FALSE") && (
         <ul className="space-y-2">
@@ -63,14 +63,14 @@ export function QuestionCard({
                   <label
                     className={`flex cursor-pointer items-start gap-3 rounded-lg border px-3 py-2.5 text-sm transition ${
                       checked
-                        ? "border-[#c96442] bg-[#fdf3ef] text-[#141413]"
-                        : "border-[#f0eee6] bg-white text-[#4d4c48] hover:border-[#e2dfd1]"
+                        ? "border-brand bg-brand-soft text-ink"
+                        : "border-line bg-paper text-ink-button hover:border-ring-warm"
                     } ${disabled ? "cursor-not-allowed opacity-60" : ""}`}
                   >
                     <input
                       type="radio"
                       name={`question-${question.id}`}
-                      className="mt-1 accent-[#c96442]"
+                      className="mt-1 accent-brand"
                       checked={checked}
                       disabled={disabled}
                       onChange={() => setSingleOption(optionId)}

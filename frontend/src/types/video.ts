@@ -34,6 +34,8 @@ export interface VideoPlayerProps {
   lessonId: number;
   transcript?: Transcript;
   autoPlay?: boolean;
+  /** Resume point in seconds; ignored when it is within the last few seconds of the video. */
+  startAt?: number;
   onTimeUpdate?: (currentTime: number) => void;
   onEnded?: () => void;
   onPlaybackError?: () => void;

@@ -1,0 +1,4 @@
+# Shell scripts are bind-mounted into Linux containers; CRLF breaks them.
+*.sh text eol=lf
+Caddyfile text eol=lf
+monitoring/** text eol=lf

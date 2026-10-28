@@ -30,7 +30,7 @@ export function BookmarkPanel({
         <h3 className="text-white font-semibold text-lg">{t('bookmarks')}</h3>
         <button
           onClick={onCreate}
-          className="bg-[#c96442] hover:bg-[#b55836] text-[#faf9f5] px-4 py-2 rounded-lg text-sm font-medium transition"
+          className="bg-brand hover:bg-brand-hover text-on-night px-4 py-2 rounded-lg text-sm font-medium transition"
         >
           {t('addBookmark')}
         </button>
@@ -50,11 +50,11 @@ export function BookmarkPanel({
               <div className="flex items-start justify-between gap-3">
                 <button
                   onClick={() => onSeek(bookmark.timestamp)}
-                  className="flex-1 text-left"
+                  className="flex-1 text-start"
                 >
                   <div className="flex items-center gap-2 mb-2">
-                    <Clock size={16} className="text-[#d97757]" />
-                    <span className="text-[#d97757] font-mono text-sm">
+                    <Clock size={16} className="text-coral" />
+                    <span className="text-coral font-mono text-sm">
                       {formatTime(bookmark.timestamp)}
                     </span>
                   </div>

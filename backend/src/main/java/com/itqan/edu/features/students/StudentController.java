@@ -35,8 +35,10 @@ public class StudentController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get student by ID", description = "Get a student by its ID")
-    public ResponseEntity<StudentResponse> getStudentById(@PathVariable Long id) {
-        StudentResponse response = studentService.getStudentById(id);
+    public ResponseEntity<StudentResponse> getStudentById(@PathVariable Long id, Authentication authentication) {
+        boolean isStaff = authentication.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()) || "ROLE_INSTRUCTOR".equals(a.getAuthority()));
+        StudentResponse response = studentService.getStudentById(id, authentication.getName(), isStaff);
         return ResponseEntity.ok(response);
     }
 
@@ -93,6 +95,14 @@ public class StudentController {
     @Operation(summary = "Deactivate student", description = "Deactivate a student")
     public ResponseEntity<StudentResponse> deactivateStudent(@PathVariable Long id) {
         StudentResponse response = studentService.deactivateStudent(id);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{id}/activate")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Activate student", description = "Re-activate a deactivated student and restore login")
+    public ResponseEntity<StudentResponse> activateStudent(@PathVariable Long id) {
+        StudentResponse response = studentService.activateStudent(id);
         return ResponseEntity.ok(response);
     }
 }

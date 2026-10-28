@@ -4,8 +4,12 @@ import { getLocale, getMessages, getTranslations } from 'next-intl/server';
 import { IBM_Plex_Sans_Arabic, Amiri } from 'next/font/google';
 import "./globals.css";
 import { ClientProviders } from "@/components/providers/ClientProviders";
+import { jsonLdHtml } from "@/lib/seo";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+
+// Applies the saved theme (or the OS preference) before first paint to avoid a light flash.
+const THEME_SCRIPT = `(function(){try{var t=localStorage.getItem('itqan-theme');var d=t==='dark'||((!t||t==='system')&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d)document.documentElement.classList.add('dark');}catch(e){}})();`;
 
 const plexArabic = IBM_Plex_Sans_Arabic({
   subsets: ['arabic', 'latin'],
@@ -50,9 +54,6 @@ export async function generateMetadata(): Promise<Metadata> {
       card: 'summary_large_image',
       title: t('title'),
       description: t('description'),
-    },
-    alternates: {
-      canonical: SITE_URL,
     },
     robots: { index: true, follow: true },
     icons: {
@@ -112,17 +113,22 @@ export default async function RootLayout({
       lang={locale}
       dir={isRTL ? 'rtl' : 'ltr'}
       className={`${plexArabic.variable} ${amiri.variable}`}
+      // The theme script below adds "dark" before React hydrates.
+      suppressHydrationWarning
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
       <body
         className={`antialiased ${isRTL ? 'font-arabic' : ''}`}
       >
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: jsonLdHtml(organizationJsonLd) }}
         />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: jsonLdHtml(websiteJsonLd) }}
         />
         <NextIntlClientProvider messages={messages}>
           <ClientProviders>{children}</ClientProviders>

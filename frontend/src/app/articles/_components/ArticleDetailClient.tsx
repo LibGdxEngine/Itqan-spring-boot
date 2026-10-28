@@ -44,22 +44,22 @@ export default function ArticleDetailClient() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f5f4ed]">
-        <Loader2 className="h-10 w-10 animate-spin text-[#c96442]" />
+      <div className="flex min-h-screen items-center justify-center bg-canvas">
+        <Loader2 className="h-10 w-10 animate-spin text-brand" />
       </div>
     )
   }
 
   if (error || !article) {
     return (
-      <div className="min-h-screen bg-[#f5f4ed]">
+      <div className="min-h-screen bg-canvas">
         <Navbar />
         <div className="flex h-[80vh] flex-col items-center justify-center px-4 text-center">
-          <AlertCircle className="mb-4 h-16 w-16 text-red-500" />
-          <h1 className="mb-2 text-2xl font-bold text-[#141413]">
+          <AlertCircle className="mb-4 h-16 w-16 text-danger" />
+          <h1 className="mb-2 text-2xl font-bold text-ink">
             {t("articles.notFoundTitle")}
           </h1>
-          <p className="text-[#5e5d59]">
+          <p className="text-ink-2">
             {error || t("articles.notFoundDesc")}
           </p>
         </div>
@@ -75,12 +75,12 @@ export default function ArticleDetailClient() {
     : null
 
   return (
-    <div className="min-h-screen bg-[#f5f4ed]">
+    <div className="min-h-screen bg-canvas">
       <Navbar />
 
-      <main className="mx-auto max-w-3xl px-4 pb-20 pt-24 sm:px-6">
+      <main id="main-content" className="mx-auto max-w-3xl px-4 pb-20 pt-24 sm:px-6">
         {article.coverImageUrl ? (
-          <div className="mb-8 h-56 w-full overflow-hidden rounded-2xl bg-[#c96442] sm:h-80">
+          <div className="mb-8 h-56 w-full overflow-hidden rounded-2xl bg-brand sm:h-80">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={article.coverImageUrl}
@@ -89,31 +89,31 @@ export default function ArticleDetailClient() {
             />
           </div>
         ) : (
-          <div className="mb-8 flex h-56 w-full items-center justify-center rounded-2xl bg-[#c96442] sm:h-80">
-            <Newspaper className="h-20 w-20 text-[#faf9f5] opacity-80" />
+          <div className="mb-8 flex h-56 w-full items-center justify-center rounded-2xl bg-brand sm:h-80">
+            <Newspaper className="h-20 w-20 text-on-night opacity-80" />
           </div>
         )}
 
         {article.category ? (
-          <span className="mb-3 inline-flex rounded-full bg-[#f0eee6] px-2.5 py-1 text-xs font-semibold text-[#c96442]">
+          <span className="mb-3 inline-flex rounded-full bg-subtle px-2.5 py-1 text-xs font-semibold text-brand">
             {article.category}
           </span>
         ) : null}
 
         <h1
-          className="text-3xl text-[#141413] sm:text-4xl"
+          className="text-3xl text-ink sm:text-4xl"
           style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
         >
           {article.title}
         </h1>
 
         {article.description ? (
-          <p className="mt-4 text-lg leading-relaxed text-[#5e5d59]">
+          <p className="mt-4 text-lg leading-relaxed text-ink-2">
             {article.description}
           </p>
         ) : null}
 
-        <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-[#e8e6dc] pb-6 text-sm text-[#87867f] ltr-flex">
+        <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-line-strong pb-6 text-sm text-ink-3 ltr-flex">
           {article.authorName ? (
             <>
               <span>

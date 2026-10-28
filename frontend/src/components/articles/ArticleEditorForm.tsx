@@ -154,7 +154,7 @@ export function ArticleEditorForm({ mode, initial }: ArticleEditorFormProps) {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h2
-            className="text-lg text-[#141413]"
+            className="text-lg text-ink"
             style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
           >
             {t("articles.preview")}
@@ -171,8 +171,8 @@ export function ArticleEditorForm({ mode, initial }: ArticleEditorFormProps) {
           </Button>
         </div>
 
-        <article className="overflow-hidden rounded-2xl border border-[#f0eee6] bg-[#faf9f5]">
-          <div className="h-56 w-full overflow-hidden bg-[#c96442] sm:h-72">
+        <article className="overflow-hidden rounded-2xl border border-line bg-surface">
+          <div className="h-56 w-full overflow-hidden bg-brand sm:h-72">
             {displayCover ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -182,25 +182,25 @@ export function ArticleEditorForm({ mode, initial }: ArticleEditorFormProps) {
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center">
-                <Newspaper className="h-16 w-16 text-[#faf9f5] opacity-80" />
+                <Newspaper className="h-16 w-16 text-on-night opacity-80" />
               </div>
             )}
           </div>
           <div className="px-6 py-8 sm:px-10">
             <h1
-              className="text-3xl text-[#141413] sm:text-4xl"
+              className="text-3xl text-ink sm:text-4xl"
               style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
             >
               {title || t("articles.untitled")}
             </h1>
             {description ? (
-              <p className="mt-3 text-lg text-[#5e5d59]">{description}</p>
+              <p className="mt-3 text-lg text-ink-2">{description}</p>
             ) : null}
             <div className="mt-8">
               {content.trim() ? (
                 <MarkdownRenderer content={content} />
               ) : (
-                <p className="text-sm text-[#87867f]">
+                <p className="text-sm text-ink-3">
                   {t("articles.previewEmpty")}
                 </p>
               )}
@@ -230,7 +230,7 @@ export function ArticleEditorForm({ mode, initial }: ArticleEditorFormProps) {
       <div className="space-y-2">
         <Label>{t("articles.coverImage")}</Label>
         {displayCover ? (
-          <div className="relative overflow-hidden rounded-xl border border-[#e8e6dc] bg-[#f0eee6]">
+          <div className="relative overflow-hidden rounded-xl border border-line-strong bg-subtle">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={displayCover}
@@ -241,7 +241,7 @@ export function ArticleEditorForm({ mode, initial }: ArticleEditorFormProps) {
               type="button"
               variant="secondary"
               size="sm"
-              className="absolute right-2 top-2 gap-1"
+              className="absolute end-2 top-2 gap-1"
               onClick={clearCover}
             >
               <X className="h-3 w-3" />
@@ -252,7 +252,7 @@ export function ArticleEditorForm({ mode, initial }: ArticleEditorFormProps) {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="flex aspect-video w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#e8e6dc] bg-[#faf9f5] text-sm text-[#87867f] transition-colors hover:border-[#c96442] hover:text-[#c96442]"
+            className="flex aspect-video w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-line-strong bg-surface text-sm text-ink-3 transition-colors hover:border-brand hover:text-brand"
           >
             <ImagePlus className="h-6 w-6" />
             <span>{t("articles.uploadCover")}</span>
@@ -306,7 +306,7 @@ export function ArticleEditorForm({ mode, initial }: ArticleEditorFormProps) {
       </div>
 
       {/* Actions */}
-      <div className="flex flex-col gap-3 border-t border-[#f0eee6] pt-6 sm:flex-row sm:justify-end">
+      <div className="flex flex-col gap-3 border-t border-line pt-6 sm:flex-row sm:justify-end">
         <Button
           type="button"
           variant="secondary"
@@ -314,7 +314,7 @@ export function ArticleEditorForm({ mode, initial }: ArticleEditorFormProps) {
           onClick={() => void submit(false)}
         >
           {submitting === "draft" && (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <Loader2 className="me-2 h-4 w-4 animate-spin" />
           )}
           {t("articles.saveDraft")}
         </Button>
@@ -324,7 +324,7 @@ export function ArticleEditorForm({ mode, initial }: ArticleEditorFormProps) {
           onClick={() => void submit(true)}
         >
           {submitting === "publish" && (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <Loader2 className="me-2 h-4 w-4 animate-spin" />
           )}
           {t("articles.publish")}
         </Button>

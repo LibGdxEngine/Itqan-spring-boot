@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import HomeClient from "./_components/HomeClient";
 import { fetchLandingPageServerSide } from "@/lib/landingPage";
+import { localizedAlternates } from "@/lib/seo";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
@@ -15,7 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: t("title"),
     description: t("description"),
     keywords,
-    alternates: { canonical: SITE_URL },
+    alternates: localizedAlternates("/", locale),
     openGraph: {
       type: "website",
       url: SITE_URL,

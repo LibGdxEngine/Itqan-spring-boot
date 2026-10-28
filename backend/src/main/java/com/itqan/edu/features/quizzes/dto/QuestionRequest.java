@@ -13,6 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class QuestionRequest {
+    private Long id; // Set when editing an existing question
     private String questionText;
     private QuestionType questionType;
     private Integer points;

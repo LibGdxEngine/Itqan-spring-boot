@@ -125,8 +125,8 @@ export function QuizPlayer({ quiz, backHref }: QuizPlayerProps) {
 
   if (starting || (!attempt && !result)) {
     return (
-      <div className="flex items-center justify-center rounded-xl border border-[#f0eee6] bg-[#faf9f5] p-10">
-        <Loader2 className="h-6 w-6 animate-spin text-[#c96442]" />
+      <div className="flex items-center justify-center rounded-xl border border-line bg-surface p-10">
+        <Loader2 className="h-6 w-6 animate-spin text-brand" />
       </div>
     )
   }
@@ -145,7 +145,7 @@ export function QuizPlayer({ quiz, backHref }: QuizPlayerProps) {
 
   if (sortedQuestions.length === 0) {
     return (
-      <div className="rounded-xl border border-[#f0eee6] bg-[#faf9f5] p-6 text-sm text-[#5e5d59]">
+      <div className="rounded-xl border border-line bg-surface p-6 text-sm text-ink-2">
         {t("quiz.player.noQuestions")}
       </div>
     )
@@ -153,7 +153,7 @@ export function QuizPlayer({ quiz, backHref }: QuizPlayerProps) {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-xl border border-[#f0eee6] bg-[#faf9f5] p-4 text-sm text-[#5e5d59]">
+      <div className="rounded-xl border border-line bg-surface p-4 text-sm text-ink-2">
         {t("quiz.player.intro", {
           count: sortedQuestions.length,
           passing: quiz.passingScore ?? 0,
@@ -177,8 +177,8 @@ export function QuizPlayer({ quiz, backHref }: QuizPlayerProps) {
         })}
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#f0eee6] bg-[#faf9f5] p-4">
-        <p className="text-sm text-[#87867f]">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-surface p-4">
+        <p className="text-sm text-ink-3">
           {allAnswered
             ? t("quiz.player.allAnswered")
             : t("quiz.player.someUnanswered")}

@@ -100,12 +100,12 @@ export default function RegisterPage() {
       {/* Header */}
       <div className="space-y-2 text-center">
         <h1
-          className="text-3xl tracking-tight text-[#141413]"
+          className="text-3xl tracking-tight text-ink"
           style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
         >
           {t("auth.register.title")}
         </h1>
-        <p className="text-[#87867f]">
+        <p className="text-ink-3">
           {t("auth.register.description")}
         </p>
       </div>
@@ -119,7 +119,7 @@ export default function RegisterPage() {
               <Separator />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-[#f5f4ed] px-3 text-[#87867f]">
+              <span className="bg-canvas px-3 text-ink-3">
                 {t("common.orContinueWithEmail")}
               </span>
             </div>
@@ -133,7 +133,7 @@ export default function RegisterPage() {
         <div className="space-y-2">
           <Label htmlFor="name">{t("auth.register.fullName")}</Label>
           <div className="relative">
-            <User className="absolute start-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
+            <User className="absolute start-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-3" />
             <Input
               id="name"
               type="text"
@@ -143,7 +143,7 @@ export default function RegisterPage() {
             />
           </div>
           {errors.name && (
-            <p className="text-sm text-red-500">{errors.name.message}</p>
+            <p className="text-sm text-danger">{errors.name.message}</p>
           )}
         </div>
 
@@ -151,7 +151,7 @@ export default function RegisterPage() {
         <div className="space-y-2">
           <Label htmlFor="email">{t("auth.register.email")}</Label>
           <div className="relative">
-            <Mail className="absolute start-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
+            <Mail className="absolute start-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-3" />
             <Input
               id="email"
               type="email"
@@ -161,7 +161,7 @@ export default function RegisterPage() {
             />
           </div>
           {errors.email && (
-            <p className="text-sm text-red-500">{errors.email.message}</p>
+            <p className="text-sm text-danger">{errors.email.message}</p>
           )}
         </div>
 
@@ -169,7 +169,7 @@ export default function RegisterPage() {
         <div className="space-y-2">
           <Label htmlFor="password">{t("auth.register.password")}</Label>
           <div className="relative">
-            <Lock className="absolute start-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
+            <Lock className="absolute start-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-3" />
             <Input
               id="password"
               type={showPassword ? "text" : "password"}
@@ -180,7 +180,7 @@ export default function RegisterPage() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute end-3.5 top-1/2 -translate-y-1/2 text-[#87867f] hover:text-[#5e5d59] transition-colors"
+              className="absolute end-3.5 top-1/2 -translate-y-1/2 text-ink-3 hover:text-ink-2 transition-colors"
             >
               {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
@@ -196,7 +196,7 @@ export default function RegisterPage() {
                     key={i}
                     className={cn(
                       "flex items-center gap-1.5 text-xs transition-colors ltr-flex",
-                      isMet ? "text-[#c96442]" : "text-[#87867f]"
+                      isMet ? "text-brand" : "text-ink-3"
                     )}
                   >
                     {isMet ? (
@@ -216,7 +216,7 @@ export default function RegisterPage() {
         <div className="space-y-2">
           <Label htmlFor="confirmPassword">{t("auth.register.confirmPassword")}</Label>
           <div className="relative">
-            <Lock className="absolute start-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
+            <Lock className="absolute start-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-3" />
             <Input
               id="confirmPassword"
               type={showConfirmPassword ? "text" : "password"}
@@ -227,13 +227,13 @@ export default function RegisterPage() {
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute end-3.5 top-1/2 -translate-y-1/2 text-[#87867f] hover:text-[#5e5d59] transition-colors"
+              className="absolute end-3.5 top-1/2 -translate-y-1/2 text-ink-3 hover:text-ink-2 transition-colors"
             >
               {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
           </div>
           {errors.confirmPassword && (
-            <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>
+            <p className="text-sm text-danger">{errors.confirmPassword.message}</p>
           )}
         </div>
 
@@ -254,17 +254,17 @@ export default function RegisterPage() {
             />
             <Label htmlFor="acceptTerms" className="text-sm font-normal cursor-pointer leading-snug">
               {t("auth.register.acceptTerms")}{" "}
-              <Link href="/terms" className="text-[#c96442] hover:text-[#b55836] underline underline-offset-2">
+              <Link href="/terms" className="text-brand hover:text-brand-hover underline underline-offset-2">
                 {t("common.termsOfService")}
               </Link>{" "}
               {t("auth.register.and")}{" "}
-              <Link href="/privacy" className="text-[#c96442] hover:text-[#b55836] underline underline-offset-2">
+              <Link href="/privacy" className="text-brand hover:text-brand-hover underline underline-offset-2">
                 {t("common.privacyPolicy")}
               </Link>
             </Label>
           </div>
           {errors.acceptTerms && (
-            <p className="text-sm text-red-500">{errors.acceptTerms.message}</p>
+            <p className="text-sm text-danger">{errors.acceptTerms.message}</p>
           )}
         </div>
 
@@ -285,11 +285,11 @@ export default function RegisterPage() {
       </form>
 
       {/* Sign in link */}
-      <p className="text-center text-sm text-[#87867f]">
+      <p className="text-center text-sm text-ink-3">
         {t("common.alreadyHaveAccount")}{" "}
         <Link
           href="/login"
-          className="font-semibold text-[#c96442] hover:text-[#b55836] transition-colors"
+          className="font-semibold text-brand hover:text-brand-hover transition-colors"
         >
           {t("common.signIn")}
         </Link>

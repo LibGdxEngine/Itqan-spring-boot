@@ -18,6 +18,8 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,6 +39,9 @@ class ModuleServiceTest {
 
     @Mock
     private LessonMapper lessonMapper;
+
+    @Mock
+    private CourseAccessService courseAccessService;
 
     @InjectMocks
     private ModuleService moduleService;
@@ -66,7 +71,7 @@ class ModuleServiceTest {
         LessonReorderRequest request = new LessonReorderRequest();
         request.setLessonIds(List.of(3L, 1L, 2L));
 
-        List<LessonResponse> reordered = moduleService.reorderLessons(moduleId, request);
+        List<LessonResponse> reordered = moduleService.reorderLessons(moduleId, request, null);
 
         assertThat(reordered).hasSize(3);
         assertThat(reordered).extracting(LessonResponse::getId).containsExactly(3L, 1L, 2L);
@@ -89,9 +94,27 @@ class ModuleServiceTest {
         LessonReorderRequest request = new LessonReorderRequest();
         request.setLessonIds(List.of(1L, 2L));
 
-        assertThatThrownBy(() -> moduleService.reorderLessons(moduleId, request))
+        assertThatThrownBy(() -> moduleService.reorderLessons(moduleId, request, null))
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
                 .isEqualTo(ErrorCode.INVALID_LESSON_ORDER);
+    }
+
+    @Test
+    void reorderLessons_shouldRejectUserWhoCannotManageCourse() {
+        Long moduleId = 5L;
+        Course course = Course.builder().id(9L).ownerUserId(100L).build();
+        Module module = Module.builder().id(moduleId).title("Module").course(course).build();
+        when(moduleRepository.findById(moduleId)).thenReturn(java.util.Optional.of(module));
+        doThrow(new BusinessException(ErrorCode.FORBIDDEN))
+                .when(courseAccessService).assertCanManage(any(), eq(course));
+
+        LessonReorderRequest request = new LessonReorderRequest();
+        request.setLessonIds(List.of(1L));
+
+        assertThatThrownBy(() -> moduleService.reorderLessons(moduleId, request, null))
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode")
+                .isEqualTo(ErrorCode.FORBIDDEN);
     }
 }

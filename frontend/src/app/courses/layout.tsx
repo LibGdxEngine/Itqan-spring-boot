@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
+import { SITE_URL, fetchPublic, localizedAlternates, jsonLdHtml } from "@/lib/seo";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
 type CourseItem = {
   id?: number;
@@ -20,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: t("title"),
     description: t("description"),
     keywords,
-    alternates: { canonical: url },
+    alternates: localizedAlternates("/courses", locale),
     openGraph: {
       type: "website",
       url,
@@ -37,16 +36,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 async function fetchCourses(): Promise<CourseItem[]> {
-  try {
-    const res = await fetch(`${API_URL}/api/courses/active`, {
-      next: { revalidate: 3600 },
-    });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return Array.isArray(data) ? data : (data.content ?? []);
-  } catch {
-    return [];
-  }
+  const data = await fetchPublic<{ content: CourseItem[] }>("/api/catalog?sort=popular&size=48", 3600);
+  return data?.content ?? [];
 }
 
 export default async function CoursesLayout({
@@ -86,7 +77,7 @@ export default async function CoursesLayout({
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdHtml(jsonLd) }}
       />
       {children}
     </>

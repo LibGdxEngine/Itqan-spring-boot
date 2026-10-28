@@ -10,21 +10,21 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-[#c96442] text-[#faf9f5] shadow-[0_0_0_1px_#c96442] hover:bg-[#b55836] hover:shadow-[0_0_0_1px_#b55836] active:scale-[0.99] focus-visible:ring-[#3898ec]",
+          "bg-brand text-on-night shadow-[0_0_0_1px_var(--color-brand)] hover:bg-brand-hover hover:shadow-[0_0_0_1px_#b55836] active:scale-[0.99] focus-visible:ring-focus",
         secondary:
-          "bg-[#e8e6dc] text-[#4d4c48] shadow-[0_0_0_1px_#d1cfc5] hover:shadow-[0_0_0_1px_#c2c0b6] active:scale-[0.99] focus-visible:ring-[#3898ec]",
+          "bg-sand text-ink-button shadow-[0_0_0_1px_var(--color-ring-warm)] hover:shadow-[0_0_0_1px_var(--color-ring-warm)] active:scale-[0.99] focus-visible:ring-focus",
         outline:
-          "bg-transparent border border-[#e8e6dc] text-[#141413] hover:bg-[#f0eee6] focus-visible:ring-[#3898ec]",
+          "bg-transparent border border-line-strong text-ink hover:bg-subtle focus-visible:ring-focus",
         ghost:
-          "bg-transparent text-[#5e5d59] hover:bg-[#e8e6dc] hover:text-[#141413] focus-visible:ring-[#3898ec]",
+          "bg-transparent text-ink-2 hover:bg-sand hover:text-ink focus-visible:ring-focus",
         dark:
-          "bg-[#30302e] text-[#faf9f5] shadow-[0_0_0_1px_#30302e] hover:bg-[#141413] active:scale-[0.99] focus-visible:ring-[#3898ec]",
+          "bg-night-2 text-on-night shadow-[0_0_0_1px_var(--color-night-2)] hover:bg-night active:scale-[0.99] focus-visible:ring-focus",
         white:
-          "bg-[#ffffff] text-[#141413] shadow-[0_0_0_1px_#e8e6dc] hover:bg-[#faf9f5] active:scale-[0.99] focus-visible:ring-[#3898ec]",
+          "bg-paper text-ink shadow-[0_0_0_1px_var(--color-line-strong)] hover:bg-surface active:scale-[0.99] focus-visible:ring-focus",
         destructive:
-          "bg-[#b53333] text-[#faf9f5] shadow-[0_0_0_1px_#b53333] hover:bg-[#991c1c] active:scale-[0.99] focus-visible:ring-[#3898ec]",
+          "bg-danger text-on-night shadow-[0_0_0_1px_var(--color-danger)] hover:bg-danger-hover active:scale-[0.99] focus-visible:ring-focus",
         link:
-          "text-[#c96442] underline-offset-4 hover:underline",
+          "text-brand underline-offset-4 hover:underline",
       },
       size: {
         default: "h-11 px-6 py-2",

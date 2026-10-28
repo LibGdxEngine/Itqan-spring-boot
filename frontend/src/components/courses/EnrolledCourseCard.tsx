@@ -1,61 +1,109 @@
 "use client"
 
+import * as React from "react"
 import Link from "next/link"
-import { PlayCircle, Clock, Award } from "lucide-react"
-import { Progress } from "@/components/ui/progress"
-import { Button } from "@/components/ui/button"
-import { EnrollmentResponse } from "@/lib/api"
+import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
+import { Award, BookOpen, Loader2 } from "lucide-react"
 
-interface EnrolledCourseCardProps {
-  enrollment: EnrollmentResponse
+import { Button } from "@/components/ui/button"
+import { useToast } from "@/components/ui/use-toast"
+import { getErrorMessage } from "@/lib/api-axios"
+import { MyCourse, certificatesApi } from "@/lib/learning-api"
+
+export function ProgressBar({ value, label }: { value: number; label: string }) {
+  return (
+    <div
+      className="h-2 overflow-hidden rounded-full bg-grid"
+      role="progressbar"
+      aria-valuenow={value}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-label={label}
+    >
+      <div className="h-full rounded-full bg-brand transition-all" style={{ width: `${Math.min(100, value)}%` }} />
+    </div>
+  )
 }
 
-export function EnrolledCourseCard({ enrollment }: EnrolledCourseCardProps) {
-  const t = useTranslations()
-  const enrolledAt = enrollment.enrolledAt ? new Date(enrollment.enrolledAt).toLocaleDateString() : "-"
+export function resumeHref(course: MyCourse) {
+  return course.lastLessonId ? `/learn/${course.courseId}/${course.lastLessonId}` : `/learn/${course.courseId}`
+}
+
+export function EnrolledCourseCard({
+  course,
+  onCertificate,
+}: {
+  course: MyCourse
+  onCertificate: (courseId: number, code: string) => void
+}) {
+  const t = useTranslations("dashboard")
+  const router = useRouter()
+  const { toast } = useToast()
+  const [claiming, setClaiming] = React.useState(false)
+  const done = course.status === "COMPLETED"
+
+  const claim = async () => {
+    setClaiming(true)
+    try {
+      const certificate = await certificatesApi.claim(course.courseId)
+      onCertificate(course.courseId, certificate.code)
+      router.push(`/certificates/${certificate.code}`)
+    } catch (err) {
+      toast({ variant: "destructive", title: t("certificateNotYet"), description: getErrorMessage(err) })
+    } finally {
+      setClaiming(false)
+    }
+  }
 
   return (
-    <div className="bg-[#faf9f5] rounded-xl border border-[#e8e6dc] shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-      {/* Course Image */}
-      <div className="aspect-video relative bg-[#f0eee6]">
-        {/* Placeholder for course image if available in backend, currently CourseResponse might not have image */}
-        <div className="absolute inset-0 flex items-center justify-center text-[#87867f]">
-           <PlayCircle className="w-12 h-12 opacity-50" />
-        </div>
-      </div>
-
-      <div className="p-5">
-        <h3 className="font-semibold text-lg mb-2 line-clamp-2">
-          {enrollment.course?.title || "Untitled Course"}
-        </h3>
-        
-        <div className="flex items-center gap-4 text-sm text-[#87867f] mb-4">
-            {/* If enrolledAt or other metadata exists */}
-           <span className="flex items-center gap-1">
-             <Clock className="w-4 h-4" />
-             {/* Format date if needed */}
-             {enrolledAt}
-           </span>
-        </div>
-
-        <div className="space-y-2 mb-4">
-          <div className="flex justify-between text-sm">
-            <span className="text-[#5e5d59] font-medium">
-                {enrollment.progress}% {t("common.completed") || "Completed"}
-            </span>
+    <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-surface transition-shadow hover:shadow-[0_4px_24px_rgba(0,0,0,0.06)]">
+      <Link href={resumeHref(course)} className="relative block aspect-video bg-brand" tabIndex={-1} aria-hidden>
+        {course.thumbnailUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={course.thumbnailUrl} alt="" className="h-full w-full object-cover" loading="lazy" />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center">
+            <BookOpen className="h-12 w-12 text-on-night" />
           </div>
-          <Progress value={enrollment.progress} className="h-2" />
-        </div>
-
-        <Button asChild className="w-full">
-          <Link href={`/learn/${enrollment.courseId}`}>
-            {enrollment.progress && enrollment.progress > 0 
-                ? (t("common.continueLearning") || "Continue Learning") 
-                : (t("common.startLearning") || "Start Learning")}
+        )}
+      </Link>
+      <div className="flex flex-1 flex-col p-4">
+        <h3 className="line-clamp-2 font-semibold text-ink">
+          <Link href={resumeHref(course)} className="hover:text-brand">
+            {course.title}
           </Link>
-        </Button>
+        </h3>
+        <p className="mb-3 text-sm text-ink-3">{course.instructor}</p>
+        <div className="mt-auto space-y-1.5">
+          <div className="flex justify-between text-xs text-ink-2">
+            <span>{t("lessonsDone", { done: course.completedLessons, total: course.totalLessons })}</span>
+            <span dir="ltr">{course.progress}%</span>
+          </div>
+          <ProgressBar value={course.progress} label={t("progressLabel", { title: course.title })} />
+          {course.lastLessonTitle && !done ? (
+            <p className="truncate pt-1 text-xs text-ink-3">{t("lastLesson", { title: course.lastLessonTitle })}</p>
+          ) : null}
+        </div>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Button size="sm" className="flex-1" asChild>
+            <Link href={resumeHref(course)}>
+              {done ? t("review") : course.progress > 0 ? t("continue") : t("start")}
+            </Link>
+          </Button>
+          {course.certificateCode ? (
+            <Button size="sm" variant="outline" asChild>
+              <Link href={`/certificates/${course.certificateCode}`}>
+                <Award /> {t("certificate")}
+              </Link>
+            </Button>
+          ) : done ? (
+            <Button size="sm" variant="outline" onClick={() => void claim()} disabled={claiming}>
+              {claiming ? <Loader2 className="animate-spin" /> : <Award />} {t("getCertificate")}
+            </Button>
+          ) : null}
+        </div>
       </div>
-    </div>
+    </article>
   )
 }

@@ -33,7 +33,8 @@
     "cancel": "إلغاء",
     "edit": "تعديل",
     "delete": "حذف",
-    "success": "تم بنجاح"
+    "success": "تم بنجاح",
+    "close": "إغلاق"
   },
   "nav": {
     "brand": "إتقان",
@@ -46,7 +47,12 @@
     "dashboard": "لوحة التحكم",
     "admin": "الإدارة",
     "instructor": "بوابة المدرب",
-    "myLearning": "تعليمي"
+    "myLearning": "تعليمي",
+    "skipToContent": "تخطَّ إلى المحتوى الرئيسي",
+    "mainLabel": "الرئيسية",
+    "accountMenu": "قائمة الحساب",
+    "openMenu": "فتح القائمة",
+    "closeMenu": "إغلاق القائمة"
   },
   "instructors": {
     "title": "مدربونا",
@@ -93,7 +99,55 @@
     "welcome": "مرحباً بك مجدداً، {name}!",
     "noCourses": "لا توجد دورات بعد",
     "noCoursesDesc": "ابدأ رحلة التعلم الخاصة بك باستكشاف كتالوج الدورات لدينا.",
-    "browseCourses": "تصفح الدورات"
+    "browseCourses": "تصفح الدورات",
+    "statsLabel": "تعلّمك في لمحة",
+    "stats": {
+      "inProgress": "قيد التعلّم",
+      "completed": "مكتملة",
+      "certificates": "الشهادات",
+      "thisWeek": "دروس هذا الأسبوع",
+      "streak": "أيام متتالية"
+    },
+    "continueLearning": "تابع التعلّم",
+    "resume": "استئناف",
+    "start": "ابدأ",
+    "continue": "تابع",
+    "review": "مراجعة",
+    "lastLesson": "آخر درس: {title}",
+    "lessonsDone": "{done} من {total} دروس",
+    "progressLabel": "التقدّم في {title}",
+    "myCourses": "دوراتي",
+    "tabs": {
+      "all": "الكل",
+      "active": "قيد التعلّم",
+      "completed": "مكتملة"
+    },
+    "nothingHere": "لا توجد دورات هنا.",
+    "certificate": "الشهادة",
+    "getCertificate": "احصل على الشهادة",
+    "certificateNotYet": "لم تكتمل الشروط بعد",
+    "certificates": "الشهادات",
+    "noCertificates": "أكمل دورة واجتز اختباراتها لتحصل على شهادة.",
+    "view": "عرض",
+    "wishlist": "محفوظة لوقت لاحق",
+    "redeem": {
+      "title": "لديك كود اشتراك؟",
+      "description": "أدخل الكود الذي وصلك لفتح الدورة.",
+      "submit": "تفعيل",
+      "success": "تم تفعيل الكود. استمتع بالدورة!",
+      "failed": "تعذّر تفعيل هذا الكود"
+    },
+    "billing": {
+      "title": "الفواتير والمدفوعات",
+      "empty": "لا توجد مدفوعات بعد.",
+      "status": {
+        "COMPLETED": "مدفوع",
+        "PENDING": "قيد الانتظار",
+        "FAILED": "فشل",
+        "REFUNDED": "مسترد",
+        "CANCELLED": "ملغي"
+      }
+    }
   },
   "admin": {
     "dashboard": "لوحة تحكم الإدارة",
@@ -179,31 +233,48 @@
     },
     "analytics": {
       "title": "التحليلات",
-      "subtitle": "نظرة عامة على أداء المنصة في آخر 30 يوماً.",
-      "backToDashboard": "العودة إلى لوحة التحكم",
+      "rangeDescription": "{from} ← {to}",
+      "export": "تصدير CSV",
       "refresh": "تحديث",
-      "loadFailed": "تعذّر تحميل التحليلات",
+      "period": "الفترة",
+      "lastDays": "آخر {days} يومًا",
+      "custom": "فترة مخصصة",
+      "from": "من",
+      "to": "إلى",
+      "granularity": "التجميع حسب",
+      "granularities": {
+        "DAILY": "يوم",
+        "WEEKLY": "أسبوع",
+        "MONTHLY": "شهر"
+      },
       "cards": {
-        "revenue": "إجمالي الإيرادات",
-        "enrollments": "إجمالي التسجيلات",
-        "students": "إجمالي الطلاب",
-        "activeCourses": "الدورات النشطة",
-        "newThisMonth": "{count} مستخدم جديد هذا الشهر",
-        "activeUsers": "{count} مستخدم نشط آخر 30 يوماً"
+        "revenue": "الإيرادات",
+        "newEnrollments": "اشتراكات جديدة",
+        "newUsers": "مستخدمون جدد",
+        "activeUsers": "المستخدمون النشطون (30 يومًا)",
+        "activeHint": "{students} طالب · {courses} دورة منشورة"
       },
-      "revenueTrend": {
-        "title": "اتجاه الإيرادات",
-        "last30Days": "آخر 30 يوماً",
-        "empty": "لا توجد بيانات إيرادات في هذه الفترة بعد."
+      "vsPrevious": "مقارنة بالفترة السابقة",
+      "revenueTrend": "الإيرادات",
+      "noRevenue": "لا توجد إيرادات في هذه الفترة.",
+      "enrollmentTrend": "الاشتراكات الجديدة",
+      "enrollmentsCount": "{count} اشتراك",
+      "noEnrollments": "لا توجد اشتراكات في هذه الفترة.",
+      "revenueByCourse": "الإيرادات حسب الدورة",
+      "course": "الدورة",
+      "revenue": "الإيرادات",
+      "payments": "المدفوعات",
+      "usersByRole": "المستخدمون حسب الدور",
+      "roles": {
+        "STUDENT": "الطلاب",
+        "INSTRUCTOR": "المدرّسون",
+        "ADMIN": "المديرون"
       },
-      "topCourses": {
-        "title": "الدورات الأكثر تسجيلاً",
-        "courseTitle": "الدورة",
-        "enrollments": "التسجيلات",
-        "completionRate": "نسبة الإكمال",
-        "averageProgress": "متوسط التقدم",
-        "empty": "لا توجد تسجيلات بعد."
-      }
+      "signupsInRange": "{count} تسجيل جديد في هذه الفترة",
+      "topCourses": "أكثر الدورات اشتراكًا (منذ البداية)",
+      "students": "الطلاب",
+      "completionRate": "الإكمال",
+      "averageProgress": "متوسط التقدم"
     },
     "instructors": {
       "title": "المعلمون",
@@ -221,6 +292,444 @@
       "createdAt": "تاريخ الإنشاء",
       "status": "الحالة",
       "actions": "الإجراءات"
+    },
+    "nav": {
+      "ariaLabel": "تنقل لوحة التحكم",
+      "brand": "إتقان",
+      "panel": "لوحة التحكم",
+      "groups": {
+        "overview": "نظرة عامة",
+        "people": "المستخدمون",
+        "learning": "التعلّم",
+        "sales": "المبيعات",
+        "content": "المحتوى",
+        "system": "النظام"
+      },
+      "dashboard": "الرئيسية",
+      "analytics": "التحليلات",
+      "users": "المستخدمون",
+      "team": "الفريق",
+      "courses": "الدورات",
+      "enrollments": "الاشتراكات",
+      "payments": "المدفوعات",
+      "coupons": "الكوبونات",
+      "enrollmentCodes": "أكواد التفعيل",
+      "landing": "الصفحة الرئيسية",
+      "clips": "المقتطفات",
+      "auditLog": "سجل التدقيق",
+      "settings": "الإعدادات",
+      "viewSite": "عرض الموقع",
+      "logout": "تسجيل الخروج",
+      "closeMenu": "إغلاق القائمة",
+      "openMenu": "فتح القائمة",
+      "breadcrumb": "مسار التنقل",
+      "superAdmin": "مدير عام",
+      "admin": "مدير",
+      "reviews": "التقييمات"
+    },
+    "table": {
+      "exportCsv": "تصدير CSV",
+      "retry": "إعادة المحاولة",
+      "actions": "الإجراءات",
+      "empty": "لا يوجد شيء هنا بعد.",
+      "total": "{count, plural, =0 {لا توجد نتائج} one {نتيجة واحدة} two {نتيجتان} few {# نتائج} many {# نتيجة} other {# نتيجة}}",
+      "previous": "الصفحة السابقة",
+      "next": "الصفحة التالية"
+    },
+    "common": {
+      "failed": "فشل الإجراء",
+      "cancel": "إلغاء",
+      "delete": "حذف",
+      "active": "نشط",
+      "course": "الدورة",
+      "chooseCourse": "اختر دورة",
+      "draft": "مسودة",
+      "allCourses": "كل الدورات"
+    },
+    "team": {
+      "title": "الفريق",
+      "description": "المديرون والمدرّسون الذين يديرون المنصة."
+    },
+    "overview": {
+      "title": "مرحبًا بعودتك يا {name}",
+      "subtitle": "أداء المنصة خلال آخر 30 يومًا.",
+      "cards": {
+        "revenue": "الإيرادات",
+        "last30": "آخر 30 يومًا",
+        "newEnrollments": "اشتراكات جديدة",
+        "totalEnrollments": "{count} منذ البداية",
+        "newUsers": "مستخدمون جدد",
+        "totalStudents": "{count} طالب إجمالًا",
+        "activeUsers": "المستخدمون النشطون",
+        "activeCourses": "{count} دورة منشورة"
+      },
+      "quick": {
+        "recordPayment": "تسجيل دفعة",
+        "grantAccess": "منح صلاحية دورة",
+        "generateCodes": "إنشاء أكواد",
+        "manageCourses": "إدارة الدورات"
+      },
+      "topCourses": "أكثر الدورات اشتراكًا",
+      "viewAnalytics": "التحليلات الكاملة",
+      "noEnrollments": "لا توجد اشتراكات بعد.",
+      "avgProgress": "متوسط التقدم {value}%",
+      "recentActivity": "آخر النشاطات",
+      "viewAll": "عرض الكل",
+      "noActivity": "لم يُسجَّل أي نشاط بعد.",
+      "system": "النظام"
+    },
+    "users": {
+      "title": "المستخدمون",
+      "description": "جميع الحسابات على المنصة: طلاب ومدرّسون ومديرون.",
+      "empty": "لا يوجد مستخدمون مطابقون لهذه الفلاتر.",
+      "search": "ابحث بالاسم أو البريد",
+      "role": "الدور",
+      "allRoles": "كل الأدوار",
+      "roles": {
+        "STUDENT": "طالب",
+        "INSTRUCTOR": "مدرّس",
+        "ADMIN": "مدير"
+      },
+      "status": "الحالة",
+      "allStatuses": "كل الحالات",
+      "suspendedLabel": "موقوف",
+      "superAdmin": "مدير عام",
+      "name": "الاسم",
+      "signIn": "طريقة الدخول",
+      "password": "كلمة مرور",
+      "joined": "تاريخ التسجيل",
+      "lastLogin": "آخر دخول",
+      "suspend": "إيقاف",
+      "reactivate": "إعادة تفعيل",
+      "suspended": "تم إيقاف الحساب",
+      "reactivated": "تمت إعادة تفعيل الحساب",
+      "confirmSuspendTitle": "إيقاف هذا الحساب؟",
+      "confirmReactivateTitle": "إعادة تفعيل هذا الحساب؟",
+      "confirmSuspend": "سيتم تسجيل خروج {name} من جميع الأجهزة ولن يتمكن من الدخول حتى إعادة التفعيل.",
+      "confirmReactivate": "سيتمكن {name} من تسجيل الدخول مجددًا."
+    },
+    "coursesPage": {
+      "title": "الدورات",
+      "description": "كل الدورات بما فيها المسودات: تعديل المحتوى والنشر والنسخ والحذف.",
+      "empty": "لا توجد دورات مطابقة لهذه الفلاتر.",
+      "search": "ابحث بالعنوان أو المدرّس",
+      "status": "الحالة",
+      "allStatuses": "كل الحالات",
+      "publishedLabel": "منشورة",
+      "draftLabel": "مسودة",
+      "course": "الدورة",
+      "price": "السعر",
+      "free": "مجانية",
+      "content": "المحتوى",
+      "contentCount": "{modules} وحدات · {lessons} دروس",
+      "students": "الطلاب",
+      "created": "تاريخ الإنشاء",
+      "editContent": "تعديل المحتوى",
+      "view": "عرض في الموقع",
+      "publish": "نشر",
+      "unpublish": "إلغاء النشر",
+      "duplicate": "نسخ",
+      "published": "تم نشر الدورة",
+      "unpublished": "تم إلغاء نشر الدورة",
+      "duplicated": "أُنشئت نسخة كمسودة",
+      "deleted": "تم حذف الدورة",
+      "confirmPublishTitle": "نشر هذه الدورة؟",
+      "confirmPublish": "ستظهر في قائمة الدورات.",
+      "confirmUnpublishTitle": "إلغاء نشر هذه الدورة؟",
+      "confirmUnpublish": "ستُخفى من قائمة الدورات، ويحتفظ المشتركون بصلاحيتهم.",
+      "confirmDuplicateTitle": "نسخ هذه الدورة؟",
+      "confirmDuplicate": "ستُنشأ نسخة مسودة بكل الوحدات والدروس والاختبارات.",
+      "confirmDeleteTitle": "حذف هذه الدورة نهائيًا؟",
+      "confirmDelete": "سيُحذف محتواها و{count} اشتراك أيضًا. لا يمكن التراجع عن ذلك."
+    },
+    "enrollments": {
+      "title": "الاشتراكات",
+      "description": "من يملك صلاحية الوصول لكل دورة. امنح الصلاحية بعد الدفع خارج الموقع.",
+      "grant": "منح صلاحية",
+      "empty": "لا توجد اشتراكات مطابقة لهذه الفلاتر.",
+      "search": "ابحث بالطالب أو الدورة",
+      "status": "الحالة",
+      "allStatuses": "كل الحالات",
+      "statuses": {
+        "ACTIVE": "نشط",
+        "COMPLETED": "مكتمل",
+        "DROPPED": "ملغى"
+      },
+      "student": "الطالب",
+      "course": "الدورة",
+      "progress": "التقدم",
+      "enrolled": "تاريخ الاشتراك",
+      "changeStatus": "تغيير الحالة",
+      "grantTitle": "منح صلاحية دورة",
+      "grantHint": "يشترك الطالب دون دفع. لتسجيل المبلغ المستلم أيضًا استخدم المدفوعات ← تسجيل دفعة.",
+      "studentEmail": "بريد الطالب",
+      "granted": "تم منح الصلاحية",
+      "statusChanged": "تم تحديث الحالة",
+      "deleted": "تم حذف الاشتراك",
+      "confirmDeleteTitle": "حذف هذا الاشتراك؟",
+      "confirmDelete": "سيفقد {name} صلاحية الوصول إلى {course}. اختر «ملغى» إن أردت الاحتفاظ بتقدمه."
+    },
+    "payments": {
+      "title": "المدفوعات",
+      "description": "كل المدفوعات الإلكترونية واليدوية. سجّل مدفوعات واتساب والنقد وأصدر المبالغ المستردة.",
+      "recordManual": "تسجيل دفعة",
+      "empty": "لا توجد مدفوعات مطابقة لهذه الفلاتر.",
+      "search": "ابحث بالطالب أو الدورة أو المرجع",
+      "status": "الحالة",
+      "allStatuses": "كل الحالات",
+      "statuses": {
+        "PENDING": "قيد الانتظار",
+        "COMPLETED": "مكتملة",
+        "FAILED": "فاشلة",
+        "REFUNDED": "مستردة",
+        "CANCELLED": "ملغاة"
+      },
+      "gateway": "بوابة الدفع",
+      "allGateways": "كل البوابات",
+      "gateways": {
+        "MANUAL": "يدوي"
+      },
+      "date": "التاريخ",
+      "student": "الطالب",
+      "course": "الدورة",
+      "amount": "المبلغ",
+      "method": "الطريقة",
+      "methods": {
+        "VODAFONE_CASH": "فودافون كاش",
+        "INSTAPAY": "إنستاباي",
+        "CASH": "نقدًا",
+        "BANK_TRANSFER": "تحويل بنكي",
+        "OTHER": "أخرى"
+      },
+      "refund": "استرداد",
+      "recorded": "تم تسجيل الدفعة",
+      "recordedHint": "أصبح للطالب حق الوصول إلى الدورة.",
+      "refunded": "تم استرداد المبلغ وإلغاء الصلاحية",
+      "manualTitle": "تسجيل دفعة خارج الموقع",
+      "manualHint": "للمدفوعات عبر فودافون كاش أو إنستاباي أو نقدًا أو بتحويل بنكي. يُشترك الطالب فورًا.",
+      "studentEmail": "بريد الطالب",
+      "currency": "العملة",
+      "reference": "المرجع",
+      "referenceHint": "رقم التحويل أو الإيصال (اختياري)",
+      "notes": "ملاحظات",
+      "recordAndEnroll": "تسجيل واشتراك",
+      "refundTitle": "استرداد هذه الدفعة؟",
+      "refundStripe": "سيُعاد {amount} إلى بطاقة الطالب عبر Stripe وتُلغى صلاحيته في الدورة.",
+      "refundManual": "سيُسجَّل {amount} كمبلغ مسترد وتُلغى صلاحية الدورة. أعد المبلغ إلى الطالب بنفسك.",
+      "refundReason": "السبب (اختياري)"
+    },
+    "couponsPage": {
+      "title": "الكوبونات",
+      "description": "أكواد خصم لأي دورة."
+    },
+    "landingPage": {
+      "title": "الصفحة الرئيسية",
+      "description": "فيديو الواجهة والدورات والمدرّسون والمقالات المميزة والتخصصات."
+    },
+    "clipsPage": {
+      "title": "المقتطفات",
+      "description": "مقاطع الفيديو والصوت القصيرة المعروضة في صفحة المقتطفات."
+    },
+    "codes": {
+      "title": "أكواد التفعيل",
+      "description": "أكواد مدفوعة مسبقًا يستخدمها الطلاب لفتح دورة — مفيدة للمكتبات والمدارس والبيع المباشر.",
+      "generate": "إنشاء أكواد",
+      "empty": "لا توجد أكواد بعد.",
+      "code": "الكود",
+      "course": "الدورة",
+      "uses": "الاستخدامات",
+      "expires": "ينتهي",
+      "never": "لا ينتهي",
+      "status": "الحالة",
+      "usable": "صالح",
+      "usedUpOrExpired": "مستنفد / منتهي",
+      "inactive": "معطّل",
+      "copy": "نسخ الكود",
+      "deactivate": "تعطيل",
+      "generated": "تم إنشاء {count} كود",
+      "deactivated": "تم تعطيل الكود",
+      "generateTitle": "إنشاء أكواد تفعيل",
+      "generateHint": "الأكواد بصيغة ABCD-EFGH-JKLM وتفتح الدورة عند استخدامها.",
+      "copyAll": "نسخ الكل",
+      "downloadCsv": "تنزيل CSV",
+      "done": "تم",
+      "quantity": "عدد الأكواد",
+      "usesPerCode": "عدد مرات الاستخدام لكل كود",
+      "usesHint": "‎-1 تعني غير محدود",
+      "expiresOn": "تاريخ الانتهاء",
+      "expiresHint": "اتركه فارغًا لعدم الانتهاء",
+      "confirmDeactivateTitle": "تعطيل هذا الكود؟",
+      "confirmDeactivate": "سيتوقف الكود {code} عن العمل فورًا."
+    },
+    "audit": {
+      "title": "سجل التدقيق",
+      "description": "الإجراءات المهمة أمنيًا: من فعل ماذا ومتى.",
+      "empty": "لا توجد سجلات مطابقة لهذه الفلاتر.",
+      "search": "ابحث بالإجراء أو البريد أو المعرّف",
+      "resource": "المورد",
+      "allResources": "كل الموارد",
+      "result": "النتيجة",
+      "allResults": "كل النتائج",
+      "success": "نجاح",
+      "failure": "فشل",
+      "from": "من",
+      "to": "إلى",
+      "time": "الوقت",
+      "actor": "المنفّذ",
+      "system": "النظام",
+      "action": "الإجراء",
+      "details": "التفاصيل"
+    },
+    "settings": {
+      "title": "الإعدادات",
+      "description": "بيانات الموقع العامة التي يراها الزوار وتستخدمها عملية الدفع.",
+      "saved": "تم حفظ الإعدادات",
+      "save": "حفظ",
+      "saveCount": "حفظ {count} تغيير",
+      "sections": {
+        "general": "عام",
+        "contact": "التواصل",
+        "social": "روابط التواصل الاجتماعي",
+        "payments": "المدفوعات"
+      },
+      "fields": {
+        "siteName": "اسم الموقع",
+        "tagline": "الشعار النصي",
+        "maintenanceMessage": "شريط إعلان",
+        "contactEmail": "بريد التواصل",
+        "contactPhone": "الهاتف",
+        "whatsappNumber": "رقم واتساب",
+        "address": "العنوان",
+        "facebookUrl": "فيسبوك",
+        "instagramUrl": "إنستغرام",
+        "youtubeUrl": "يوتيوب",
+        "xUrl": "إكس (تويتر)",
+        "tiktokUrl": "تيك توك",
+        "telegramUrl": "تيليغرام",
+        "defaultCurrency": "العملة الافتراضية",
+        "manualPaymentsEnabled": "الدفع اليدوي",
+        "cardPaymentsEnabled": "الدفع بالبطاقة"
+      },
+      "hints": {
+        "maintenanceMessage": "رسالة اختيارية تظهر في أنحاء الموقع. اتركها فارغة لإخفائها.",
+        "whatsappNumber": "بالصيغة الدولية بدون +، مثل 201001234567",
+        "defaultCurrency": "رمز من 3 أحرف، مثل EGP",
+        "manualPaymentsEnabled": "يدفع الطلاب عبر فودافون كاش / إنستاباي وتؤكد أنت الدفعة.",
+        "cardPaymentsEnabled": "الدفع الإلكتروني بالبطاقة عبر Stripe."
+      }
+    },
+    "reviews": {
+      "title": "التقييمات",
+      "description": "اقرأ تقييمات الطلاب وأخفِ ما يخالف القواعد.",
+      "empty": "لا توجد تقييمات مطابقة.",
+      "search": "ابحث في التعليقات أو الطلاب أو الدورات",
+      "rating": "التقييم",
+      "anyRating": "أي تقييم",
+      "stars": "{count, plural, one {نجمة واحدة} two {نجمتان} few {# نجوم} many {# نجمة} other {# نجمة}}",
+      "visibility": "الظهور",
+      "allVisibility": "الظاهرة والمخفية",
+      "visible": "ظاهر",
+      "hiddenFilter": "مخفي",
+      "noComment": "بدون تعليق",
+      "show": "إظهار",
+      "hide": "إخفاء",
+      "shown": "أصبح التقييم ظاهرًا",
+      "hidden": "تم إخفاء التقييم",
+      "cols": {
+        "review": "التقييم",
+        "course": "الدورة",
+        "student": "الطالب",
+        "date": "التاريخ",
+        "status": "الحالة"
+      }
+    },
+    "landingEditor": {
+      "loading": "جارٍ تحميل إعدادات الصفحة الرئيسية…",
+      "title": "الصفحة الرئيسية",
+      "save": "حفظ التغييرات",
+      "toasts": {
+        "loadFailed": "تعذّر تحميل الصفحة الرئيسية",
+        "videoUploaded": "تم رفع الفيديو",
+        "uploadFailed": "فشل الرفع",
+        "saved": "تم حفظ الصفحة الرئيسية",
+        "saveFailed": "فشل الحفظ",
+        "specRequired": "الاسم (بالعربية والإنجليزية) والمعرّف النصي مطلوبان",
+        "specCreated": "تم إنشاء التخصص",
+        "specUpdated": "تم تحديث التخصص",
+        "specSaveFailed": "تعذّر حفظ التخصص",
+        "specDeleted": "تم حذف التخصص",
+        "deleteFailed": "فشل الحذف"
+      },
+      "hero": {
+        "heading": "فيديو الواجهة",
+        "videoUrl": "رابط الفيديو",
+        "uploadNew": "رفع فيديو جديد (MP4/WebM)",
+        "titleAr": "العنوان (عربي)",
+        "titleEn": "العنوان (إنجليزي)",
+        "teacherAr": "المعلّم (عربي)",
+        "teacherEn": "المعلّم (إنجليزي)",
+        "durationAr": "تسمية المدة (عربي)",
+        "durationEn": "تسمية المدة (إنجليزي)"
+      },
+      "featuredCourses": "الدورات المميزة",
+      "featuredInstructors": "المدرّسون المميزون",
+      "featuredArticles": "المقالات المميزة",
+      "specs": {
+        "heading": "التخصصات (الشارات)",
+        "nameAr": "الاسم (عربي)",
+        "nameEn": "الاسم (إنجليزي)",
+        "slug": "المعرّف النصي",
+        "order": "الترتيب",
+        "add": "إضافة تخصص",
+        "update": "تحديث التخصص",
+        "cancel": "إلغاء",
+        "empty": "لا توجد تخصصات بعد",
+        "active": "مفعّل",
+        "yes": "نعم",
+        "no": "لا",
+        "actions": "الإجراءات",
+        "edit": "تعديل",
+        "confirmDelete": "هل تريد حذف هذا التخصص؟"
+      },
+      "picker": {
+        "add": "إضافة",
+        "placeholder": "اختر عنصرًا…",
+        "selected": "المحدد ({count})",
+        "noneSelected": "لم يتم تحديد أي عنصر"
+      }
+    },
+    "clipsEditor": {
+      "title": "مقتطفات",
+      "subtitle": "مقاطع مرئية وصوتية عامة مجانية",
+      "uploadButton": "رفع مقاطع",
+      "uploading": "جارٍ الرفع...",
+      "uploadingFiles": "{count, plural, zero {لا توجد ملفات للرفع} one {جارٍ رفع ملف واحد...} two {جارٍ رفع ملفين...} few {جارٍ رفع # ملفات...} many {جارٍ رفع # ملفًا...} other {جارٍ رفع # ملف...}}",
+      "empty": "لا توجد مقتطفات بعد. ارفع أول مقطع الآن.",
+      "descriptionPlaceholder": "وصف اختياري...",
+      "toasts": {
+        "error": "خطأ",
+        "uploaded": "تم الرفع",
+        "uploadedDescription": "{count, plural, zero {لم يُرفع أي مقطع} one {تم رفع مقطع واحد بنجاح} two {تم رفع مقطعين بنجاح} few {تم رفع # مقاطع بنجاح} many {تم رفع # مقطعًا بنجاح} other {تم رفع # مقطع بنجاح}}",
+        "uploadFailed": "فشل الرفع",
+        "saved": "تم الحفظ",
+        "savedDescription": "تم تحديث المقطع بنجاح",
+        "saveFailed": "فشل الحفظ",
+        "deleted": "تم الحذف",
+        "deletedDescription": "تم حذف المقطع بنجاح",
+        "deleteFailed": "فشل الحذف"
+      },
+      "columns": {
+        "title": "العنوان",
+        "description": "الوصف",
+        "type": "النوع",
+        "size": "الحجم",
+        "date": "التاريخ",
+        "actions": "إجراء"
+      },
+      "types": {
+        "video": "فيديو",
+        "audio": "صوت"
+      }
     }
   },
   "home": {
@@ -299,7 +808,8 @@
       "new": "جديد",
       "free": "مجاني",
       "browseAll": "تصفح كل الدورات"
-    }
+    },
+    "playFeatured": "تشغيل الدرس المميّز"
   },
   "auth": {
     "login": {
@@ -404,7 +914,11 @@
     "linkDashboard": "لوحة التحكم",
     "linkMyCourses": "تعليمي",
     "email": "support@itqan.edu",
-    "rights": "جميع الحقوق محفوظة."
+    "rights": "جميع الحقوق محفوظة.",
+    "social": "تابعنا",
+    "whatsapp": "راسلنا على واتساب",
+    "linkPrivacy": "سياسة الخصوصية",
+    "linkTerms": "شروط الاستخدام"
   },
   "language": {
     "english": "English",
@@ -450,6 +964,10 @@
       "title": "مقتطفات — مقاطع صوتية مختارة",
       "description": "مقتطفات صوتية مختارة من دروس ومحاضرات العلماء والمشايخ على منصة إتقان للعلوم الإسلامية.",
       "keywords": "مقتطفات صوتية|دروس إسلامية|محاضرات|تلاوات|إتقان"
+    },
+    "payment": {
+      "success": "تمّ الدفع بنجاح",
+      "cancel": "أُلغيت عملية الدفع"
     }
   },
   "quiz": {
@@ -652,7 +1170,13 @@
     },
     "yourProgress": "تقدمك في الدورة",
     "progressOf": "اكتمل {completed} من {total} درسًا",
-    "courseContent": "محتوى الدورة"
+    "courseContent": "محتوى الدورة",
+    "resourceTitle": "ملف الدرس",
+    "resourceHint": "افتح ملف هذا الدرس أو حمّله",
+    "autoCompleted": "اكتمل الدرس",
+    "noLessonsYet": "لا توجد دروس في هذه الدورة بعد.",
+    "openCourseMenu": "فتح محتوى الدورة",
+    "closeCourseMenu": "إغلاق محتوى الدورة"
   },
   "checkout": {
     "success": {
@@ -739,5 +1263,585 @@
       "quoteText": "اقتباس",
       "codeText": "كود"
     }
+  },
+  "studio": {
+    "nav": {
+      "label": "أقسام الاستوديو",
+      "courses": "الدورات",
+      "analytics": "الإحصائيات",
+      "coupons": "القسائم",
+      "articles": "المقالات"
+    },
+    "home": {
+      "title": "دوراتك",
+      "description": "أنشئ دوراتك وانشرها وتابع أداءها.",
+      "newCourse": "دورة جديدة",
+      "kpi": {
+        "students": "الطلاب",
+        "newEnrollments": "تسجيلات جديدة",
+        "last30": "آخر 30 يومًا",
+        "revenue": "الإيرادات",
+        "progress": "متوسط التقدّم"
+      },
+      "emptyTitle": "أنشئ دورتك الأولى",
+      "emptyDescription": "ابدأ بعنوان ووصف قصير. تبقى الدورة مسودة خاصة حتى تنشرها.",
+      "published": "منشورة",
+      "draft": "مسودة",
+      "students": "الطلاب",
+      "lessons": "الدروس",
+      "price": "السعر",
+      "free": "مجانية",
+      "edit": "تعديل الدورة",
+      "insights": "الأداء",
+      "delete": "حذف الدورة",
+      "deleted": "تم حذف الدورة",
+      "deleteTitle": "حذف هذه الدورة؟",
+      "deleteDescription": "سيتم حذف «{title}» نهائيًا مع كل أقسامها ودروسها واختباراتها وتسجيلاتها."
+    },
+    "newCourse": {
+      "back": "كل الدورات",
+      "title": "دورة جديدة",
+      "description": "يمكنك تعديل كل شيء لاحقًا. تُحفظ الدورات الجديدة كمسودات خاصة."
+    },
+    "course": {
+      "back": "كل الدورات",
+      "statusPublished": "منشورة",
+      "statusDraft": "مسودة",
+      "counts": "{modules, plural, zero {لا أقسام} one {قسم واحد} two {قسمان} few {# أقسام} many {# قسمًا} other {# قسم}} · {lessons, plural, zero {لا دروس} one {درس واحد} two {درسان} few {# دروس} many {# درسًا} other {# درس}}",
+      "preview": "معاينة",
+      "publish": "نشر",
+      "unpublish": "إلغاء النشر",
+      "published": "تم نشر الدورة وأصبحت ظاهرة في الكتالوج.",
+      "unpublished": "تم إلغاء نشر الدورة",
+      "needLesson": "أضف درسًا واحدًا على الأقل قبل النشر",
+      "draftNeedsLesson": "هذه الدورة مسودة خاصة. أضف درسًا واحدًا على الأقل ثم انشرها.",
+      "draftHint": "هذه الدورة مسودة خاصة. لا يراها إلا أنت والمشرفون حتى تنشرها.",
+      "tabsLabel": "أقسام الدورة",
+      "tabs": {
+        "curriculum": "المنهج",
+        "details": "التفاصيل",
+        "analytics": "الإحصائيات"
+      },
+      "unpublishTitle": "إلغاء نشر هذه الدورة؟",
+      "unpublishDescription": "ستختفي من الكتالوج ونتائج البحث. يحتفظ الطلاب المسجّلون بإمكانية الوصول."
+    },
+    "details": {
+      "basics": "الأساسيات",
+      "thumbnail": "الصورة المصغّرة",
+      "chooseImage": "اختر صورة",
+      "thumbnailHint": "JPEG أو PNG أو WebP حتى 5 ميجابايت",
+      "thumbnailTooLarge": "حجم الصورة أكبر من 5 ميجابايت.",
+      "thumbnailType": "استخدم صورة JPEG أو PNG أو WebP.",
+      "thumbnailFailed": "تعذّر رفع الصورة",
+      "remove": "إزالة",
+      "title": "عنوان الدورة",
+      "description": "الوصف",
+      "charsLeft": "متبقٍ {count} حرف",
+      "instructorName": "اسم المدرّس",
+      "instructorHint": "يظهر في صفحة الدورة. يظهر المدرّسون دائمًا باسم حسابهم.",
+      "pricing": "التصنيف والسعر",
+      "category": "التصنيف",
+      "general": "عام",
+      "level": "المستوى",
+      "levels": {
+        "BEGINNER": "مبتدئ",
+        "INTERMEDIATE": "متوسط",
+        "ADVANCED": "متقدّم"
+      },
+      "price": "السعر ({currency})",
+      "priceHint": "اكتب 0 لدورة مجانية.",
+      "duration": "المدة (بالساعات)",
+      "landing": "صفحة الدورة",
+      "outcomes": "ماذا سيتعلّم الطلاب",
+      "outcomesHint": "نتائج قصيرة وواضحة. حتى 20.",
+      "outcomePlaceholder": "نتيجة",
+      "requirements": "المتطلبات",
+      "requirementsHint": "ما يحتاجه الطالب قبل البدء. حتى 20.",
+      "requirementPlaceholder": "متطلب",
+      "addItem": "إضافة",
+      "removeItem": "إزالة",
+      "previewVideo": "رابط الفيديو التعريفي",
+      "previewVideoHint": "اختياري. يظهر للزوار كتعريف بالدورة.",
+      "tags": "الوسوم",
+      "tagsHint": "افصل بين الوسوم بفاصلة.",
+      "titleTooShort": "يجب أن يتكوّن العنوان من 3 أحرف على الأقل.",
+      "invalidNumbers": "راجع السعر والمدة.",
+      "save": "حفظ التغييرات",
+      "saved": "تم حفظ تفاصيل الدورة",
+      "createDraft": "إنشاء مسودة",
+      "created": "تم إنشاء المسودة. أضف الآن القسم الأول."
+    },
+    "curriculum": {
+      "hint": "اسحب الأقسام والدروس من مقبض السحب لإعادة ترتيبها، ويمكنك نقل الدروس بين الأقسام.",
+      "savingOrder": "جارٍ حفظ الترتيب…",
+      "orderFailed": "تعذّر حفظ الترتيب الجديد",
+      "section": "القسم {number}",
+      "sectionTitle": "عنوان القسم",
+      "saveTitle": "حفظ العنوان",
+      "cancelRename": "إلغاء",
+      "renameSection": "إعادة تسمية القسم",
+      "deleteSection": "حذف القسم",
+      "lessonCount": "{count, plural, zero {لا دروس} one {درس واحد} two {درسان} few {# دروس} many {# درسًا} other {# درس}}",
+      "emptySection": "لا توجد دروس بعد. أضف درسًا أو اسحب درسًا إلى هنا.",
+      "addLesson": "إضافة درس",
+      "addSection": "إضافة قسم",
+      "newSectionPlaceholder": "عنوان القسم الجديد",
+      "emptyTitle": "لا توجد أقسام بعد",
+      "emptyDescription": "الأقسام تجمع دروسك. أضف القسم الأول بالأسفل.",
+      "dragLesson": "نقل الدرس {title}",
+      "dragModule": "نقل القسم {title}",
+      "free": "معاينة مجانية",
+      "hidden": "مخفي",
+      "videoReady": "الفيديو جاهز",
+      "videoUploading": "جارٍ الرفع",
+      "videoFailed": "فشل الرفع",
+      "videoMissing": "لا يوجد فيديو بعد",
+      "quizMissing": "لا توجد أسئلة بعد",
+      "minutes": "{count} د",
+      "uploadVideo": "فيديو",
+      "buildQuiz": "إنشاء الاختبار",
+      "editQuiz": "تعديل الاختبار",
+      "editLesson": "تعديل الدرس",
+      "deleteLesson": "حذف الدرس",
+      "uploadTitle": "رفع فيديو: {title}",
+      "lessonDeleted": "تم حذف الدرس",
+      "sectionDeleted": "تم حذف القسم",
+      "deleteLessonTitle": "حذف هذا الدرس؟",
+      "deleteLessonDescription": "سيتم حذف «{title}» نهائيًا مع اختباره وتقدّم الطلاب فيه.",
+      "deleteSectionTitle": "حذف هذا القسم؟",
+      "deleteSectionDescription": "سيتم حذف «{title}» نهائيًا مع {count, plural, zero {محتواه} one {درسه الوحيد} two {درسيه} few {دروسه الـ#} many {دروسه الـ#} other {دروسه الـ#}}.",
+      "a11y": {
+        "picked": "تم الالتقاط. استخدم الأسهم للتحريك، والمسافة للإفلات، و Escape للإلغاء.",
+        "over": "تم التحريك.",
+        "outside": "ليس فوق منطقة إفلات.",
+        "dropped": "تم الإفلات.",
+        "cancelled": "تم إلغاء النقل."
+      }
+    },
+    "lesson": {
+      "addTitle": "إضافة درس",
+      "editTitle": "تعديل الدرس",
+      "type": "نوع الدرس",
+      "types": {
+        "VIDEO": "فيديو",
+        "TEXT": "مقال",
+        "RESOURCE": "ملف",
+        "QUIZ": "اختبار",
+        "ASSIGNMENT": "واجب"
+      },
+      "title": "العنوان",
+      "summary": "ملخّص قصير",
+      "summaryHint": "اختياري. يظهر أسفل عنوان الدرس.",
+      "videoFile": "ارفع ملف فيديو",
+      "videoFileHint": "حتى 5 جيجابايت. يبدأ الرفع بعد الحفظ.",
+      "videoLink": "أو أضف رابط فيديو",
+      "videoLinkHint": "رابط MP4 مباشر أو رابط يوتيوب.",
+      "videoAlreadyUploaded": "تم رفع فيديو بالفعل. اختر ملفًا جديدًا فقط إذا أردت استبداله.",
+      "videoTooLarge": "حجم الفيديو أكبر من 5 جيجابايت.",
+      "uploading": "جارٍ رفع الفيديو…",
+      "article": "المقال",
+      "articleHint": "اكتب بصيغة Markdown واستخدم المعاينة للتحقق من التنسيق.",
+      "uploadResource": "رفع ملف",
+      "resourceHint": "PDF أو Office أو ZIP أو نص أو صورة، حتى 50 ميجابايت.",
+      "resourceLink": "رابط الملف",
+      "resourceTooLarge": "حجم الملف أكبر من 50 ميجابايت.",
+      "resourceRequired": "ارفع ملفًا أو الصق رابطًا لهذا الدرس.",
+      "uploadFailed": "فشل الرفع",
+      "quizNext": "بعد الحفظ ستضيف الأسئلة في منشئ الاختبار.",
+      "quizExists": "لهذا الدرس اختبار. عدّل أسئلته من صفحة المنهج.",
+      "quizInstructions": "تعليمات للطلاب (اختياري)",
+      "duration": "المدة (بالدقائق)",
+      "freePreview": "معاينة مجانية",
+      "freePreviewHint": "يمكن للزوار المسجّلين فتحه دون الاشتراك.",
+      "visible": "ظاهر للطلاب",
+      "visibleHint": "ألغِ التحديد لإخفائه أثناء العمل عليه.",
+      "titleRequired": "أضف عنوانًا للدرس.",
+      "invalidLink": "يجب أن تبدأ الروابط بـ http:// أو https://.",
+      "invalidDuration": "يجب أن تكون المدة رقمًا موجبًا.",
+      "create": "إضافة الدرس",
+      "createAndBuild": "إضافة وإنشاء الاختبار",
+      "save": "حفظ الدرس",
+      "created": "تمت إضافة الدرس",
+      "updated": "تم حفظ الدرس"
+    },
+    "quiz": {
+      "backToCurriculum": "العودة إلى المنهج",
+      "heading": "اختبار «{title}»",
+      "lessonNotFound": "هذا الدرس لم يعد موجودًا.",
+      "settings": "إعدادات الاختبار",
+      "title": "عنوان الاختبار",
+      "description": "الوصف",
+      "passingScore": "درجة النجاح (%)",
+      "timeLimit": "الوقت المحدد (بالدقائق)",
+      "timeLimitHint": "اتركه فارغًا لعدم التقييد.",
+      "attempts": "عدد المحاولات",
+      "attemptsHint": "اتركه فارغًا لمحاولات غير محدودة.",
+      "showAnswers": "إظهار الإجابات الصحيحة بعد تسليم الطالب",
+      "questions": "الأسئلة",
+      "totals": "{count, plural, zero {لا أسئلة} one {سؤال واحد} two {سؤالان} few {# أسئلة} many {# سؤالًا} other {# سؤال}} · {points, plural, zero {لا نقاط} one {نقطة واحدة} two {نقطتان} few {# نقاط} many {# نقطة} other {# نقطة}}",
+      "questionNumber": "السؤال {n}",
+      "questionType": "نوع السؤال",
+      "types": {
+        "MULTIPLE_CHOICE": "اختيار من متعدد",
+        "TRUE_FALSE": "صح / خطأ",
+        "SHORT_ANSWER": "إجابة قصيرة"
+      },
+      "add": {
+        "MULTIPLE_CHOICE": "اختيار من متعدد",
+        "TRUE_FALSE": "صح / خطأ",
+        "SHORT_ANSWER": "إجابة قصيرة"
+      },
+      "points": "النقاط",
+      "moveUp": "تحريك لأعلى",
+      "moveDown": "تحريك لأسفل",
+      "duplicate": "تكرار السؤال",
+      "removeQuestion": "حذف السؤال",
+      "questionText": "السؤال",
+      "questionPlaceholder": "اكتب السؤال",
+      "expectedAnswer": "الإجابة المتوقعة",
+      "expectedAnswerHint": "تُطابق حرفيًا مع تجاهل حالة الأحرف والمسافات الزائدة.",
+      "markCorrect": "حدّد كل الخيارات الصحيحة",
+      "pickCorrectOne": "اختر الإجابة الصحيحة",
+      "correctOption": "الخيار {n} صحيح",
+      "optionPlaceholder": "الخيار {n}",
+      "addOption": "إضافة خيار",
+      "removeOption": "حذف الخيار",
+      "true": "صح",
+      "false": "خطأ",
+      "fixErrors": "صحّح ما يلي قبل الحفظ:",
+      "errors": {
+        "title": "يحتاج الاختبار إلى عنوان.",
+        "passingScore": "يجب أن تكون درجة النجاح بين 0 و100.",
+        "noQuestions": "أضف سؤالًا واحدًا على الأقل.",
+        "questionText": "السؤال {n} بلا نص.",
+        "shortAnswer": "السؤال {n} يحتاج إلى إجابة متوقعة.",
+        "emptyOption": "في السؤال {n} خيار فارغ.",
+        "multipleChoice": "السؤال {n} يحتاج إلى خيارين على الأقل وإجابة صحيحة واحدة.",
+        "trueFalse": "السؤال {n} يحتاج إلى إجابة صحيحة واحدة بالضبط."
+      },
+      "unsaved": "تغييرات غير محفوظة",
+      "allSaved": "تم حفظ كل التغييرات",
+      "notCreated": "لم يُحفظ بعد",
+      "save": "حفظ الاختبار",
+      "saved": "تم حفظ الاختبار",
+      "deleteQuiz": "حذف الاختبار",
+      "deleted": "تم حذف الاختبار",
+      "deleteTitle": "حذف هذا الاختبار؟",
+      "deleteDescription": "سيتم حذف الأسئلة وكل محاولات الطلاب نهائيًا. يبقى الدرس كما هو."
+    },
+    "coupons": {
+      "title": "القسائم",
+      "description": "أكواد الخصم لدوراتك."
+    },
+    "analytics": {
+      "title": "الإحصائيات",
+      "description": "التسجيلات والتقدّم والإيرادات عبر دوراتك.",
+      "range": "الفترة",
+      "lastDays": "آخر {count} يومًا",
+      "kpi": {
+        "students": "الطلاب",
+        "allTime": "منذ البداية",
+        "newEnrollments": "تسجيلات جديدة",
+        "progress": "متوسط التقدّم",
+        "progressHint": "بين الطلاب المسجّلين",
+        "quizScore": "متوسط درجات الاختبارات",
+        "quizHint": "المحاولات المسلّمة"
+      },
+      "enrollmentsChart": "التسجيلات الجديدة",
+      "revenueChart": "الإيرادات",
+      "noRevenue": "لا توجد مدفوعات مكتملة في هذه الفترة.",
+      "inRange": "في هذه الفترة",
+      "byCourse": "حسب الدورة",
+      "noCourses": "لا توجد دورات بعد.",
+      "draft": "مسودة",
+      "cols": {
+        "course": "الدورة",
+        "students": "الطلاب",
+        "newEnrollments": "جدد",
+        "progress": "متوسط التقدّم",
+        "completed": "أكملوا",
+        "quizScore": "متوسط الاختبارات",
+        "revenue": "الإيرادات"
+      }
+    },
+    "courseAnalytics": {
+      "students": "الطلاب المسجّلون",
+      "reachedEnd": "أكملوا الدرس الأخير",
+      "reachedEndHint": "نسبة من الطلاب المسجّلين",
+      "quizAttempts": "محاولات الاختبارات",
+      "funnel": "إكمال الدروس",
+      "funnelHint": "نسبة الطلاب المسجّلين الذين أكملوا كل درس بترتيب الدورة. الانخفاض الحاد يبيّن أين يتوقف الطلاب.",
+      "noLessons": "لا توجد دروس ظاهرة بعد.",
+      "quizzes": "الاختبارات",
+      "noQuizzes": "لا توجد اختبارات في هذه الدورة بعد.",
+      "cols": {
+        "quiz": "الاختبار",
+        "lesson": "الدرس",
+        "questions": "الأسئلة",
+        "attempts": "المحاولات",
+        "average": "متوسط الدرجة",
+        "passRate": "نسبة النجاح"
+      }
+    },
+    "couponManager": {
+      "title": "قسائم الدورات",
+      "noCourses": "أنشئ دورة أولًا لإدارة القسائم.",
+      "courseLabel": "الدورة",
+      "codePlaceholder": "الرمز (اختياري)",
+      "discountPlaceholder": "نسبة الخصم %",
+      "usageLimitPlaceholder": "حد الاستخدام",
+      "create": "إنشاء قسيمة",
+      "existing": "القسائم الحالية",
+      "empty": "لا توجد قسائم لهذه الدورة بعد.",
+      "summary": "خصم {percent}% · مرات الاستخدام: {used}",
+      "summaryWithLimit": "خصم {percent}% · مرات الاستخدام: {used} / {limit}",
+      "deactivate": "إلغاء التفعيل",
+      "delete": "حذف",
+      "status": {
+        "active": "مفعّلة",
+        "inactive": "غير مفعّلة"
+      },
+      "toasts": {
+        "created": "تم إنشاء القسيمة",
+        "createdDescription": "تم إنشاء القسيمة بنجاح.",
+        "createFailed": "تعذّر إنشاء القسيمة",
+        "createFailedDescription": "يرجى مراجعة البيانات المدخلة والمحاولة مرة أخرى.",
+        "deactivateFailed": "تعذّر إلغاء تفعيل القسيمة",
+        "tryAgain": "يرجى المحاولة مرة أخرى.",
+        "deleted": "تم حذف القسيمة",
+        "deleteFailed": "تعذّر حذف القسيمة"
+      }
+    }
+  },
+  "catalog": {
+    "free": "مجانية",
+    "ratingLabel": "التقييم {rating} من 5",
+    "newCourse": "دورة جديدة",
+    "lessons": "{count, plural, zero {لا دروس} one {درس واحد} two {درسان} few {# دروس} many {# درسًا} other {# درس}}",
+    "hours": "{count, plural, zero {أقل من ساعة} one {ساعة واحدة} two {ساعتان} few {# ساعات} many {# ساعة} other {# ساعة}}",
+    "students": "{count, plural, zero {لا طلاب} one {طالب واحد} two {طالبان} few {# طلاب} many {# طالبًا} other {# طالب}}",
+    "wishlist": {
+      "add": "احفظ لوقت لاحق",
+      "remove": "إزالة من المحفوظات",
+      "added": "تم الحفظ في قائمة الرغبات",
+      "removed": "تمت الإزالة من قائمة الرغبات",
+      "failed": "تعذّر تحديث قائمة الرغبات"
+    },
+    "filters": {
+      "toggle": "التصفية",
+      "category": "التصنيف",
+      "allCategories": "كل التصنيفات",
+      "level": "المستوى",
+      "allLevels": "كل المستويات",
+      "price": "السعر",
+      "anyPrice": "أي سعر",
+      "free": "مجانية",
+      "paid": "مدفوعة",
+      "sort": "الترتيب"
+    },
+    "sort": {
+      "newest": "الأحدث",
+      "popular": "الأكثر شعبية",
+      "rating": "الأعلى تقييمًا",
+      "price_asc": "السعر: من الأقل للأعلى",
+      "price_desc": "السعر: من الأعلى للأقل"
+    },
+    "searchPlaceholder": "ابحث عن دورة أو موضوع أو مدرّس",
+    "resultCount": "{count, plural, =0 {لا توجد دورات} one {دورة واحدة} two {دورتان} few {# دورات} many {# دورة} other {# دورة}}",
+    "clearFilters": "مسح التصفية",
+    "noResults": "لا توجد دورات مطابقة لبحثك",
+    "noResultsHint": "جرّب كلمات أخرى أو أزل بعض عوامل التصفية.",
+    "pagination": "الصفحات",
+    "previous": "الصفحة السابقة",
+    "next": "الصفحة التالية"
+  },
+  "reviews": {
+    "title": "آراء الطلاب",
+    "stars": "{count, plural, one {نجمة واحدة} two {نجمتان} few {# نجوم} many {# نجمة} other {# نجمة}}",
+    "average": "متوسط التقييم {rating} من 5",
+    "count": "{count, plural, zero {لا تقييمات} one {تقييم واحد} two {تقييمان} few {# تقييمات} many {# تقييمًا} other {# تقييم}}",
+    "distribution": "توزيع التقييمات",
+    "beFirst": "لا توجد تقييمات بعد. كن أول من يشارك رأيه.",
+    "none": "لا توجد تقييمات بعد.",
+    "rateCourse": "قيّم هذه الدورة",
+    "yourRating": "تقييمك",
+    "youRated": "قيّمت هذه الدورة",
+    "pickRating": "اختر عدد النجوم أولًا.",
+    "commentPlaceholder": "ما الذي أعجبك، وما الذي يمكن تحسينه؟ (اختياري)",
+    "submit": "نشر التقييم",
+    "update": "تحديث التقييم",
+    "edit": "تعديل التقييم",
+    "delete": "حذف",
+    "thanks": "شكرًا على تقييمك!",
+    "updated": "تم تحديث التقييم",
+    "deleted": "تم حذف التقييم",
+    "failed": "تعذّر حفظ تقييمك",
+    "anonymous": "طالب",
+    "more": "عرض المزيد من التقييمات"
+  },
+  "courseDetail": {
+    "breadcrumb": "مسار التنقل",
+    "allCourses": "كل الدورات",
+    "updated": "آخر تحديث {date}",
+    "watchPreview": "شاهد المقدمة",
+    "previewTitle": "مقدمة: {title}",
+    "share": "مشاركة",
+    "linkCopied": "تم نسخ الرابط",
+    "staffNote": "أنت مسجّل كموظف. يرى الطلاب زر الاشتراك هنا.",
+    "includes": {
+      "lessons": "{count, plural, zero {لا دروس} one {درس واحد} two {درسان} few {# دروس} many {# درسًا} other {# درس}}",
+      "hours": "{count, plural, zero {محتوى قصير} one {ساعة محتوى واحدة} two {ساعتا محتوى} few {# ساعات محتوى} many {# ساعة محتوى} other {# ساعة محتوى}}"
+    },
+    "whatYouLearn": "ماذا ستتعلّم",
+    "requirements": "المتطلبات",
+    "instructor": "مدرّسك",
+    "allInstructors": "تعرّف على كل المدرّسين",
+    "related": "دورات شاهدها طلاب آخرون",
+    "browseOthers": "تصفّح دورات أخرى"
+  },
+  "certificate": {
+    "heading": "شهادة إتمام",
+    "certifies": "تشهد هذه الوثيقة بأن",
+    "completed": "قد أتمّ بنجاح دورة",
+    "instructor": "بإشراف {name}",
+    "issued": "تاريخ الإصدار",
+    "code": "رقم الشهادة",
+    "verifyAt": "للتحقق:",
+    "verified": "شهادة موثّقة",
+    "copyLink": "نسخ الرابط",
+    "linkCopied": "تم نسخ الرابط",
+    "print": "طباعة أو حفظ PDF",
+    "notFound": "الشهادة غير موجودة",
+    "notFoundHint": "لا توجد شهادة بالرقم {code}. تحقّق منه وحاول مرة أخرى."
+  },
+  "theme": {
+    "label": "مظهر الألوان",
+    "light": "فاتح",
+    "dark": "داكن",
+    "system": "حسب النظام"
+  },
+  "errors": {
+    "notFound": {
+      "title": "لم نجد هذه الصفحة",
+      "description": "ربما يكون الرابط غير صحيح أو نُقلت الصفحة. جرّب الصفحة الرئيسية أو تصفّح دوراتنا.",
+      "home": "الذهاب إلى الصفحة الرئيسية",
+      "courses": "تصفّح الدورات"
+    },
+    "generic": {
+      "title": "حدث خطأ",
+      "description": "واجهت هذه الصفحة خطأً غير متوقع. حاول مرة أخرى، وإن تكرّر الأمر فعُد بعد قليل.",
+      "reference": "رقم المرجع",
+      "retry": "إعادة المحاولة",
+      "home": "الذهاب إلى الصفحة الرئيسية"
+    }
+  },
+  "pages": {
+    "about": {
+      "eyebrow": "من نحن",
+      "title": "عن إتقان",
+      "intro": "إتقان أكاديمية للعلم الشرعي الأصيل واللغة العربية، تجمع العلماء الموثوقين والتعليم المتقن في منصة واحدة، بالعربية والإنجليزية.",
+      "sections": [
+        {
+          "title": "رسالتنا",
+          "body": "نريد أن يكون العلم الصحيح الموثّق في متناول كل طالب أينما كان. والإتقان غايتنا: دروس دقيقة واضحة أمينة على المصادر."
+        },
+        {
+          "title": "ماذا نُدرّس",
+          "body": "دورات في التفسير والحديث والفقه والعقيدة والسيرة النبوية والتجويد وأصول الفقه واللغة العربية، من المبتدئ إلى المتقدّم. كل دورة مقسّمة إلى أقسام ودروس، مع اختبارات تقيس فهمك وشهادة عند الإتمام."
+        },
+        {
+          "title": "مدرّسونا",
+          "body": "يقدّم الدروس علماء مؤهّلون ومعلّمون ذوو خبرة، ويبني كل مدرّس دوراته ويحدّثها بنفسه على إتقان، فيبقى المحتوى متجددًا ومرتبطًا بمن يُدرّسه."
+        },
+        {
+          "title": "الخدمات العلمية والتعليمية",
+          "body": "إلى جانب الدورات، يقدّم فريق إتقان تحقيق المخطوطات، ومراجعة الكتب والرسائل العلمية، والتدقيق اللغوي، وتعليم القرآن الكريم، وتعليم العربية لغير الناطقين بها. التفاصيل في صفحة الخدمات."
+        },
+        {
+          "title": "تواصل معنا",
+          "body": "نرحّب بأسئلتكم واقتراحاتكم وأفكار التعاون. تجدون وسائل التواصل في أسفل كل صفحة."
+        }
+      ]
+    },
+    "privacy": {
+      "eyebrow": "قانوني",
+      "title": "سياسة الخصوصية",
+      "intro": "توضّح هذه السياسة ما تجمعه إتقان من معلومات شخصية، ولماذا، وما الخيارات المتاحة لك.",
+      "sections": [
+        {
+          "title": "المعلومات التي نجمعها",
+          "body": "بيانات الحساب التي تقدّمها (الاسم والبريد الإلكتروني ورقم الهاتف اختياريًا). ونشاطك التعليمي: الاشتراكات والدروس المكتملة ومواضع التوقف في الفيديو وإجابات الاختبارات والتقييمات والشهادات. وسجلات الدفع (المبلغ والحالة والدورة)؛ أما بيانات البطاقة فيتولاها مزوّد الدفع ولا تُخزَّن على خوادمنا. وبيانات تقنية أساسية مثل عنوان IP لحماية الخدمة."
+        },
+        {
+          "title": "كيف نستخدمها",
+          "body": "لإدارة حسابك ومنحك الوصول إلى الدورات التي اشتركت فيها، ولحفظ تقدّمك وإصدار الشهادات، ولمعالجة المدفوعات والاسترداد، وللرد على رسائلك، وللحفاظ على أمان المنصة، مثل الحدّ من محاولات تسجيل الدخول المتكررة."
+        },
+        {
+          "title": "ما يراه الآخرون",
+          "body": "تظهر في التقييمات باسمك الأول والحرف الأول من اسم العائلة. وتعرض صفحة الشهادة اسمك والدورة وتاريخ الإصدار لكل من لديه رابطها أو رقمها. ويرى المدرّسون أرقام الاشتراك والتقدّم في دوراتهم فقط."
+        },
+        {
+          "title": "مشاركة البيانات",
+          "body": "لا نبيع معلوماتك الشخصية. نشاركها فقط مع الخدمات التي تساعدنا في تشغيل إتقان (كمعالجة الدفع وإرسال البريد وتخزين الملفات) وبالقدر الذي تحتاجه، أو عندما يلزم القانون بذلك."
+        },
+        {
+          "title": "الاحتفاظ بالبيانات وخياراتك",
+          "body": "نحتفظ ببياناتك ما دام حسابك نشطًا لتعود إلى دوراتك متى شئت. يمكنك تعديل ملفك الشخصي في أي وقت، ويمكنك طلب تصدير بيانات حسابك أو حذفه بالتواصل معنا."
+        },
+        {
+          "title": "ملفات تعريف الارتباط والتخزين المحلي",
+          "body": "نستخدم تخزين المتصفح لإبقائك مسجّل الدخول ولتذكّر تفضيلاتك مثل اللغة ومظهر الألوان. لا نستخدم أدوات تتبّع إعلانية."
+        }
+      ],
+      "footnote": "إذا تغيّرت هذه السياسة تغييرًا جوهريًا فسننبّه إلى ذلك في هذه الصفحة ونحدّث التاريخ أدناه. آخر تحديث: أكتوبر 2026."
+    },
+    "terms": {
+      "eyebrow": "قانوني",
+      "title": "شروط الاستخدام",
+      "intro": "بإنشائك حسابًا أو استخدامك منصة إتقان فإنك توافق على هذه الشروط، فاقرأها بعناية.",
+      "sections": [
+        {
+          "title": "حسابك",
+          "body": "حافظ على سرية بيانات الدخول وقدّم معلومات صحيحة. أنت مسؤول عن النشاط الذي يتم عبر حسابك. ويجوز لنا إيقاف الحسابات التي تخالف هذه الشروط أو تعرّض المستخدمين الآخرين للخطر."
+        },
+        {
+          "title": "الدورات والوصول إليها",
+          "body": "يمنحك الاشتراك وصولًا شخصيًا غير قابل للتحويل إلى الدورة ما دامت متاحة على إتقان. لا تشارك حسابك، ولا تُنزّل مقاطع الدورات وموادها أو تنسخها أو تعيد نشرها دون إذن."
+        },
+        {
+          "title": "المدفوعات والاسترداد",
+          "body": "تظهر الأسعار قبل الدفع، ويُفعَّل الاشتراك المدفوع بعد تأكيد الدفع. وإذا استُرد المبلغ انتهى الوصول إلى تلك الدورة. تواصل معنا بشأن أي مشكلة في الفواتير."
+        },
+        {
+          "title": "التقييمات والسلوك",
+          "body": "يجب أن تكون التقييمات صادقة ومهذّبة ومتعلّقة بالدورة. ويجوز لنا إخفاء أي محتوى مسيء أو مضلّل أو خارج عن الموضوع."
+        },
+        {
+          "title": "الشهادات",
+          "body": "تؤكّد الشهادات أنك أتممت دروس الدورة واختباراتها على إتقان، وليست درجات أكاديمية ما لم تنص الدورة على خلاف ذلك."
+        },
+        {
+          "title": "التعديلات والإتاحة",
+          "body": "نسعى لإبقاء إتقان متاحة ودقيقة، لكن الدورات والميزات قد تتغيّر بمرور الوقت. وقد نحدّث هذه الشروط، واستمرارك في الاستخدام بعد التحديث يعني قبولك للنسخة الجديدة."
+        }
+      ],
+      "footnote": "آخر تحديث: أكتوبر 2026."
+    }
+  },
+  "clipsPage": {
+    "title": "مقتطفات",
+    "subtitle": "مقاطع مرئية وصوتية متاحة للجميع",
+    "search": "ابحث عن مقطع…",
+    "empty": "لا توجد مقتطفات متاحة حالياً.",
+    "tabs": {
+      "all": "الكل",
+      "video": "فيديو",
+      "audio": "صوت"
+    }
+  },
+  "offline": {
+    "title": "أنت غير متصل بالإنترنت",
+    "description": "تحقّق من اتصالك بالإنترنت ثم حاول مرة أخرى. ستُفتح الصفحات بشكل طبيعي عند عودة الاتصال.",
+    "retry": "إعادة المحاولة"
   }
 }

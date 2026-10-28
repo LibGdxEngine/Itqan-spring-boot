@@ -14,8 +14,8 @@ x-backend-base: &backend-base
     SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
     SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
     SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
-    SPRING_JPA_HIBERNATE_DDL_AUTO: ${JPA_HIBERNATE_DDL_AUTO:-update}
-    SPRING_JPA_SHOW_SQL: ${JPA_SHOW_SQL:-true}
+    SPRING_JPA_HIBERNATE_DDL_AUTO: ${JPA_HIBERNATE_DDL_AUTO:-validate}
+    SPRING_JPA_SHOW_SQL: ${JPA_SHOW_SQL:-false}
     SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
     SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL: "true"
     JWT_SECRET: ${JWT_SECRET:-itqan-education-platform-secret-key-change-in-production-environment-minimum-256-bits}
@@ -58,7 +58,12 @@ x-backend-base: &backend-base
     REDIS_PASSWORD: ${REDIS_PASSWORD:-redispassword}
     ACCOUNT_LOCKOUT_MAX_ATTEMPTS: ${ACCOUNT_LOCKOUT_MAX_ATTEMPTS:-5}
     ACCOUNT_LOCKOUT_DURATION_MINUTES: ${ACCOUNT_LOCKOUT_DURATION_MINUTES:-15}
+    RATE_LIMIT_AUTH: ${RATE_LIMIT_AUTH:-10}
     SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-default}
+    METRICS_SCRAPE_TOKEN: ${METRICS_SCRAPE_TOKEN:-}
+    SENTRY_DSN: ${SENTRY_DSN:-}
+    SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT:-development}
+    SENTRY_TRACES_SAMPLE_RATE: ${SENTRY_TRACES_SAMPLE_RATE:-0.0}
   depends_on:
     postgres:
       condition: service_healthy
@@ -84,6 +89,8 @@ x-frontend-base: &frontend-base
     # Read at runtime by /api/payment-config — change + recreate, no rebuild needed.
     WHATSAPP_VODAFONE_NUMBER: ${WHATSAPP_VODAFONE_NUMBER:-}
     WHATSAPP_INSTAPAY_NUMBER: ${WHATSAPP_INSTAPAY_NUMBER:-}
+    NEXT_PUBLIC_SENTRY_DSN: ${SENTRY_DSN_FRONTEND:-}
+    SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT:-development}
 
 services:
   minio:
@@ -253,6 +260,10 @@ services:
     environment:
       <<: *backend-env
       SPRING_PROFILES_ACTIVE: prod
+      # Flyway owns the schema in production; never let Hibernate alter it.
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      SPRING_JPA_SHOW_SQL: "false"
+      SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL: "false"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health/readiness"]
       interval: 30s
@@ -271,6 +282,8 @@ services:
       args:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8080}
         NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+        NEXT_PUBLIC_SENTRY_DSN: ${SENTRY_DSN_FRONTEND:-}
+        NEXT_PUBLIC_SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT:-production}
     environment:
       <<: *frontend-env
       NODE_ENV: production
@@ -316,12 +329,16 @@ services:
       timeout: 5s
       retries: 5
 
+  # ==========================================
+  # BACKUPS (on with prod; or alone with COMPOSE_PROFILES=backup)
+  # Daily database dumps and a copy of the video bucket in the backup_data volume,
+  # plus an optional off-site copy when BACKUP_S3_* is set. Restore: scripts/db-restore.sh
+  # ==========================================
+
   postgres-backup:
     image: postgres:16-alpine
     container_name: itqan-postgres-backup
-    # Opt-in only: cron inside an alpine container has setpgid issues on some hosts.
-    # Enable with: COMPOSE_PROFILES=prod,backup
-    profiles: [backup]
+    profiles: [prod, backup]
     depends_on:
       postgres:
         condition: service_healthy
@@ -333,11 +350,91 @@ services:
       BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-7}
     volumes:
       - ./scripts/db-backup.sh:/usr/local/bin/db-backup.sh:ro
+      - ./scripts/run-daily.sh:/usr/local/bin/run-daily.sh:ro
       - backup_data:/backups
     networks:
       - itqan-network
-    entrypoint: /bin/sh
-    command: -c "apk add --no-cache dcron && echo '0 2 * * * /usr/local/bin/db-backup.sh' | crontab - && crond -f -l 2"
+    entrypoint: ["/bin/sh", "/usr/local/bin/run-daily.sh", "${BACKUP_DB_TIME:-02:00}", "/bin/sh", "/usr/local/bin/db-backup.sh"]
+    restart: ${RESTART_POLICY:-unless-stopped}
+
+  minio-backup:
+    image: rclone/rclone:1.71
+    container_name: itqan-minio-backup
+    profiles: [prod, backup]
+    depends_on:
+      - minio
+    environment:
+      MINIO_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_PASS: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      BUCKET: ${APP_STORAGE_S3_BUCKET:-itqan-videos}
+      BACKUP_S3_ENDPOINT: ${BACKUP_S3_ENDPOINT:-}
+      BACKUP_S3_BUCKET: ${BACKUP_S3_BUCKET:-}
+      BACKUP_S3_ACCESS_KEY: ${BACKUP_S3_ACCESS_KEY:-}
+      BACKUP_S3_SECRET_KEY: ${BACKUP_S3_SECRET_KEY:-}
+    volumes:
+      - ./scripts/minio-backup.sh:/usr/local/bin/minio-backup.sh:ro
+      - ./scripts/run-daily.sh:/usr/local/bin/run-daily.sh:ro
+      - backup_data:/backups
+    networks:
+      - itqan-network
+    # Runs after the database dump so the off-site copy includes that night's dump.
+    entrypoint: ["/bin/sh", "/usr/local/bin/run-daily.sh", "${BACKUP_FILES_TIME:-03:00}", "/bin/sh", "/usr/local/bin/minio-backup.sh"]
+    restart: ${RESTART_POLICY:-unless-stopped}
+
+  # ==========================================
+  # MONITORING (Profile: monitoring) — e.g. COMPOSE_PROFILES=prod,monitoring
+  # Needs METRICS_SCRAPE_TOKEN (same value the backend gets) and GRAFANA_ADMIN_PASSWORD.
+  # ==========================================
+
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    container_name: itqan-prometheus
+    profiles: [monitoring]
+    environment:
+      METRICS_TARGET: ${METRICS_TARGET:-backend-prod:8080}
+      METRICS_SCRAPE_TOKEN: ${METRICS_SCRAPE_TOKEN:-}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        [ -n "$$METRICS_SCRAPE_TOKEN" ] || { echo 'Set METRICS_SCRAPE_TOKEN (same value as the backend)'; exit 1; }
+        mkdir -p /tmp/secrets
+        printf '%s' "$$METRICS_SCRAPE_TOKEN" > /tmp/secrets/scrape-token
+        sed "s#__METRICS_TARGET__#$$METRICS_TARGET#" /etc/prometheus/prometheus.tmpl.yml > /tmp/prometheus.yml
+        exec /bin/prometheus --config.file=/tmp/prometheus.yml --storage.tsdb.path=/prometheus --storage.tsdb.retention.time=15d
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.tmpl.yml:ro
+      - ./monitoring/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "${PORT_BIND_HOST:-127.0.0.1}:${PROMETHEUS_PORT:-9090}:9090"
+    networks:
+      - itqan-network
+    restart: ${RESTART_POLICY:-unless-stopped}
+
+  grafana:
+    image: grafana/grafana:12.1.1
+    container_name: itqan-grafana
+    profiles: [monitoring]
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+    # Refuse to start with Grafana's default admin/admin login.
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        [ -n "$$GF_SECURITY_ADMIN_PASSWORD" ] || { echo 'Set GRAFANA_ADMIN_PASSWORD'; exit 1; }
+        exec /run.sh
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "${PORT_BIND_HOST:-127.0.0.1}:${GRAFANA_PORT:-3001}:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - itqan-network
     restart: ${RESTART_POLICY:-unless-stopped}
 
 volumes:
@@ -350,6 +447,8 @@ volumes:
   caddy_config:
   redis_data:
   backup_data:
+  prometheus_data:
+  grafana_data:
 
 networks:
   itqan-network:

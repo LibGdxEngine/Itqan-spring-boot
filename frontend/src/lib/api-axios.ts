@@ -1,4 +1,5 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
+import { clearTokens, getValidAccessToken, refreshAccessToken } from "./token-store";
 
 // Base API client configuration
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -12,11 +13,11 @@ export const api = axios.create({
   withCredentials: true,
 });
 
-// Request interceptor - add auth token
+// Request interceptor - add auth token (refreshed first if it is about to expire)
 api.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
-    if (typeof window !== "undefined") {
-      const token = localStorage.getItem("auth_token");
+  async (config: InternalAxiosRequestConfig) => {
+    if (typeof window !== "undefined" && !config.url?.startsWith("/api/auth/")) {
+      const token = await getValidAccessToken();
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -28,22 +29,31 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor - handle errors
+type RetriableConfig = InternalAxiosRequestConfig & { _retried?: boolean };
+
+// Response interceptor - on 401 try one silent refresh, otherwise end the session
 api.interceptors.response.use(
   (response) => response,
-  (error: AxiosError) => {
-    if (error.response?.status === 401) {
-      // Clear token and redirect to login if unauthorized
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("auth_token");
-        localStorage.removeItem("auth_user");
-        // Don't redirect if already on auth pages
-        if (
-          !window.location.pathname.startsWith("/login") &&
-          !window.location.pathname.startsWith("/register")
-        ) {
-          window.location.href = "/login";
+  async (error: AxiosError) => {
+    const config = error.config as RetriableConfig | undefined;
+    const isAuthCall = config?.url?.startsWith("/api/auth/");
+
+    if (error.response?.status === 401 && typeof window !== "undefined" && !isAuthCall) {
+      if (config && !config._retried) {
+        config._retried = true;
+        const token = await refreshAccessToken();
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+          return api(config);
         }
+      }
+      clearTokens();
+      // Don't redirect if already on auth pages
+      if (
+        !window.location.pathname.startsWith("/login") &&
+        !window.location.pathname.startsWith("/register")
+      ) {
+        window.location.href = "/login";
       }
     }
     return Promise.reject(error);

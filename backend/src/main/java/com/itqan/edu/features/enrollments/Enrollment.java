@@ -43,6 +43,9 @@ public class Enrollment {
 
     private LocalDateTime completedAt;
 
+    /** The lesson the student opened most recently, for "continue learning". */
+    private Long lastLessonId;
+
     private LocalDateTime lastAccessedAt;
 
     @PrePersist

@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import { formatMoney } from '@/components/admin/ui';
+import { useSiteCurrency } from '@/lib/use-site-currency';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/components/auth-context';
 import { useRouter } from 'next/navigation';
@@ -23,6 +25,9 @@ export function EnrollButton({ courseId, coursePrice, courseTitle }: EnrollButto
     const router = useRouter();
     const { toast } = useToast();
     const t = useTranslations();
+    const locale = useLocale();
+    const currency = useSiteCurrency();
+    const money = (amount: number) => formatMoney(amount, currency, locale);
     const [loading, setLoading] = useState(false);
     const [validatingCoupon, setValidatingCoupon] = useState(false);
     const [isEnrolled, setIsEnrolled] = useState(false);
@@ -195,10 +200,10 @@ export function EnrollButton({ courseId, coursePrice, courseTitle }: EnrollButto
         return (
             <Button 
                 variant="outline" 
-                className="w-full border-[#c96442] text-[#c96442] hover:bg-[#f0eee6]"
+                className="w-full border-brand text-brand hover:bg-subtle"
                 onClick={() => router.push(`/learn/${courseId}`)}
             >
-                <CheckCircle className="mr-2 h-4 w-4" />
+                <CheckCircle className="me-2 h-4 w-4" />
                 {t('courses.enroll.continueLearning')}
             </Button>
         );
@@ -211,7 +216,7 @@ export function EnrollButton({ courseId, coursePrice, courseTitle }: EnrollButto
                     placeholder={t('courses.enroll.couponPlaceholder')}
                     value={couponCode}
                     onChange={(e) => setCouponCode(e.target.value)}
-                    className="text-[#141413]"
+                    className="text-ink"
                 />
                 <Button
                     type="button"
@@ -223,28 +228,28 @@ export function EnrollButton({ courseId, coursePrice, courseTitle }: EnrollButto
                 </Button>
             </div>
 
-            <div className="rounded-lg border border-[#e8e6dc] p-3 text-sm text-[#4d4c48]">
+            <div className="rounded-lg border border-line-strong p-3 text-sm text-ink-button">
                 <div className="flex items-center justify-between">
                     <span>{t('courses.enroll.original')}</span>
-                    <span>${pricing.originalAmount.toFixed(2)}</span>
+                    <span dir="ltr">{money(pricing.originalAmount)}</span>
                 </div>
                 <div className="flex items-center justify-between">
                     <span>{t('courses.enroll.discount')}</span>
-                    <span>- ${pricing.discountAmount.toFixed(2)}</span>
+                    <span dir="ltr">−{money(pricing.discountAmount)}</span>
                 </div>
-                <div className="mt-2 flex items-center justify-between font-semibold text-[#141413]">
+                <div className="mt-2 flex items-center justify-between font-semibold text-ink">
                     <span>{t('courses.enroll.total')}</span>
-                    <span>${pricing.finalAmount.toFixed(2)}</span>
+                    <span dir="ltr">{money(pricing.finalAmount)}</span>
                 </div>
             </div>
 
             {pricing.free ? (
                 <Button
-                    className="w-full bg-[#c96442] hover:bg-[#b55836] text-[#faf9f5]"
+                    className="w-full bg-brand hover:bg-brand-hover text-on-night"
                     onClick={handleCheckout}
                     disabled={loading}
                 >
-                    {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    {loading ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : null}
                     {t('courses.enroll.enrollFree')}
                 </Button>
             ) : (

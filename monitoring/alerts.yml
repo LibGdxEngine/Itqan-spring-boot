@@ -1,0 +1,43 @@
+# Visible under Status > Alerts in Prometheus and in Grafana's alerting view.
+groups:
+  - name: itqan-backend
+    rules:
+      - alert: BackendDown
+        expr: up{job="itqan-backend"} == 0
+        for: 2m
+        labels: { severity: critical }
+        annotations:
+          summary: "Backend has not answered a metrics scrape for 2 minutes"
+
+      - alert: HighServerErrorRate
+        expr: |
+          sum(rate(http_server_requests_seconds_count{job="itqan-backend",status=~"5.."}[5m]))
+            / clamp_min(sum(rate(http_server_requests_seconds_count{job="itqan-backend"}[5m])), 1e-9) > 0.05
+        for: 10m
+        labels: { severity: warning }
+        annotations:
+          summary: "More than 5% of API requests are failing with 5xx"
+
+      - alert: SlowApi
+        expr: |
+          histogram_quantile(0.95, sum by (le) (rate(http_server_requests_seconds_bucket{job="itqan-backend"}[5m]))) > 1.5
+        for: 10m
+        labels: { severity: warning }
+        annotations:
+          summary: "95th percentile API latency is above 1.5s"
+
+      - alert: DatabasePoolExhausted
+        expr: hikaricp_connections_pending{job="itqan-backend"} > 0
+        for: 5m
+        labels: { severity: warning }
+        annotations:
+          summary: "Requests are waiting for a database connection"
+
+      - alert: HeapNearlyFull
+        expr: |
+          sum(jvm_memory_used_bytes{job="itqan-backend",area="heap"})
+            / sum(jvm_memory_max_bytes{job="itqan-backend",area="heap"}) > 0.9
+        for: 10m
+        labels: { severity: warning }
+        annotations:
+          summary: "JVM heap usage is above 90%"

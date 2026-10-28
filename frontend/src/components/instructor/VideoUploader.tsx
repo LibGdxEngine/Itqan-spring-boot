@@ -224,7 +224,7 @@ export function VideoUploader({ lessonId, onUploaded }: VideoUploaderProps) {
   const isBusy = phase === "preparing" || phase === "uploading" || phase === "completing"
 
   return (
-    <div className="space-y-3 rounded-lg border border-[#f0eee6] bg-white p-4">
+    <div className="space-y-3 rounded-lg border border-line bg-paper p-4">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
         <input
           ref={inputRef}
@@ -232,27 +232,27 @@ export function VideoUploader({ lessonId, onUploaded }: VideoUploaderProps) {
           accept="video/*"
           onChange={onSelect}
           disabled={isBusy}
-          className="block text-sm text-[#4d4c48] file:mr-3 file:rounded-md file:border file:border-[#e8e6dc] file:bg-[#faf9f5] file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-[#141413] hover:file:bg-[#f0eee6]"
+          className="block text-sm text-ink-button file:me-3 file:rounded-md file:border file:border-line-strong file:bg-surface file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-ink hover:file:bg-subtle"
         />
         {file && phase !== "done" && !isBusy && (
           <Button onClick={() => void startUpload()} size="sm">
-            <Upload className="mr-1 h-4 w-4" />
+            <Upload className="me-1 h-4 w-4" />
             {t("instructor.videoUploader.start")}
           </Button>
         )}
       </div>
 
       {file && (
-        <p className="text-xs text-[#87867f]">
+        <p className="text-xs text-ink-3">
           {file.name} • {formatBytes(file.size)}
         </p>
       )}
 
       {(phase === "preparing" || phase === "uploading" || phase === "completing") && (
         <div className="space-y-2">
-          <div className="flex items-center justify-between text-xs text-[#5e5d59]">
+          <div className="flex items-center justify-between text-xs text-ink-2">
             <span className="flex items-center gap-1.5">
-              <Loader2 className="h-3.5 w-3.5 animate-spin text-[#c96442]" />
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-brand" />
               {phase === "preparing" && t("instructor.videoUploader.preparing")}
               {phase === "uploading" && partInfo &&
                 t("instructor.videoUploader.partProgress", {
@@ -263,23 +263,23 @@ export function VideoUploader({ lessonId, onUploaded }: VideoUploaderProps) {
                 ` (${t("instructor.videoUploader.retryAttempt", { n: partInfo.attempt })})`}
               {phase === "completing" && t("instructor.videoUploader.finalizing")}
             </span>
-            <span className="font-medium text-[#141413]">{progress}%</span>
+            <span className="font-medium text-ink">{progress}%</span>
           </div>
-          <div className="h-2 overflow-hidden rounded-full bg-[#e8e6dc]">
+          <div className="h-2 overflow-hidden rounded-full bg-sand">
             <div
-              className="h-full bg-[#c96442] transition-all"
+              className="h-full bg-brand transition-all"
               style={{ width: `${progress}%` }}
             />
           </div>
           <Button variant="outline" size="sm" onClick={() => void cancelUpload()}>
-            <X className="mr-1 h-4 w-4" />
+            <X className="me-1 h-4 w-4" />
             {t("instructor.videoUploader.cancel")}
           </Button>
         </div>
       )}
 
       {phase === "done" && (
-        <div className="flex items-center gap-2 text-sm text-[#1f7a3a]">
+        <div className="flex items-center gap-2 text-sm text-success">
           <CheckCircle2 className="h-4 w-4" />
           {t("instructor.videoUploader.done")}
           <Button variant="ghost" size="sm" onClick={reset}>
@@ -289,7 +289,7 @@ export function VideoUploader({ lessonId, onUploaded }: VideoUploaderProps) {
       )}
 
       {phase === "cancelled" && (
-        <div className="flex items-center justify-between gap-2 text-sm text-[#87867f]">
+        <div className="flex items-center justify-between gap-2 text-sm text-ink-3">
           <span>{t("instructor.videoUploader.cancelled")}</span>
           <Button variant="ghost" size="sm" onClick={reset}>
             {t("instructor.videoUploader.retry")}
@@ -298,7 +298,7 @@ export function VideoUploader({ lessonId, onUploaded }: VideoUploaderProps) {
       )}
 
       {phase === "error" && error && (
-        <div className="flex flex-col gap-2 rounded-md border border-[#f3c9be] bg-[#fdf3ef] p-3 text-sm text-[#b53333]">
+        <div className="flex flex-col gap-2 rounded-md border border-danger-line bg-brand-soft p-3 text-sm text-danger">
           <span>{error}</span>
           <div className="flex gap-2">
             <Button size="sm" onClick={() => void startUpload()}>

@@ -37,9 +37,11 @@ Next.js 16 web application (React 19, TypeScript) for the Itqan education platfo
 - Route folders use lowercase/kebab-case
 
 ### Testing Requirements
-- Run `npm run lint` for ESLint checks
+- Run `npm run lint` for ESLint checks and `npm run typecheck` for TypeScript
+- Run `npm run test:run` for unit tests (Vitest + Testing Library; files in `src/**/__tests__/*.test.ts(x)`)
 - Run `npm run build` for production build verification
-- No test runner configured yet — manually verify UI changes in browser
+- Run `npm run test:e2e` for the Playwright smoke tests in `e2e/` (needs a running backend and frontend;
+  see the root AGENTS.md for the required env vars)
 
 ### Common Patterns
 - App Router with route groups: `(auth)` for auth pages, `[locale]` for i18n

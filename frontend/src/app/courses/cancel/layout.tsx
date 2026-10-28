@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = {
-  title: "Payment Cancelled",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("seo.payment");
+  return { title: t("cancel"), robots: { index: false, follow: false } };
+}
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return children;

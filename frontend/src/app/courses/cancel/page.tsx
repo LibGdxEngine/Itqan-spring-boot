@@ -11,12 +11,12 @@ export default function CheckoutCancelPage() {
   const t = useTranslations();
 
   return (
-    <div className="min-h-screen bg-[#f5f4ed]">
+    <div className="min-h-screen bg-canvas">
       <Navbar />
-      <main className="mx-auto flex max-w-xl flex-col items-center px-4 py-24 text-center">
-        <XCircle className="mb-4 h-12 w-12 text-red-600" />
+      <main id="main-content" className="mx-auto flex max-w-xl flex-col items-center px-4 py-24 text-center">
+        <XCircle className="mb-4 h-12 w-12 text-danger" />
         <h1 className="text-2xl font-semibold">{t("checkout.cancel.title")}</h1>
-        <p className="mt-2 text-[#5e5d59]">{t("checkout.cancel.description")}</p>
+        <p className="mt-2 text-ink-2">{t("checkout.cancel.description")}</p>
 
         <div className="mt-6 flex gap-3">
           <Button onClick={() => router.push("/courses")}>{t("checkout.cancel.browseCourses")}</Button>

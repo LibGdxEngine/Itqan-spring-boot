@@ -15,6 +15,11 @@ export default function robots(): MetadataRoute.Robots {
                     "/articles",
                     "/articles/*",
                     "/muqtatafat",
+                    "/services",
+                    "/about",
+                    "/privacy",
+                    "/terms",
+                    "/certificates/*",
                 ],
                 disallow: [
                     "/admin",

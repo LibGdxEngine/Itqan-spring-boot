@@ -1,6 +1,7 @@
 package com.itqan.edu.common.exception;
 
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -18,6 +19,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -173,10 +175,10 @@ public class GlobalExceptionHandler {
         problemDetail.setProperty("timestamp", Instant.now());
         problemDetail.setProperty("code", ErrorCode.INTERNAL_ERROR.getCode());
 
-        // In production, don't expose exception message
-        if (ex.getMessage() != null) {
-            problemDetail.setProperty("message", ex.getMessage());
-        }
+        // Never expose internal exception messages to clients; log them server-side instead.
+        log.error("Unhandled exception", ex);
+        // No-op unless SENTRY_DSN is configured.
+        io.sentry.Sentry.captureException(ex);
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(problemDetail);
     }

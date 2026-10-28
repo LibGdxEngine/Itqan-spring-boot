@@ -65,12 +65,12 @@ export default function LoginPage() {
       {/* Header */}
       <div className="space-y-2 text-center">
         <h1
-          className="text-3xl tracking-tight text-[#141413]"
+          className="text-3xl tracking-tight text-ink"
           style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
         >
           {t("auth.login.title")}
         </h1>
-        <p className="text-[#87867f]">
+        <p className="text-ink-3">
           {t("auth.login.description")}
         </p>
       </div>
@@ -85,7 +85,7 @@ export default function LoginPage() {
               <Separator />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-[#f5f4ed] px-3 text-[#87867f]">
+              <span className="bg-canvas px-3 text-ink-3">
                 {t("common.orContinueWithEmail")}
               </span>
             </div>
@@ -99,7 +99,7 @@ export default function LoginPage() {
         <div className="space-y-2">
           <Label htmlFor="email">{t("auth.login.email")}</Label>
           <div className="relative">
-            <Mail className="absolute start-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
+            <Mail className="absolute start-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-3" />
             <Input
               id="email"
               type="email"
@@ -109,7 +109,7 @@ export default function LoginPage() {
             />
           </div>
           {errors.email && (
-            <p className="text-sm text-red-500">{errors.email.message}</p>
+            <p className="text-sm text-danger">{errors.email.message}</p>
           )}
         </div>
 
@@ -119,13 +119,13 @@ export default function LoginPage() {
             <Label htmlFor="password">{t("auth.login.password")}</Label>
             <Link
               href="/forgot-password"
-              className="text-sm font-medium text-[#c96442] hover:text-[#b55836] transition-colors"
+              className="text-sm font-medium text-brand hover:text-brand-hover transition-colors"
             >
               {t("common.forgotPassword")}
             </Link>
           </div>
           <div className="relative">
-            <Lock className="absolute start-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
+            <Lock className="absolute start-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-3" />
             <Input
               id="password"
               type={showPassword ? "text" : "password"}
@@ -136,13 +136,13 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute end-3.5 top-1/2 -translate-y-1/2 text-[#87867f] hover:text-[#5e5d59] transition-colors"
+              className="absolute end-3.5 top-1/2 -translate-y-1/2 text-ink-3 hover:text-ink-2 transition-colors"
             >
               {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
           </div>
           {errors.password && (
-            <p className="text-sm text-red-500">{errors.password.message}</p>
+            <p className="text-sm text-danger">{errors.password.message}</p>
           )}
         </div>
 
@@ -171,11 +171,11 @@ export default function LoginPage() {
       </form>
 
       {/* Sign up link */}
-      <p className="text-center text-sm text-[#87867f]">
+      <p className="text-center text-sm text-ink-3">
         {t("common.dontHaveAccount")}{" "}
         <Link
           href="/register"
-          className="font-semibold text-[#c96442] hover:text-[#b55836] transition-colors"
+          className="font-semibold text-brand hover:text-brand-hover transition-colors"
         >
           {t("common.createAccount")}
         </Link>

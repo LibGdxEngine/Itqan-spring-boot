@@ -13,10 +13,15 @@ export function LanguageSwitcher() {
     const newLocale = locale === 'en' ? 'ar' : 'en'
     
     startTransition(() => {
-      // Set the locale cookie
-      document.cookie = `NEXT_LOCALE=${newLocale};path=/;max-age=31536000`
-      // Reload to apply the new locale
-      window.location.reload()
+      document.cookie = `NEXT_LOCALE=${newLocale};path=/;max-age=31536000;samesite=lax`
+      // A ?lang= in the address would override the cookie, so swap it for the new language.
+      const url = new URL(window.location.href)
+      if (url.searchParams.has("lang")) {
+        url.searchParams.set("lang", newLocale)
+        window.location.assign(url.toString())
+      } else {
+        window.location.reload()
+      }
     })
   }
 
@@ -25,6 +30,8 @@ export function LanguageSwitcher() {
       variant="ghost"
       size="sm"
       onClick={toggleLocale}
+      lang={locale === 'en' ? 'ar' : 'en'}
+      aria-label={locale === 'en' ? 'التبديل إلى العربية' : 'Switch to English'}
       disabled={isPending}
       className="gap-2"
     >

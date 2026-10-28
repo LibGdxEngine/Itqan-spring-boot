@@ -7,8 +7,6 @@ import com.itqan.edu.features.courses.Course;
 import com.itqan.edu.features.courses.CourseRepository;
 import com.itqan.edu.features.courses.Lesson;
 import com.itqan.edu.features.courses.LessonRepository;
-import com.itqan.edu.features.courses.LessonType;
-import com.itqan.edu.features.courses.LessonVideoStatus;
 import com.itqan.edu.features.courses.Module;
 import com.itqan.edu.features.courses.ModuleRepository;
 import com.itqan.edu.features.quizzes.Question;
@@ -19,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -196,59 +193,5 @@ public class AdminContentService {
         }
         copy.setQuestions(copyQuestions);
         return copy;
-    }
-
-    @CacheEvict(value = "courses", allEntries = true)
-    @Transactional
-    public List<Lesson> bulkUploadLessons(Long moduleId, List<MultipartFile> files) {
-        if (files.size() > 20) {
-            throw new BusinessException(ErrorCode.VALIDATION_ERROR,
-                    "Maximum 20 files allowed per bulk upload");
-        }
-
-        Module module = moduleRepository.findById(moduleId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.MODULE_NOT_FOUND));
-
-        // Get current max orderIndex
-        int maxOrder = module.getLessons().stream()
-                .mapToInt(Lesson::getOrderIndex)
-                .max()
-                .orElse(0);
-
-        List<Lesson> lessons = new ArrayList<>();
-        for (int i = 0; i < files.size(); i++) {
-            MultipartFile file = files.get(i);
-
-            // Validate video mime type
-            String contentType = file.getContentType();
-            if (contentType == null || !contentType.startsWith("video/")) {
-                throw new BusinessException(ErrorCode.VALIDATION_ERROR,
-                        "File '" + file.getOriginalFilename() + "' is not a video file");
-            }
-
-            // Derive title from filename (strip extension)
-            String filename = file.getOriginalFilename();
-            String title = filename != null && filename.contains(".")
-                    ? filename.substring(0, filename.lastIndexOf('.'))
-                    : (filename != null ? filename : "Lesson " + (maxOrder + i + 1));
-
-            Lesson lesson = Lesson.builder()
-                    .title(title)
-                    .type(LessonType.VIDEO)
-                    .orderIndex(maxOrder + i + 1)
-                    .active(true)
-                    .isFree(false)
-                    .module(module)
-                    .videoStatus(LessonVideoStatus.PENDING)
-                    .videoMimeType(contentType)
-                    .videoSizeBytes(file.getSize())
-                    .build();
-
-            lessons.add(lesson);
-        }
-
-        List<Lesson> savedLessons = lessonRepository.saveAll(lessons);
-        log.info("Bulk uploaded {} lessons to module {}", savedLessons.size(), moduleId);
-        return savedLessons;
     }
 }

@@ -4,6 +4,7 @@ import com.itqan.edu.common.config.StorageProperties;
 import com.itqan.edu.common.config.VideoStorageProperties;
 import com.itqan.edu.common.exception.BusinessException;
 import com.itqan.edu.common.exception.ErrorCode;
+import com.itqan.edu.features.auth.User;
 import com.itqan.edu.features.courses.dto.LessonResponse;
 import com.itqan.edu.features.courses.dto.LessonVideoMultipartAbortRequest;
 import com.itqan.edu.features.courses.dto.LessonVideoMultipartCompleteRequest;
@@ -24,6 +25,7 @@ import software.amazon.awssdk.services.s3.model.CompletedMultipartUpload;
 import software.amazon.awssdk.services.s3.model.CompletedPart;
 import software.amazon.awssdk.services.s3.model.CreateMultipartUploadRequest;
 import software.amazon.awssdk.services.s3.model.CreateMultipartUploadResponse;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.UploadPartRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
@@ -53,14 +55,17 @@ public class LessonVideoService {
     private final S3Presigner s3Presigner;
     private final StorageProperties storageProperties;
     private final VideoStorageProperties videoStorageProperties;
+    private final CourseAccessService courseAccessService;
 
     @CacheEvict(value = "courses", allEntries = true)
     @Transactional
     public LessonVideoMultipartInitiateResponse initiateMultipartUpload(
             Long lessonId,
-            LessonVideoMultipartInitiateRequest request) {
+            LessonVideoMultipartInitiateRequest request,
+            User currentUser) {
 
         Lesson lesson = getLessonOrThrow(lessonId);
+        courseAccessService.assertCanManage(currentUser, lesson.getModule().getCourse());
         if (lesson.getType() != LessonType.VIDEO) {
             throw new BusinessException(ErrorCode.VIDEO_UPLOAD_FAILED, "Lesson is not a video lesson");
         }
@@ -129,9 +134,12 @@ public class LessonVideoService {
     }
 
     @CacheEvict(value = "courses", allEntries = true)
-    @Transactional
-    public LessonResponse completeMultipartUpload(Long lessonId, LessonVideoMultipartCompleteRequest request) {
+    // Keep the FAILED status when we reject an upload instead of rolling it back.
+    @Transactional(noRollbackFor = BusinessException.class)
+    public LessonResponse completeMultipartUpload(Long lessonId, LessonVideoMultipartCompleteRequest request,
+            User currentUser) {
         Lesson lesson = getLessonOrThrow(lessonId);
+        courseAccessService.assertCanManage(currentUser, lesson.getModule().getCourse());
         if (!request.getObjectKey().equals(lesson.getVideoObjectKey())) {
             throw new BusinessException(ErrorCode.VIDEO_UPLOAD_FAILED, "Upload object key mismatch");
         }
@@ -167,6 +175,8 @@ public class LessonVideoService {
             throw new BusinessException(ErrorCode.VIDEO_UPLOAD_FAILED, ex.getMessage());
         }
 
+        verifyUploadedVideo(lesson, request.getObjectKey());
+
         lesson.setVideoObjectKey(request.getObjectKey());
         lesson.setVideoStatus(LessonVideoStatus.READY);
         lesson.setVideoUploadedAt(LocalDateTime.now());
@@ -178,8 +188,9 @@ public class LessonVideoService {
 
     @CacheEvict(value = "courses", allEntries = true)
     @Transactional
-    public void abortMultipartUpload(Long lessonId, LessonVideoMultipartAbortRequest request) {
+    public void abortMultipartUpload(Long lessonId, LessonVideoMultipartAbortRequest request, User currentUser) {
         Lesson lesson = getLessonOrThrow(lessonId);
+        courseAccessService.assertCanManage(currentUser, lesson.getModule().getCourse());
         if (!request.getObjectKey().equals(lesson.getVideoObjectKey())) {
             throw new BusinessException(ErrorCode.VIDEO_UPLOAD_FAILED, "Upload object key mismatch");
         }
@@ -200,8 +211,10 @@ public class LessonVideoService {
         lessonRepository.save(lesson);
     }
 
-    public LessonVideoPlaybackResponse getPlaybackUrl(Long lessonId) {
+    @Transactional(readOnly = true)
+    public LessonVideoPlaybackResponse getPlaybackUrl(Long lessonId, User currentUser) {
         Lesson lesson = getLessonOrThrow(lessonId);
+        courseAccessService.assertCanViewLesson(currentUser, lesson);
 
         if (!StringUtils.hasText(lesson.getVideoObjectKey())) {
             if (StringUtils.hasText(lesson.getVideoUrl())) {
@@ -309,6 +322,43 @@ public class LessonVideoService {
         if (!valid) {
             throw new BusinessException(ErrorCode.VIDEO_INVALID_MIME_TYPE,
                     "File content does not match any supported video format. Declared: " + declaredMimeType);
+        }
+    }
+
+    /**
+     * Uploads go straight from the browser to storage, so the first bytes are checked here once
+     * the object exists. Anything that is not a real video file is deleted and the upload fails.
+     */
+    private void verifyUploadedVideo(Lesson lesson, String objectKey) {
+        byte[] header;
+        try {
+            header = s3Client.getObjectAsBytes(GetObjectRequest.builder()
+                    .bucket(storageProperties.getBucket())
+                    .key(objectKey)
+                    .range("bytes=0-11")
+                    .build()).asByteArray();
+        } catch (Exception ex) {
+            log.error("Could not read uploaded video header lesson={} key={}: {}", lesson.getId(), objectKey, ex.toString());
+            lesson.setVideoStatus(LessonVideoStatus.FAILED);
+            lessonRepository.save(lesson);
+            throw new BusinessException(ErrorCode.VIDEO_UPLOAD_FAILED, "Uploaded video could not be verified");
+        }
+        try {
+            validateVideoMagicNumber(header, lesson.getVideoMimeType());
+        } catch (BusinessException ex) {
+            log.warn("Rejected upload that is not a video lesson={} key={}", lesson.getId(), objectKey);
+            try {
+                s3Client.deleteObject(DeleteObjectRequest.builder()
+                        .bucket(storageProperties.getBucket())
+                        .key(objectKey)
+                        .build());
+            } catch (Exception deleteError) {
+                log.error("Could not delete rejected upload key={}: {}", objectKey, deleteError.toString());
+            }
+            lesson.setVideoObjectKey(null);
+            lesson.setVideoStatus(LessonVideoStatus.FAILED);
+            lessonRepository.save(lesson);
+            throw ex;
         }
     }
 

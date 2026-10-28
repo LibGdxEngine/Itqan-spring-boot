@@ -1,20 +1,11 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useState } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
+import * as React from "react"
 import { useLocale, useTranslations } from "next-intl"
+import { Download, Loader2, RefreshCw } from "lucide-react"
 import {
-  ArrowLeft,
-  BarChart3,
-  BookOpen,
-  DollarSign,
-  GraduationCap,
-  Loader2,
-  TrendingUp,
-  Users,
-} from "lucide-react"
-import {
+  Bar,
+  BarChart,
   CartesianGrid,
   Line,
   LineChart,
@@ -24,306 +15,428 @@ import {
   YAxis,
 } from "recharts"
 
-import { useAuth } from "@/components/auth-context"
-import { Navbar } from "@/components/Navbar"
+import { PageHeader, Panel, Select, StatCard, formatMoney } from "@/components/admin/ui"
 import { Button } from "@/components/ui/button"
-import { useToast } from "@/components/ui/use-toast"
+import { Input } from "@/components/ui/input"
 import { ResponsiveTable } from "@/components/ui/responsive-table"
 import { getErrorMessage } from "@/lib/api-axios"
 import {
-  AnalyticsOverview,
+  AnalyticsSummary,
   CoursePopularity,
-  RevenueDataPoint,
-  RevenueTrend,
-  analyticsApi,
-} from "@/lib/analytics"
+  CourseRevenue,
+  DateRange,
+  Granularity,
+  Series,
+  UserBreakdown,
+  downloadCsv,
+  isoDate,
+  reportsApi,
+} from "@/lib/admin-api"
 
-interface ChartPoint {
-  date: string
-  label: string
-  [currency: string]: number | string
+// Categorical slots from the validated reference palette (fixed order, never cycled).
+const SERIES_COLORS = ["#2a78d6", "#eb6834", "#1baf7a"]
+const GRID = "#ebe9e0"
+const AXIS_TEXT = "#87867f"
+
+const PRESETS = [7, 30, 90, 365] as const
+
+function rangeForDays(days: number): DateRange {
+  const to = new Date()
+  const from = new Date()
+  from.setDate(to.getDate() - (days - 1))
+  return { from: isoDate(from), to: isoDate(to) }
 }
 
-const CURRENCY_COLORS = ["#c96442", "#3b82f6", "#10b981", "#a855f7", "#f59e0b"]
-
-function formatCurrency(amount: number, currency: string, locale: string) {
-  try {
-    return new Intl.NumberFormat(locale, {
-      style: "currency",
-      currency,
-      maximumFractionDigits: 2,
-    }).format(amount)
-  } catch {
-    return `${amount.toFixed(2)} ${currency}`
-  }
+function percentChange(current: number, previous: number): number | null {
+  if (previous === 0) return current === 0 ? 0 : null
+  return ((current - previous) / previous) * 100
 }
 
-function formatNumber(value: number, locale: string) {
-  try {
-    return new Intl.NumberFormat(locale).format(value)
-  } catch {
-    return value.toString()
-  }
+function formatBucket(date: string, granularity: Granularity, locale: string) {
+  const d = new Date(`${date}T00:00:00`)
+  const loc = locale === "ar" ? "ar-EG" : "en-GB"
+  return granularity === "MONTHLY"
+    ? d.toLocaleDateString(loc, { month: "short", year: "2-digit" })
+    : d.toLocaleDateString(loc, { day: "numeric", month: "short" })
 }
 
-function buildChartSeries(points: RevenueDataPoint[], locale: string) {
-  const currencies = new Set<string>()
-  const byDate = new Map<string, ChartPoint>()
-
-  for (const p of points) {
-    currencies.add(p.currency)
-    const existing = byDate.get(p.date) ?? {
-      date: p.date,
-      label: new Date(p.date).toLocaleDateString(locale, { month: "short", day: "numeric" }),
-    }
-    existing[p.currency] = ((existing[p.currency] as number | undefined) ?? 0) + p.amount
-    byDate.set(p.date, existing)
-  }
-
-  const series = Array.from(byDate.values()).sort((a, b) => a.date.localeCompare(b.date))
-  return { series, currencies: Array.from(currencies) }
-}
-
-export default function AnalyticsPage() {
-  const { user, isAuthenticated, isLoading: authLoading } = useAuth()
-  const router = useRouter()
-  const t = useTranslations()
-  const locale = useLocale()
-  const { toast } = useToast()
-
-  const [overview, setOverview] = useState<AnalyticsOverview | null>(null)
-  const [trend, setTrend] = useState<RevenueTrend | null>(null)
-  const [topCourses, setTopCourses] = useState<CoursePopularity[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  const fetchAnalytics = useCallback(async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const [overviewData, trendData, coursesData] = await Promise.all([
-        analyticsApi.getOverview(),
-        analyticsApi.getRevenueTrend(30),
-        analyticsApi.getTopCourses(5),
-      ])
-      setOverview(overviewData)
-      setTrend(trendData)
-      setTopCourses(coursesData)
-    } catch (err) {
-      const message = getErrorMessage(err)
-      setError(message)
-      toast({ title: t("admin.analytics.loadFailed"), description: message, variant: "destructive" })
-    } finally {
-      setLoading(false)
-    }
-  }, [t, toast])
-
-  useEffect(() => {
-    if (authLoading) return
-    if (!isAuthenticated || user?.role !== "ADMIN") {
-      router.replace("/")
-      return
-    }
-    void fetchAnalytics()
-  }, [authLoading, isAuthenticated, user?.role, router, fetchAnalytics])
-
-  const chart = useMemo(() => {
-    if (!trend) return { series: [], currencies: [] }
-    return buildChartSeries(trend.dataPoints, locale)
-  }, [trend, locale])
-
-  const totalRevenueLine = useMemo(() => {
-    if (!overview) return null
-    const entries = Object.entries(overview.revenueByCurrency)
-    if (entries.length === 0) return formatCurrency(0, "USD", locale)
-    return entries
-      .map(([currency, amount]) => formatCurrency(amount, currency, locale))
-      .join(" • ")
-  }, [overview, locale])
-
-  if (authLoading || loading) {
-    return (
-      <div className="min-h-screen bg-[#f5f4ed]">
-        <Navbar />
-        <div className="container mx-auto flex max-w-7xl items-center justify-center px-4 pt-32">
-          <Loader2 className="h-8 w-8 animate-spin text-[#c96442]" />
-        </div>
-      </div>
-    )
-  }
-
-  if (!user || user.role !== "ADMIN") return null
-
+function ChartTooltip({
+  active,
+  payload,
+  label,
+  format,
+}: {
+  active?: boolean
+  payload?: { value: number }[]
+  label?: string
+  format: (value: number) => string
+}) {
+  if (!active || !payload?.length) return null
   return (
-    <div className="min-h-screen bg-[#f5f4ed]">
-      <Navbar />
-      <div className="container mx-auto max-w-7xl px-4 sm:px-6 pt-24 pb-10">
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <Link
-              href="/admin"
-              className="mb-2 inline-flex items-center gap-1 text-sm text-[#5e5d59] hover:text-[#c96442]"
-            >
-              <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
-              {t("admin.analytics.backToDashboard")}
-            </Link>
-            <h1 className="flex items-center gap-2 text-2xl sm:text-3xl font-bold text-[#141413]">
-              <BarChart3 className="h-8 w-8 text-[#c96442]" />
-              {t("admin.analytics.title")}
-            </h1>
-            <p className="mt-2 text-[#5e5d59]">{t("admin.analytics.subtitle")}</p>
-          </div>
-          <Button variant="outline" size="sm" onClick={() => void fetchAnalytics()}>
-            {t("admin.analytics.refresh")}
-          </Button>
-        </div>
-
-        {error && (
-          <div className="mb-6 rounded-xl border border-[#f3c9be] bg-[#fdf3ef] px-4 py-3 text-sm text-[#b53333]">
-            {error}
-          </div>
-        )}
-
-        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard
-            label={t("admin.analytics.cards.revenue")}
-            icon={<DollarSign className="h-5 w-5 text-[#c96442]" />}
-            primary={totalRevenueLine ?? "—"}
-          />
-          <StatCard
-            label={t("admin.analytics.cards.enrollments")}
-            icon={<GraduationCap className="h-5 w-5 text-[#87867f]" />}
-            primary={formatNumber(overview?.totalEnrollments ?? 0, locale)}
-          />
-          <StatCard
-            label={t("admin.analytics.cards.students")}
-            icon={<Users className="h-5 w-5 text-[#87867f]" />}
-            primary={formatNumber(overview?.totalStudents ?? 0, locale)}
-            secondary={
-              overview
-                ? t("admin.analytics.cards.newThisMonth", {
-                    count: overview.newUsersThisMonth,
-                  })
-                : undefined
-            }
-          />
-          <StatCard
-            label={t("admin.analytics.cards.activeCourses")}
-            icon={<BookOpen className="h-5 w-5 text-[#87867f]" />}
-            primary={formatNumber(overview?.totalCourses ?? 0, locale)}
-            secondary={
-              overview
-                ? t("admin.analytics.cards.activeUsers", {
-                    count: overview.activeUsers,
-                  })
-                : undefined
-            }
-          />
-        </div>
-
-        <section className="mb-8 rounded-xl border border-[#f0eee6] bg-[#faf9f5] p-4">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="flex items-center gap-2 text-lg font-semibold text-[#141413]">
-              <TrendingUp className="h-5 w-5 text-[#c96442]" />
-              {t("admin.analytics.revenueTrend.title")}
-            </h2>
-            <span className="text-sm text-[#87867f]">
-              {t("admin.analytics.revenueTrend.last30Days")}
-            </span>
-          </div>
-          {chart.series.length === 0 ? (
-            <div className="flex h-64 sm:h-72 items-center justify-center text-sm text-[#87867f]">
-              {t("admin.analytics.revenueTrend.empty")}
-            </div>
-          ) : (
-            <div className="h-64 sm:h-72 w-full" dir="ltr">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chart.series} margin={{ top: 8, right: 16, left: 8, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e8e6dc" />
-                  <XAxis dataKey="label" stroke="#87867f" fontSize={12} tickMargin={8} />
-                  <YAxis stroke="#87867f" fontSize={12} tickMargin={8} />
-                  <Tooltip
-                    contentStyle={{
-                      background: "#faf9f5",
-                      border: "1px solid #f0eee6",
-                      borderRadius: 8,
-                      fontSize: 13,
-                    }}
-                  />
-                  {chart.currencies.map((currency, idx) => (
-                    <Line
-                      key={currency}
-                      type="monotone"
-                      dataKey={currency}
-                      name={currency}
-                      stroke={CURRENCY_COLORS[idx % CURRENCY_COLORS.length]}
-                      strokeWidth={2}
-                      dot={{ r: 3 }}
-                      activeDot={{ r: 5 }}
-                    />
-                  ))}
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          )}
-        </section>
-
-        <section className="rounded-xl border border-[#f0eee6] bg-[#faf9f5]">
-          <div className="border-b border-[#f0eee6] px-4 py-3">
-            <h2 className="text-lg font-semibold text-[#141413]">
-              {t("admin.analytics.topCourses.title")}
-            </h2>
-          </div>
-          <ResponsiveTable
-            rows={topCourses}
-            getRowKey={(course, i) => course.courseId ?? i}
-            emptyState={
-              <p className="px-4 py-6 text-sm text-[#87867f]">{t("admin.analytics.topCourses.empty")}</p>
-            }
-            columns={[
-              {
-                header: t("admin.analytics.topCourses.courseTitle"),
-                cell: (course) => <span className="text-[#141413]">{course.title}</span>,
-              },
-              {
-                header: t("admin.analytics.topCourses.enrollments"),
-                cell: (course) => formatNumber(course.enrollmentCount, locale),
-              },
-              {
-                header: t("admin.analytics.topCourses.completionRate"),
-                cell: (course) => `${course.completionRate.toFixed(1)}%`,
-              },
-              {
-                header: t("admin.analytics.topCourses.averageProgress"),
-                cell: (course) => `${course.averageProgress.toFixed(1)}%`,
-              },
-            ]}
-          />
-        </section>
-      </div>
+    <div className="rounded-lg border border-line-strong bg-paper px-3 py-2 text-xs shadow-md">
+      <p className="text-ink-3">{label}</p>
+      <p className="mt-0.5 text-sm font-semibold text-ink" dir="ltr">
+        {format(payload[0].value)}
+      </p>
     </div>
   )
 }
 
-function StatCard({
-  label,
-  icon,
-  primary,
-  secondary,
-}: {
-  label: string
-  icon: React.ReactNode
-  primary: string
-  secondary?: string
-}) {
+export default function AdminAnalyticsPage() {
+  const t = useTranslations("admin.analytics")
+  const locale = useLocale()
+  const [preset, setPreset] = React.useState<number | "custom">(30)
+  const [range, setRange] = React.useState<DateRange>(() => rangeForDays(30))
+  const [granularity, setGranularity] = React.useState<Granularity>("DAILY")
+  const [summary, setSummary] = React.useState<AnalyticsSummary | null>(null)
+  const [revenue, setRevenue] = React.useState<Series[]>([])
+  const [enrollments, setEnrollments] = React.useState<Series | null>(null)
+  const [byCourse, setByCourse] = React.useState<CourseRevenue[]>([])
+  const [users, setUsers] = React.useState<UserBreakdown | null>(null)
+  const [topCourses, setTopCourses] = React.useState<CoursePopularity[]>([])
+  const [loading, setLoading] = React.useState(true)
+  const [error, setError] = React.useState<string | null>(null)
+  const [reloadToken, setReloadToken] = React.useState(0)
+
+  React.useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    setError(null)
+    Promise.all([
+      reportsApi.summary(range),
+      reportsApi.revenueSeries(range, granularity),
+      reportsApi.enrollmentSeries(range, granularity),
+      reportsApi.revenueByCourse(range),
+      reportsApi.users(range),
+      reportsApi.topCourses(10),
+    ])
+      .then(([s, rev, enr, courses, u, top]) => {
+        if (cancelled) return
+        setSummary(s)
+        setRevenue(rev)
+        setEnrollments(enr)
+        setByCourse(courses)
+        setUsers(u)
+        setTopCourses(top)
+      })
+      .catch((err) => !cancelled && setError(getErrorMessage(err)))
+      .finally(() => !cancelled && setLoading(false))
+    return () => {
+      cancelled = true
+    }
+  }, [range, granularity, reloadToken])
+
+  const choosePreset = (value: string) => {
+    if (value === "custom") {
+      setPreset("custom")
+      return
+    }
+    const days = Number(value)
+    setPreset(days)
+    setRange(rangeForDays(days))
+    setGranularity(days > 120 ? "MONTHLY" : days > 31 ? "WEEKLY" : "DAILY")
+  }
+
+  const refresh = async () => {
+    await reportsApi.refresh().catch(() => undefined)
+    setReloadToken((n) => n + 1)
+  }
+
+  const exportReport = () => {
+    const rows = revenue.flatMap((series) => series.points.map((p) => ({ currency: series.key, ...p })))
+    downloadCsv(`revenue_${range.from}_${range.to}.csv`, rows, [
+      { header: "period_start", value: (r) => r.date },
+      { header: "currency", value: (r) => r.currency },
+      { header: "revenue", value: (r) => r.value },
+    ])
+    downloadCsv(`revenue-by-course_${range.from}_${range.to}.csv`, byCourse, [
+      { header: "course", value: (r) => r.courseTitle },
+      { header: "currency", value: (r) => r.currency },
+      { header: "revenue", value: (r) => r.revenue },
+      { header: "payments", value: (r) => r.payments },
+    ])
+  }
+
+  const revenueEntries = summary ? Object.entries(summary.revenueByCurrency) : []
+  const maxCourseRevenue = Math.max(1, ...byCourse.map((c) => c.revenue))
+  const roleTotal = users ? Object.values(users.usersByRole).reduce((a, b) => a + b, 0) : 0
+  const number = (value: number) => value.toLocaleString(locale === "ar" ? "ar-EG" : "en-US")
+
   return (
-    <div className="rounded-xl border border-[#f0eee6] bg-[#faf9f5] p-4">
-      <p className="text-sm text-[#87867f]">{label}</p>
-      <p className="mt-2 flex items-center gap-2 text-2xl font-bold text-[#141413]">
-        {icon}
-        <span className="break-words">{primary}</span>
-      </p>
-      {secondary && <p className="mt-2 text-xs text-[#87867f]">{secondary}</p>}
-    </div>
+    <>
+      <PageHeader
+        title={t("title")}
+        description={t("rangeDescription", { from: range.from, to: range.to })}
+        actions={
+          <>
+            <Button variant="outline" onClick={exportReport} disabled={loading || revenue.length === 0}>
+              <Download />
+              {t("export")}
+            </Button>
+            <Button variant="outline" onClick={() => void refresh()} disabled={loading}>
+              <RefreshCw className={loading ? "animate-spin" : undefined} />
+              {t("refresh")}
+            </Button>
+          </>
+        }
+      />
+
+      {/* Filters: one row above the charts */}
+      <div className="mb-6 flex flex-wrap items-center gap-2 rounded-xl border border-line bg-surface p-3">
+        <Select aria-label={t("period")} value={String(preset)} onChange={(e) => choosePreset(e.target.value)}>
+          {PRESETS.map((days) => (
+            <option key={days} value={days}>
+              {t("lastDays", { days })}
+            </option>
+          ))}
+          <option value="custom">{t("custom")}</option>
+        </Select>
+        {preset === "custom" ? (
+          <>
+            <Input
+              type="date"
+              dir="ltr"
+              aria-label={t("from")}
+              className="h-9 w-auto"
+              value={range.from}
+              max={range.to}
+              onChange={(e) => e.target.value && setRange((r) => ({ ...r, from: e.target.value }))}
+            />
+            <Input
+              type="date"
+              dir="ltr"
+              aria-label={t("to")}
+              className="h-9 w-auto"
+              value={range.to}
+              min={range.from}
+              onChange={(e) => e.target.value && setRange((r) => ({ ...r, to: e.target.value }))}
+            />
+          </>
+        ) : null}
+        <div className="inline-flex rounded-lg border border-line-strong bg-paper p-0.5" role="group" aria-label={t("granularity")}>
+          {(["DAILY", "WEEKLY", "MONTHLY"] as const).map((g) => (
+            <button
+              key={g}
+              type="button"
+              aria-pressed={granularity === g}
+              onClick={() => setGranularity(g)}
+              className={
+                granularity === g
+                  ? "rounded-md bg-brand px-3 py-1.5 text-xs font-medium text-white"
+                  : "rounded-md px-3 py-1.5 text-xs text-ink-2 hover:bg-subtle"
+              }
+            >
+              {t(`granularities.${g}`)}
+            </button>
+          ))}
+        </div>
+        {loading ? <Loader2 className="h-4 w-4 animate-spin text-ink-3" /> : null}
+      </div>
+
+      {error ? (
+        <p className="mb-6 rounded-lg border border-danger-line bg-danger-soft px-4 py-3 text-sm text-danger">{error}</p>
+      ) : null}
+
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {summary ? (
+          <>
+            <StatCard
+              label={t("cards.revenue")}
+              value={
+                revenueEntries.length
+                  ? formatMoney(revenueEntries[0][1], revenueEntries[0][0], locale)
+                  : formatMoney(0, "EGP", locale)
+              }
+              delta={
+                revenueEntries.length
+                  ? percentChange(revenueEntries[0][1], summary.previousRevenueByCurrency[revenueEntries[0][0]] ?? 0)
+                  : null
+              }
+              hint={
+                revenueEntries.length > 1
+                  ? revenueEntries.slice(1).map(([c, v]) => formatMoney(v, c, locale)).join(" · ")
+                  : t("vsPrevious")
+              }
+            />
+            <StatCard
+              label={t("cards.newEnrollments")}
+              value={number(summary.newEnrollments)}
+              delta={percentChange(summary.newEnrollments, summary.previousNewEnrollments)}
+              hint={t("vsPrevious")}
+            />
+            <StatCard
+              label={t("cards.newUsers")}
+              value={number(summary.newUsers)}
+              delta={percentChange(summary.newUsers, summary.previousNewUsers)}
+              hint={t("vsPrevious")}
+            />
+            <StatCard
+              label={t("cards.activeUsers")}
+              value={number(summary.activeUsers30d)}
+              hint={t("cards.activeHint", { students: number(summary.totalStudents), courses: number(summary.activeCourses) })}
+            />
+          </>
+        ) : (
+          Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-[118px] animate-pulse rounded-xl border border-line bg-surface" />
+          ))
+        )}
+      </div>
+
+      <div className="mb-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
+        {/* Revenue: one small multiple per currency (never two scales on one axis) */}
+        <Panel title={t("revenueTrend")}>
+          <div className="space-y-6 p-4">
+            {revenue.length === 0 ? (
+              <p className="py-16 text-center text-sm text-ink-3">{t("noRevenue")}</p>
+            ) : (
+              revenue.map((series, i) => (
+                <div key={series.key}>
+                  {revenue.length > 1 ? (
+                    <p className="mb-2 text-xs font-medium text-ink-2" dir="ltr">
+                      {series.key}
+                    </p>
+                  ) : null}
+                  <div className="h-56" dir="ltr">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={series.points} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+                        <CartesianGrid vertical={false} stroke={GRID} />
+                        <XAxis
+                          dataKey="date"
+                          tickFormatter={(d: string) => formatBucket(d, granularity, locale)}
+                          tick={{ fill: AXIS_TEXT, fontSize: 11 }}
+                          axisLine={false}
+                          tickLine={false}
+                          minTickGap={24}
+                        />
+                        <YAxis
+                          tick={{ fill: AXIS_TEXT, fontSize: 11 }}
+                          axisLine={false}
+                          tickLine={false}
+                          width={56}
+                          tickFormatter={(v: number) => v.toLocaleString("en-US", { notation: "compact" })}
+                        />
+                        <Tooltip
+                          cursor={{ stroke: "#c3c2b7", strokeDasharray: "3 3" }}
+                          content={
+                            <ChartTooltip format={(v) => formatMoney(v, series.key, locale)} />
+                          }
+                          labelFormatter={(d) => formatBucket(String(d), granularity, locale)}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="value"
+                          stroke={SERIES_COLORS[i % SERIES_COLORS.length]}
+                          strokeWidth={2}
+                          dot={false}
+                          activeDot={{ r: 5, stroke: "#faf9f5", strokeWidth: 2 }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </Panel>
+
+        <Panel title={t("enrollmentTrend")}>
+          <div className="h-56 p-4" dir="ltr">
+            {enrollments && enrollments.points.some((p) => p.value > 0) ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={enrollments.points} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+                  <CartesianGrid vertical={false} stroke={GRID} />
+                  <XAxis
+                    dataKey="date"
+                    tickFormatter={(d: string) => formatBucket(d, granularity, locale)}
+                    tick={{ fill: AXIS_TEXT, fontSize: 11 }}
+                    axisLine={false}
+                    tickLine={false}
+                    minTickGap={24}
+                  />
+                  <YAxis allowDecimals={false} tick={{ fill: AXIS_TEXT, fontSize: 11 }} axisLine={false} tickLine={false} width={40} />
+                  <Tooltip
+                    cursor={{ fill: "#f0eee6" }}
+                    content={<ChartTooltip format={(v) => t("enrollmentsCount", { count: v })} />}
+                    labelFormatter={(d) => formatBucket(String(d), granularity, locale)}
+                  />
+                  <Bar dataKey="value" fill={SERIES_COLORS[0]} radius={[4, 4, 0, 0]} maxBarSize={28} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="py-16 text-center text-sm text-ink-3">{t("noEnrollments")}</p>
+            )}
+          </div>
+        </Panel>
+      </div>
+
+      <div className="mb-6 grid grid-cols-1 gap-6 xl:grid-cols-3">
+        <Panel title={t("revenueByCourse")} className="xl:col-span-2">
+          <ResponsiveTable
+            rows={byCourse}
+            getRowKey={(row) => `${row.courseId}-${row.currency}`}
+            emptyState={<p className="px-4 py-10 text-center text-sm text-ink-3">{t("noRevenue")}</p>}
+            columns={[
+              { header: t("course"), cell: (row) => row.courseTitle },
+              {
+                header: t("revenue"),
+                cell: (row) => (
+                  <div className="flex items-center gap-3">
+                    <div className="hidden h-2 w-28 overflow-hidden rounded-full bg-subtle sm:block">
+                      <div
+                        className="h-full rounded-full"
+                        style={{ width: `${(row.revenue / maxCourseRevenue) * 100}%`, backgroundColor: SERIES_COLORS[0] }}
+                      />
+                    </div>
+                    <span dir="ltr">{formatMoney(row.revenue, row.currency, locale)}</span>
+                  </div>
+                ),
+              },
+              { header: t("payments"), cell: (row) => number(row.payments), alignEnd: true },
+            ]}
+          />
+        </Panel>
+
+        <Panel title={t("usersByRole")}>
+          <div className="space-y-4 p-4">
+            {users ? (
+              <>
+                {Object.entries(users.usersByRole).map(([role, count]) => (
+                  <div key={role}>
+                    <div className="mb-1 flex justify-between text-sm">
+                      <span className="text-ink-button">{t.has(`roles.${role}`) ? t(`roles.${role}`) : role}</span>
+                      <span className="font-medium text-ink">{number(count)}</span>
+                    </div>
+                    <div className="h-2 overflow-hidden rounded-full bg-subtle">
+                      <div
+                        className="h-full rounded-full"
+                        style={{ width: `${roleTotal ? (count / roleTotal) * 100 : 0}%`, backgroundColor: SERIES_COLORS[0] }}
+                      />
+                    </div>
+                  </div>
+                ))}
+                <p className="border-t border-line pt-3 text-xs text-ink-3">
+                  {t("signupsInRange", { count: users.newSignups })}
+                </p>
+              </>
+            ) : null}
+          </div>
+        </Panel>
+      </div>
+
+      <Panel title={t("topCourses")}>
+        <ResponsiveTable
+          rows={topCourses}
+          getRowKey={(row) => row.courseId}
+          emptyState={<p className="px-4 py-10 text-center text-sm text-ink-3">{t("noEnrollments")}</p>}
+          columns={[
+            { header: t("course"), cell: (row) => row.title },
+            { header: t("students"), cell: (row) => number(row.enrollmentCount), alignEnd: true },
+            { header: t("completionRate"), cell: (row) => `${row.completionRate.toFixed(0)}%`, alignEnd: true },
+            { header: t("averageProgress"), cell: (row) => `${row.averageProgress.toFixed(0)}%`, alignEnd: true },
+          ]}
+        />
+      </Panel>
+    </>
   )
 }

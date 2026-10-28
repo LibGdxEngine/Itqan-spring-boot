@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -49,6 +50,7 @@ public class AuthService {
     private int lockoutDurationMinutes;
 
     private static final SecureRandom RANDOM = new SecureRandom();
+    private static final int MAX_OTP_ATTEMPTS = 5;
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -115,6 +117,8 @@ public class AuthService {
             return response;
         } catch (LockedException e) {
             throw new BusinessException(ErrorCode.ACCOUNT_LOCKED);
+        } catch (DisabledException e) {
+            throw new BusinessException(ErrorCode.ACCOUNT_DISABLED);
         } catch (BadCredentialsException e) {
             // Increment failed attempts
             if (user != null) {
@@ -128,6 +132,10 @@ public class AuthService {
     public AuthResponse refreshAccessToken(RefreshTokenRequest request) {
         RefreshToken rotated = refreshTokenService.verifyAndRotate(request.getRefreshToken());
         User user = rotated.getUser();
+        if (!user.isEnabled()) {
+            refreshTokenService.revokeAllUserTokens(user.getId());
+            throw new BusinessException(ErrorCode.ACCOUNT_DISABLED);
+        }
 
         String newAccessToken = jwtTokenProvider.generateToken(user);
 
@@ -173,6 +181,8 @@ public class AuthService {
             studentRepository.save(student);
 
             log.info("New user created from Google auth: {}", email);
+        } else if (!user.isEnabled()) {
+            throw new BusinessException(ErrorCode.ACCOUNT_DISABLED);
         } else if (user.getAuthProvider() == User.AuthProvider.LOCAL) {
             // Link Google account to existing local account
             user.setAuthProvider(User.AuthProvider.GOOGLE);
@@ -229,31 +239,20 @@ public class AuthService {
         PasswordResetToken token = passwordResetRepository.findByEmailAndUsedFalse(email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.OTP_INVALID));
 
-        if (token.isExpired()) {
-            throw new BusinessException(ErrorCode.OTP_EXPIRED);
-        }
-
-        if (!passwordEncoder.matches(request.getOtp(), token.getOtpHash())) {
-            throw new BusinessException(ErrorCode.OTP_INVALID);
-        }
+        checkOtp(token, request.getOtp());
 
         return true;
     }
 
-    @Transactional
+    // Failed-attempt counters must persist even though the request fails.
+    @Transactional(noRollbackFor = BusinessException.class)
     public void resetPassword(ResetPasswordRequest request) {
         String email = request.getEmail().toLowerCase();
 
         PasswordResetToken token = passwordResetRepository.findByEmailAndUsedFalse(email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.OTP_INVALID));
 
-        if (token.isExpired()) {
-            throw new BusinessException(ErrorCode.OTP_EXPIRED);
-        }
-
-        if (!passwordEncoder.matches(request.getOtp(), token.getOtpHash())) {
-            throw new BusinessException(ErrorCode.OTP_INVALID);
-        }
+        checkOtp(token, request.getOtp());
 
         // Mark token as used
         token.setUsed(true);
@@ -273,6 +272,23 @@ public class AuthService {
         refreshTokenService.revokeAllUserTokens(user.getId());
 
         log.info("Password reset successful for: {}", email);
+    }
+
+    private void checkOtp(PasswordResetToken token, String otp) {
+        if (token.isExpired()) {
+            throw new BusinessException(ErrorCode.OTP_EXPIRED);
+        }
+        if (!passwordEncoder.matches(otp, token.getOtpHash())) {
+            int attempts = (token.getFailedAttempts() == null ? 0 : token.getFailedAttempts()) + 1;
+            token.setFailedAttempts(attempts);
+            if (attempts >= MAX_OTP_ATTEMPTS) {
+                // Burn the code so a 6-digit OTP cannot be brute-forced; user must request a new one.
+                token.setUsed(true);
+                log.warn("OTP for {} invalidated after {} failed attempts", token.getEmail(), attempts);
+            }
+            passwordResetRepository.save(token);
+            throw new BusinessException(ErrorCode.OTP_INVALID);
+        }
     }
 
     private void checkAccountLockout(User user) {

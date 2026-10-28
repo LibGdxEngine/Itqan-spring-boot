@@ -1,98 +1,80 @@
 import type { MetadataRoute } from "next";
 
-export const dynamic = "force-dynamic";
+import { SITE_URL, fetchPublic, localizedUrl } from "@/lib/seo";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+export const revalidate = 3600;
 
-type CourseItem = {
-    id?: number;
-    updatedAt?: string;
-};
+type Page<T> = { content: T[]; totalPages: number };
+type CatalogItem = { id: number; createdAt?: string };
+type ArticleItem = { slug?: string; publishedAt?: string | null; updatedAt?: string | null };
 
-type ArticleItem = {
-    slug?: string;
-    publishedAt?: string | null;
-};
+const MAX_PAGES = 50;
+
+/** Every page of a paged endpoint (bounded, so a huge catalog can't stall the sitemap). */
+async function allPages<T>(path: (page: number) => string): Promise<T[]> {
+    const items: T[] = [];
+    for (let page = 0; page < MAX_PAGES; page++) {
+        const data = await fetchPublic<Page<T> | T[]>(path(page), 3600);
+        if (!data) break;
+        if (Array.isArray(data)) return data;
+        items.push(...data.content);
+        if (page + 1 >= data.totalPages) break;
+    }
+    return items;
+}
+
+/** Entry available in both languages: Arabic at the plain URL, English at ?lang=en. */
+function bilingual(
+    path: string,
+    changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"],
+    priority: number,
+    lastModified?: Date,
+): MetadataRoute.Sitemap[number] {
+    return {
+        url: localizedUrl(path, "ar"),
+        lastModified,
+        changeFrequency,
+        priority,
+        alternates: { languages: { ar: localizedUrl(path, "ar"), en: localizedUrl(path, "en") } },
+    };
+}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+    const now = new Date();
     const staticPages: MetadataRoute.Sitemap = [
-        {
-            url: SITE_URL,
-            lastModified: new Date(),
-            changeFrequency: "weekly",
-            priority: 1.0,
-        },
-        {
-            url: `${SITE_URL}/courses`,
-            lastModified: new Date(),
-            changeFrequency: "daily",
-            priority: 0.9,
-        },
-        {
-            url: `${SITE_URL}/instructors`,
-            lastModified: new Date(),
-            changeFrequency: "weekly",
-            priority: 0.7,
-        },
-        {
-            url: `${SITE_URL}/articles`,
-            lastModified: new Date(),
-            changeFrequency: "daily",
-            priority: 0.8,
-        },
-        {
-            url: `${SITE_URL}/muqtatafat`,
-            lastModified: new Date(),
-            changeFrequency: "weekly",
-            priority: 0.6,
-        },
+        bilingual("/", "weekly", 1.0, now),
+        bilingual("/courses", "daily", 0.9, now),
+        bilingual("/instructors", "weekly", 0.7),
+        bilingual("/articles", "daily", 0.8, now),
+        bilingual("/muqtatafat", "weekly", 0.6),
+        bilingual("/about", "monthly", 0.5),
+        bilingual("/privacy", "yearly", 0.2),
+        bilingual("/terms", "yearly", 0.2),
+        // The services page is Arabic-only content.
+        { url: `${SITE_URL}/services`, changeFrequency: "monthly", priority: 0.7 },
     ];
 
-    let coursePages: MetadataRoute.Sitemap = [];
-    try {
-        const res = await fetch(`${API_URL}/api/courses/active`, {
-            next: { revalidate: 3600 },
-        });
-        if (res.ok) {
-            const courses: CourseItem[] = await res.json();
-            coursePages = courses.map((course) => ({
-                url: `${SITE_URL}/courses/${course.id}`,
-                lastModified: course.updatedAt
-                    ? new Date(course.updatedAt)
-                    : new Date(),
-                changeFrequency: "weekly" as const,
-                priority: 0.8,
-            }));
-        }
-    } catch {
-        // If API is unavailable, return static pages only
-    }
+    const [courses, articles] = await Promise.all([
+        allPages<CatalogItem>((page) => `/api/catalog?sort=newest&size=48&page=${page}`),
+        allPages<ArticleItem>((page) => `/api/articles?page=${page}&size=100`),
+    ]);
 
-    let articlePages: MetadataRoute.Sitemap = [];
-    try {
-        const res = await fetch(`${API_URL}/api/articles?page=0&size=100`, {
-            next: { revalidate: 3600 },
-        });
-        if (res.ok) {
-            const data = await res.json();
-            const articles: ArticleItem[] = Array.isArray(data)
-                ? data
-                : (data.content ?? []);
-            articlePages = articles.map((article) => ({
-                url: `${SITE_URL}/articles/${encodeURIComponent(
-                    article.slug ?? "",
-                )}`,
-                lastModified: article.publishedAt
-                    ? new Date(article.publishedAt)
-                    : undefined,
+    const coursePages = courses.map((course) =>
+        bilingual(`/courses/${course.id}`, "weekly", 0.8, course.createdAt ? new Date(course.createdAt) : undefined),
+    );
+
+    // Articles are written in one language, so they get a single URL.
+    const articlePages: MetadataRoute.Sitemap = articles
+        .filter((article) => article.slug)
+        .map((article) => {
+            const modified = article.updatedAt ?? article.publishedAt;
+            return {
+                url: `${SITE_URL}/articles/${encodeURIComponent(article.slug!)}`,
+                lastModified: modified ? new Date(modified) : undefined,
                 changeFrequency: "weekly" as const,
                 priority: 0.7,
-            }));
-        }
-    } catch {
-        // If API is unavailable, return static pages only
-    }
+            };
+        });
 
     return [...staticPages, ...coursePages, ...articlePages];
 }

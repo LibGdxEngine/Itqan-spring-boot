@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { getLocale, getTranslations } from "next-intl/server"
 
 import ArticlesListClient from "./_components/ArticlesListClient"
+import { localizedAlternates, jsonLdHtml } from "@/lib/seo"
 
 const API_URL =
   process.env.BACKEND_INTERNAL_URL ||
@@ -28,7 +29,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: t("title"),
     description: t("description"),
     keywords,
-    alternates: { canonical: url },
+    alternates: localizedAlternates("/articles", locale),
     openGraph: {
       type: "website",
       url,
@@ -93,7 +94,7 @@ export default async function ArticlesPage() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdHtml(jsonLd) }}
       />
       <ArticlesListClient />
     </>

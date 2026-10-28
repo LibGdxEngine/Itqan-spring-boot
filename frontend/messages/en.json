@@ -33,20 +33,26 @@
     "cancel": "Cancel",
     "edit": "Edit",
     "delete": "Delete",
-    "success": "Success"
+    "success": "Success",
+    "close": "Close"
   },
   "nav": {
     "brand": "Itqan",
     "courses": "Courses",
     "publicCourses": "Courses",
     "services": "Academy Services",
-    "muqtatafat": "مقطتفات",
+    "muqtatafat": "Clips",
     "articles": "Articles",
     "instructors": "Instructors",
     "dashboard": "Dashboard",
     "admin": "Admin",
     "instructor": "Instructor Portal",
-    "myLearning": "My Learning"
+    "myLearning": "My Learning",
+    "skipToContent": "Skip to main content",
+    "mainLabel": "Main",
+    "accountMenu": "Account menu",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
   },
   "instructors": {
     "title": "Our Instructors",
@@ -93,7 +99,55 @@
     "welcome": "Welcome back, {name}!",
     "noCourses": "No courses yet",
     "noCoursesDesc": "Start your learning journey by exploring our course catalog.",
-    "browseCourses": "Browse Courses"
+    "browseCourses": "Browse Courses",
+    "statsLabel": "Your learning at a glance",
+    "stats": {
+      "inProgress": "In progress",
+      "completed": "Completed",
+      "certificates": "Certificates",
+      "thisWeek": "Lessons this week",
+      "streak": "Day streak"
+    },
+    "continueLearning": "Continue learning",
+    "resume": "Resume",
+    "start": "Start",
+    "continue": "Continue",
+    "review": "Review",
+    "lastLesson": "Last: {title}",
+    "lessonsDone": "{done} of {total} lessons",
+    "progressLabel": "Progress in {title}",
+    "myCourses": "My courses",
+    "tabs": {
+      "all": "All",
+      "active": "In progress",
+      "completed": "Completed"
+    },
+    "nothingHere": "No courses in this tab.",
+    "certificate": "Certificate",
+    "getCertificate": "Get certificate",
+    "certificateNotYet": "Not ready yet",
+    "certificates": "Certificates",
+    "noCertificates": "Finish a course and pass its quizzes to earn a certificate.",
+    "view": "View",
+    "wishlist": "Saved for later",
+    "redeem": {
+      "title": "Have an enrollment code?",
+      "description": "Enter the code you received to unlock a course.",
+      "submit": "Redeem",
+      "success": "Code redeemed. Enjoy the course!",
+      "failed": "Couldn't redeem this code"
+    },
+    "billing": {
+      "title": "Billing and payments",
+      "empty": "No payments yet.",
+      "status": {
+        "COMPLETED": "Paid",
+        "PENDING": "Pending",
+        "FAILED": "Failed",
+        "REFUNDED": "Refunded",
+        "CANCELLED": "Cancelled"
+      }
+    }
   },
   "admin": {
     "dashboard": "Admin Dashboard",
@@ -179,31 +233,48 @@
     },
     "analytics": {
       "title": "Analytics",
-      "subtitle": "Platform performance overview for the past 30 days.",
-      "backToDashboard": "Back to dashboard",
+      "rangeDescription": "{from} → {to}",
+      "export": "Export CSV",
       "refresh": "Refresh",
-      "loadFailed": "Failed to load analytics",
+      "period": "Period",
+      "lastDays": "Last {days} days",
+      "custom": "Custom range",
+      "from": "From",
+      "to": "To",
+      "granularity": "Group by",
+      "granularities": {
+        "DAILY": "Day",
+        "WEEKLY": "Week",
+        "MONTHLY": "Month"
+      },
       "cards": {
-        "revenue": "Total revenue",
-        "enrollments": "Total enrollments",
-        "students": "Total students",
-        "activeCourses": "Active courses",
-        "newThisMonth": "{count} new users this month",
-        "activeUsers": "{count} active users in the last 30 days"
+        "revenue": "Revenue",
+        "newEnrollments": "New enrollments",
+        "newUsers": "New users",
+        "activeUsers": "Active users (30 days)",
+        "activeHint": "{students} students · {courses} published courses"
       },
-      "revenueTrend": {
-        "title": "Revenue trend",
-        "last30Days": "Last 30 days",
-        "empty": "No revenue data in this period yet."
+      "vsPrevious": "vs. previous period",
+      "revenueTrend": "Revenue",
+      "noRevenue": "No revenue in this period.",
+      "enrollmentTrend": "New enrollments",
+      "enrollmentsCount": "{count, plural, one {# enrollment} other {# enrollments}}",
+      "noEnrollments": "No enrollments in this period.",
+      "revenueByCourse": "Revenue by course",
+      "course": "Course",
+      "revenue": "Revenue",
+      "payments": "Payments",
+      "usersByRole": "Users by role",
+      "roles": {
+        "STUDENT": "Students",
+        "INSTRUCTOR": "Instructors",
+        "ADMIN": "Admins"
       },
-      "topCourses": {
-        "title": "Top courses by enrollment",
-        "courseTitle": "Course",
-        "enrollments": "Enrollments",
-        "completionRate": "Completion rate",
-        "averageProgress": "Average progress",
-        "empty": "No enrollments yet."
-      }
+      "signupsInRange": "{count} sign-ups in this period",
+      "topCourses": "Top courses (all time)",
+      "students": "Students",
+      "completionRate": "Completion",
+      "averageProgress": "Avg. progress"
     },
     "instructors": {
       "title": "Instructors",
@@ -221,6 +292,444 @@
       "createdAt": "Created",
       "status": "Status",
       "actions": "Actions"
+    },
+    "nav": {
+      "ariaLabel": "Admin navigation",
+      "brand": "Itqan",
+      "panel": "Admin panel",
+      "groups": {
+        "overview": "Overview",
+        "people": "People",
+        "learning": "Learning",
+        "sales": "Sales",
+        "content": "Content",
+        "system": "System"
+      },
+      "dashboard": "Dashboard",
+      "analytics": "Analytics",
+      "users": "Users",
+      "team": "Team",
+      "courses": "Courses",
+      "enrollments": "Enrollments",
+      "payments": "Payments",
+      "coupons": "Coupons",
+      "enrollmentCodes": "Enrollment codes",
+      "landing": "Landing page",
+      "clips": "Clips",
+      "auditLog": "Audit log",
+      "settings": "Settings",
+      "viewSite": "View site",
+      "logout": "Log out",
+      "closeMenu": "Close menu",
+      "openMenu": "Open menu",
+      "breadcrumb": "Breadcrumb",
+      "superAdmin": "Super admin",
+      "admin": "Admin",
+      "reviews": "Reviews"
+    },
+    "table": {
+      "exportCsv": "Export CSV",
+      "retry": "Retry",
+      "actions": "Actions",
+      "empty": "Nothing here yet.",
+      "total": "{count, plural, =0 {No results} one {# result} other {# results}}",
+      "previous": "Previous page",
+      "next": "Next page"
+    },
+    "common": {
+      "failed": "Action failed",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "active": "Active",
+      "course": "Course",
+      "chooseCourse": "Choose a course",
+      "draft": "draft",
+      "allCourses": "All courses"
+    },
+    "team": {
+      "title": "Team",
+      "description": "Admins and instructors who can manage the platform."
+    },
+    "overview": {
+      "title": "Welcome back, {name}",
+      "subtitle": "Here is how the platform did over the last 30 days.",
+      "cards": {
+        "revenue": "Revenue",
+        "last30": "Last 30 days",
+        "newEnrollments": "New enrollments",
+        "totalEnrollments": "{count} all-time",
+        "newUsers": "New users",
+        "totalStudents": "{count} students in total",
+        "activeUsers": "Active users",
+        "activeCourses": "{count} published courses"
+      },
+      "quick": {
+        "recordPayment": "Record a payment",
+        "grantAccess": "Grant course access",
+        "generateCodes": "Generate codes",
+        "manageCourses": "Manage courses"
+      },
+      "topCourses": "Top courses",
+      "viewAnalytics": "Full analytics",
+      "noEnrollments": "No enrollments yet.",
+      "avgProgress": "avg. progress {value}%",
+      "recentActivity": "Recent activity",
+      "viewAll": "View all",
+      "noActivity": "No activity recorded yet.",
+      "system": "System"
+    },
+    "users": {
+      "title": "Users",
+      "description": "Every account on the platform: students, instructors and admins.",
+      "empty": "No users match these filters.",
+      "search": "Search name or email",
+      "role": "Role",
+      "allRoles": "All roles",
+      "roles": {
+        "STUDENT": "Student",
+        "INSTRUCTOR": "Instructor",
+        "ADMIN": "Admin"
+      },
+      "status": "Status",
+      "allStatuses": "All statuses",
+      "suspendedLabel": "Suspended",
+      "superAdmin": "Super admin",
+      "name": "Name",
+      "signIn": "Sign-in",
+      "password": "Password",
+      "joined": "Joined",
+      "lastLogin": "Last login",
+      "suspend": "Suspend",
+      "reactivate": "Reactivate",
+      "suspended": "Account suspended",
+      "reactivated": "Account reactivated",
+      "confirmSuspendTitle": "Suspend this account?",
+      "confirmReactivateTitle": "Reactivate this account?",
+      "confirmSuspend": "{name} will be signed out everywhere and won't be able to log in until reactivated.",
+      "confirmReactivate": "{name} will be able to log in again."
+    },
+    "coursesPage": {
+      "title": "Courses",
+      "description": "All courses, including drafts. Edit content, publish, duplicate or delete.",
+      "empty": "No courses match these filters.",
+      "search": "Search title or instructor",
+      "status": "Status",
+      "allStatuses": "All statuses",
+      "publishedLabel": "Published",
+      "draftLabel": "Draft",
+      "course": "Course",
+      "price": "Price",
+      "free": "Free",
+      "content": "Content",
+      "contentCount": "{modules} modules · {lessons} lessons",
+      "students": "Students",
+      "created": "Created",
+      "editContent": "Edit content",
+      "view": "View on site",
+      "publish": "Publish",
+      "unpublish": "Unpublish",
+      "duplicate": "Duplicate",
+      "published": "Course published",
+      "unpublished": "Course unpublished",
+      "duplicated": "Copy created as a draft",
+      "deleted": "Course deleted",
+      "confirmPublishTitle": "Publish this course?",
+      "confirmPublish": "it will appear in the catalog.",
+      "confirmUnpublishTitle": "Unpublish this course?",
+      "confirmUnpublish": "it will be hidden from the catalog. Enrolled students keep access.",
+      "confirmDuplicateTitle": "Duplicate this course?",
+      "confirmDuplicate": "a draft copy with all modules, lessons and quizzes will be created.",
+      "confirmDeleteTitle": "Delete this course permanently?",
+      "confirmDelete": "this also removes {count, plural, =0 {its content} one {its content and # enrollment} other {its content and # enrollments}}. This cannot be undone."
+    },
+    "enrollments": {
+      "title": "Enrollments",
+      "description": "Who has access to which course. Grant access after offline payments.",
+      "grant": "Grant access",
+      "empty": "No enrollments match these filters.",
+      "search": "Search student or course",
+      "status": "Status",
+      "allStatuses": "All statuses",
+      "statuses": {
+        "ACTIVE": "Active",
+        "COMPLETED": "Completed",
+        "DROPPED": "Revoked"
+      },
+      "student": "Student",
+      "course": "Course",
+      "progress": "Progress",
+      "enrolled": "Enrolled",
+      "changeStatus": "Change status",
+      "grantTitle": "Grant course access",
+      "grantHint": "Enrolls the student without a payment. To also record money received, use Payments → Record payment.",
+      "studentEmail": "Student email",
+      "granted": "Access granted",
+      "statusChanged": "Status updated",
+      "deleted": "Enrollment deleted",
+      "confirmDeleteTitle": "Delete this enrollment?",
+      "confirmDelete": "{name} will lose access to {course}. Prefer “Revoked” if you want to keep their progress."
+    },
+    "payments": {
+      "title": "Payments",
+      "description": "Every payment, online and offline. Record WhatsApp / cash payments and issue refunds.",
+      "recordManual": "Record payment",
+      "empty": "No payments match these filters.",
+      "search": "Search student, course or reference",
+      "status": "Status",
+      "allStatuses": "All statuses",
+      "statuses": {
+        "PENDING": "Pending",
+        "COMPLETED": "Completed",
+        "FAILED": "Failed",
+        "REFUNDED": "Refunded",
+        "CANCELLED": "Cancelled"
+      },
+      "gateway": "Gateway",
+      "allGateways": "All gateways",
+      "gateways": {
+        "MANUAL": "Manual"
+      },
+      "date": "Date",
+      "student": "Student",
+      "course": "Course",
+      "amount": "Amount",
+      "method": "Method",
+      "methods": {
+        "VODAFONE_CASH": "Vodafone Cash",
+        "INSTAPAY": "InstaPay",
+        "CASH": "Cash",
+        "BANK_TRANSFER": "Bank transfer",
+        "OTHER": "Other"
+      },
+      "refund": "Refund",
+      "recorded": "Payment recorded",
+      "recordedHint": "The student now has access to the course.",
+      "refunded": "Payment refunded and access revoked",
+      "manualTitle": "Record an offline payment",
+      "manualHint": "For payments received via Vodafone Cash, InstaPay, cash or bank transfer. The student is enrolled immediately.",
+      "studentEmail": "Student email",
+      "currency": "Currency",
+      "reference": "Reference",
+      "referenceHint": "Transfer or receipt number (optional)",
+      "notes": "Notes",
+      "recordAndEnroll": "Record & enroll",
+      "refundTitle": "Refund this payment?",
+      "refundStripe": "{amount} will be refunded to the student's card through Stripe and their course access revoked.",
+      "refundManual": "This marks {amount} as refunded and revokes course access. Return the money to the student yourself.",
+      "refundReason": "Reason (optional)"
+    },
+    "couponsPage": {
+      "title": "Coupons",
+      "description": "Discount codes for any course."
+    },
+    "landingPage": {
+      "title": "Landing page",
+      "description": "Hero video, featured courses, teachers, articles and specializations."
+    },
+    "clipsPage": {
+      "title": "Clips",
+      "description": "Short videos and audio shown on the Muqtatafat page."
+    },
+    "codes": {
+      "title": "Enrollment codes",
+      "description": "Prepaid codes students redeem to unlock a course — useful for bookshops, schools and offline sales.",
+      "generate": "Generate codes",
+      "empty": "No codes yet.",
+      "code": "Code",
+      "course": "Course",
+      "uses": "Uses",
+      "expires": "Expires",
+      "never": "Never",
+      "status": "Status",
+      "usable": "Usable",
+      "usedUpOrExpired": "Used up / expired",
+      "inactive": "Deactivated",
+      "copy": "Copy code",
+      "deactivate": "Deactivate",
+      "generated": "{count, plural, one {# code} other {# codes}} generated",
+      "deactivated": "Code deactivated",
+      "generateTitle": "Generate enrollment codes",
+      "generateHint": "Codes look like ABCD-EFGH-JKLM and unlock the course when redeemed.",
+      "copyAll": "Copy all",
+      "downloadCsv": "Download CSV",
+      "done": "Done",
+      "quantity": "How many codes",
+      "usesPerCode": "Uses per code",
+      "usesHint": "-1 means unlimited",
+      "expiresOn": "Expires on",
+      "expiresHint": "Leave empty for no expiry",
+      "confirmDeactivateTitle": "Deactivate this code?",
+      "confirmDeactivate": "{code} will stop working immediately."
+    },
+    "audit": {
+      "title": "Audit log",
+      "description": "Security-relevant actions: who did what, and when.",
+      "empty": "No entries match these filters.",
+      "search": "Search action, email or id",
+      "resource": "Resource",
+      "allResources": "All resources",
+      "result": "Result",
+      "allResults": "All results",
+      "success": "Success",
+      "failure": "Failure",
+      "from": "From",
+      "to": "To",
+      "time": "Time",
+      "actor": "Actor",
+      "system": "System",
+      "action": "Action",
+      "details": "Details"
+    },
+    "settings": {
+      "title": "Settings",
+      "description": "Site-wide details shown to visitors and used by the payment flow.",
+      "saved": "Settings saved",
+      "save": "Save",
+      "saveCount": "Save {count, plural, one {# change} other {# changes}}",
+      "sections": {
+        "general": "General",
+        "contact": "Contact",
+        "social": "Social links",
+        "payments": "Payments"
+      },
+      "fields": {
+        "siteName": "Site name",
+        "tagline": "Tagline",
+        "maintenanceMessage": "Announcement banner",
+        "contactEmail": "Contact email",
+        "contactPhone": "Phone",
+        "whatsappNumber": "WhatsApp number",
+        "address": "Address",
+        "facebookUrl": "Facebook",
+        "instagramUrl": "Instagram",
+        "youtubeUrl": "YouTube",
+        "xUrl": "X (Twitter)",
+        "tiktokUrl": "TikTok",
+        "telegramUrl": "Telegram",
+        "defaultCurrency": "Default currency",
+        "manualPaymentsEnabled": "Manual payments",
+        "cardPaymentsEnabled": "Card payments"
+      },
+      "hints": {
+        "maintenanceMessage": "Optional message shown across the site. Leave empty to hide.",
+        "whatsappNumber": "International format without +, e.g. 201001234567",
+        "defaultCurrency": "3-letter code, e.g. EGP",
+        "manualPaymentsEnabled": "Students can pay via Vodafone Cash / InstaPay and you confirm the payment.",
+        "cardPaymentsEnabled": "Online card checkout through Stripe."
+      }
+    },
+    "reviews": {
+      "title": "Reviews",
+      "description": "Read student reviews and hide ones that break the rules.",
+      "empty": "No reviews match these filters.",
+      "search": "Search comments, students or courses",
+      "rating": "Rating",
+      "anyRating": "Any rating",
+      "stars": "{count, plural, one {# star} other {# stars}}",
+      "visibility": "Visibility",
+      "allVisibility": "Visible and hidden",
+      "visible": "Visible",
+      "hiddenFilter": "Hidden",
+      "noComment": "No comment",
+      "show": "Show",
+      "hide": "Hide",
+      "shown": "Review is visible again",
+      "hidden": "Review hidden",
+      "cols": {
+        "review": "Review",
+        "course": "Course",
+        "student": "Student",
+        "date": "Date",
+        "status": "Status"
+      }
+    },
+    "landingEditor": {
+      "loading": "Loading landing page settings…",
+      "title": "Landing Page",
+      "save": "Save changes",
+      "toasts": {
+        "loadFailed": "Failed to load landing page",
+        "videoUploaded": "Video uploaded",
+        "uploadFailed": "Upload failed",
+        "saved": "Landing page saved",
+        "saveFailed": "Save failed",
+        "specRequired": "Name (Ar/En) and slug are required",
+        "specCreated": "Specialization created",
+        "specUpdated": "Specialization updated",
+        "specSaveFailed": "Failed to save specialization",
+        "specDeleted": "Specialization deleted",
+        "deleteFailed": "Failed to delete"
+      },
+      "hero": {
+        "heading": "Hero video",
+        "videoUrl": "Video URL",
+        "uploadNew": "Upload new (MP4/WebM)",
+        "titleAr": "Title (AR)",
+        "titleEn": "Title (EN)",
+        "teacherAr": "Teacher (AR)",
+        "teacherEn": "Teacher (EN)",
+        "durationAr": "Duration label (AR)",
+        "durationEn": "Duration label (EN)"
+      },
+      "featuredCourses": "Featured courses",
+      "featuredInstructors": "Featured instructors",
+      "featuredArticles": "Featured articles",
+      "specs": {
+        "heading": "Specializations (chips)",
+        "nameAr": "Name (AR)",
+        "nameEn": "Name (EN)",
+        "slug": "Slug",
+        "order": "Order",
+        "add": "Add specialization",
+        "update": "Update specialization",
+        "cancel": "Cancel",
+        "empty": "No specializations yet",
+        "active": "Active",
+        "yes": "Yes",
+        "no": "No",
+        "actions": "Actions",
+        "edit": "Edit",
+        "confirmDelete": "Delete this specialization?"
+      },
+      "picker": {
+        "add": "Add",
+        "placeholder": "Pick an option…",
+        "selected": "Selected ({count})",
+        "noneSelected": "None selected"
+      }
+    },
+    "clipsEditor": {
+      "title": "Clips",
+      "subtitle": "Free public video and audio clips",
+      "uploadButton": "Upload clips",
+      "uploading": "Uploading...",
+      "uploadingFiles": "{count, plural, one {Uploading # file...} other {Uploading # files...}}",
+      "empty": "No clips yet. Upload your first clip now.",
+      "descriptionPlaceholder": "Optional description...",
+      "toasts": {
+        "error": "Error",
+        "uploaded": "Uploaded",
+        "uploadedDescription": "{count, plural, =0 {No clips were uploaded} one {# clip uploaded successfully} other {# clips uploaded successfully}}",
+        "uploadFailed": "Upload failed",
+        "saved": "Saved",
+        "savedDescription": "The clip was updated successfully",
+        "saveFailed": "Save failed",
+        "deleted": "Deleted",
+        "deletedDescription": "The clip was deleted successfully",
+        "deleteFailed": "Delete failed"
+      },
+      "columns": {
+        "title": "Title",
+        "description": "Description",
+        "type": "Type",
+        "size": "Size",
+        "date": "Date",
+        "actions": "Action"
+      },
+      "types": {
+        "video": "Video",
+        "audio": "Audio"
+      }
     }
   },
   "home": {
@@ -299,7 +808,8 @@
       "new": "New",
       "free": "Free",
       "browseAll": "Browse all courses"
-    }
+    },
+    "playFeatured": "Play the featured lecture"
   },
   "auth": {
     "login": {
@@ -404,7 +914,11 @@
     "linkDashboard": "Dashboard",
     "linkMyCourses": "My Learning",
     "email": "support@itqan.edu",
-    "rights": "All rights reserved."
+    "rights": "All rights reserved.",
+    "social": "Follow us",
+    "whatsapp": "Message us on WhatsApp",
+    "linkPrivacy": "Privacy policy",
+    "linkTerms": "Terms of use"
   },
   "language": {
     "english": "English",
@@ -450,6 +964,10 @@
       "title": "Muqtatafat — Selected Audio Clips",
       "description": "Selected audio excerpts from lessons and lectures by scholars on Itqan, the Islamic sciences platform.",
       "keywords": "audio clips|islamic lectures|quran recitation|lessons|Itqan"
+    },
+    "payment": {
+      "success": "Payment successful",
+      "cancel": "Payment cancelled"
     }
   },
   "quiz": {
@@ -652,7 +1170,13 @@
     },
     "yourProgress": "Your progress",
     "progressOf": "{completed} of {total} lessons completed",
-    "courseContent": "Course content"
+    "courseContent": "Course content",
+    "resourceTitle": "Lesson resource",
+    "resourceHint": "Open or download the file for this lesson",
+    "autoCompleted": "Lesson completed",
+    "noLessonsYet": "This course has no lessons yet.",
+    "openCourseMenu": "Open course contents",
+    "closeCourseMenu": "Close course contents"
   },
   "checkout": {
     "success": {
@@ -739,5 +1263,585 @@
       "quoteText": "Quote",
       "codeText": "code"
     }
+  },
+  "studio": {
+    "nav": {
+      "label": "Studio sections",
+      "courses": "Courses",
+      "analytics": "Analytics",
+      "coupons": "Coupons",
+      "articles": "Articles"
+    },
+    "home": {
+      "title": "Your courses",
+      "description": "Build, publish and track your courses.",
+      "newCourse": "New course",
+      "kpi": {
+        "students": "Students",
+        "newEnrollments": "New enrollments",
+        "last30": "Last 30 days",
+        "revenue": "Revenue",
+        "progress": "Average progress"
+      },
+      "emptyTitle": "Create your first course",
+      "emptyDescription": "Start with a title and a short description. It stays a private draft until you publish it.",
+      "published": "Published",
+      "draft": "Draft",
+      "students": "Students",
+      "lessons": "Lessons",
+      "price": "Price",
+      "free": "Free",
+      "edit": "Edit course",
+      "insights": "Insights",
+      "delete": "Delete course",
+      "deleted": "Course deleted",
+      "deleteTitle": "Delete this course?",
+      "deleteDescription": "“{title}” and all of its sections, lessons, quizzes and enrollments will be permanently removed."
+    },
+    "newCourse": {
+      "back": "All courses",
+      "title": "New course",
+      "description": "You can change everything later. New courses are saved as private drafts."
+    },
+    "course": {
+      "back": "All courses",
+      "statusPublished": "Published",
+      "statusDraft": "Draft",
+      "counts": "{modules, plural, one {# section} other {# sections}} · {lessons, plural, one {# lesson} other {# lessons}}",
+      "preview": "Preview",
+      "publish": "Publish",
+      "unpublish": "Unpublish",
+      "published": "Course published. It is now visible in the catalog.",
+      "unpublished": "Course unpublished",
+      "needLesson": "Add at least one lesson before publishing",
+      "draftNeedsLesson": "This course is a private draft. Add at least one lesson, then publish it.",
+      "draftHint": "This course is a private draft. Only you and admins can see it until you publish it.",
+      "tabsLabel": "Course sections",
+      "tabs": {
+        "curriculum": "Curriculum",
+        "details": "Details",
+        "analytics": "Analytics"
+      },
+      "unpublishTitle": "Unpublish this course?",
+      "unpublishDescription": "It disappears from the catalog and search. Students who are already enrolled keep their access."
+    },
+    "details": {
+      "basics": "Basics",
+      "thumbnail": "Thumbnail",
+      "chooseImage": "Choose image",
+      "thumbnailHint": "JPEG, PNG or WebP, up to 5 MB",
+      "thumbnailTooLarge": "The image is larger than 5 MB.",
+      "thumbnailType": "Use a JPEG, PNG or WebP image.",
+      "thumbnailFailed": "Couldn't upload the image",
+      "remove": "Remove",
+      "title": "Course title",
+      "description": "Description",
+      "charsLeft": "{count} characters left",
+      "instructorName": "Instructor name",
+      "instructorHint": "Shown on the course page. Instructors always appear under their own account name.",
+      "pricing": "Category and pricing",
+      "category": "Category",
+      "general": "General",
+      "level": "Level",
+      "levels": {
+        "BEGINNER": "Beginner",
+        "INTERMEDIATE": "Intermediate",
+        "ADVANCED": "Advanced"
+      },
+      "price": "Price ({currency})",
+      "priceHint": "Set 0 for a free course.",
+      "duration": "Duration (hours)",
+      "landing": "Course page",
+      "outcomes": "What students will learn",
+      "outcomesHint": "Short, concrete outcomes. Up to 20.",
+      "outcomePlaceholder": "Outcome",
+      "requirements": "Requirements",
+      "requirementsHint": "What students need before starting. Up to 20.",
+      "requirementPlaceholder": "Requirement",
+      "addItem": "Add",
+      "removeItem": "Remove",
+      "previewVideo": "Preview video link",
+      "previewVideoHint": "Optional trailer shown to visitors.",
+      "tags": "Tags",
+      "tagsHint": "Separate tags with commas.",
+      "titleTooShort": "The title needs at least 3 characters.",
+      "invalidNumbers": "Check the price and duration.",
+      "save": "Save changes",
+      "saved": "Course details saved",
+      "createDraft": "Create draft",
+      "created": "Draft created. Now add your first section."
+    },
+    "curriculum": {
+      "hint": "Drag sections and lessons by their handle to reorder them, including between sections.",
+      "savingOrder": "Saving order…",
+      "orderFailed": "Couldn't save the new order",
+      "section": "Section {number}",
+      "sectionTitle": "Section title",
+      "saveTitle": "Save title",
+      "cancelRename": "Cancel",
+      "renameSection": "Rename section",
+      "deleteSection": "Delete section",
+      "lessonCount": "{count, plural, one {# lesson} other {# lessons}}",
+      "emptySection": "No lessons yet. Add one, or drag a lesson here.",
+      "addLesson": "Add lesson",
+      "addSection": "Add section",
+      "newSectionPlaceholder": "New section title",
+      "emptyTitle": "No sections yet",
+      "emptyDescription": "Sections group your lessons. Add the first one below.",
+      "dragLesson": "Move lesson {title}",
+      "dragModule": "Move section {title}",
+      "free": "Free preview",
+      "hidden": "Hidden",
+      "videoReady": "Video ready",
+      "videoUploading": "Uploading",
+      "videoFailed": "Upload failed",
+      "videoMissing": "No video yet",
+      "quizMissing": "No questions yet",
+      "minutes": "{count} min",
+      "uploadVideo": "Video",
+      "buildQuiz": "Build quiz",
+      "editQuiz": "Edit quiz",
+      "editLesson": "Edit lesson",
+      "deleteLesson": "Delete lesson",
+      "uploadTitle": "Upload video: {title}",
+      "lessonDeleted": "Lesson deleted",
+      "sectionDeleted": "Section deleted",
+      "deleteLessonTitle": "Delete this lesson?",
+      "deleteLessonDescription": "“{title}”, its quiz and student progress on it will be permanently removed.",
+      "deleteSectionTitle": "Delete this section?",
+      "deleteSectionDescription": "“{title}” and its {count, plural, one {# lesson} other {# lessons}} will be permanently removed.",
+      "a11y": {
+        "picked": "Picked up. Use the arrow keys to move, space to drop, escape to cancel.",
+        "over": "Moved.",
+        "outside": "Not over a drop target.",
+        "dropped": "Dropped.",
+        "cancelled": "Move cancelled."
+      }
+    },
+    "lesson": {
+      "addTitle": "Add lesson",
+      "editTitle": "Edit lesson",
+      "type": "Lesson type",
+      "types": {
+        "VIDEO": "Video",
+        "TEXT": "Article",
+        "RESOURCE": "Resource",
+        "QUIZ": "Quiz",
+        "ASSIGNMENT": "Assignment"
+      },
+      "title": "Title",
+      "summary": "Short summary",
+      "summaryHint": "Optional. Shown under the lesson title.",
+      "videoFile": "Upload a video file",
+      "videoFileHint": "Up to 5 GB. Uploads in the background after saving.",
+      "videoLink": "Or link to a video",
+      "videoLinkHint": "A direct MP4 or YouTube link.",
+      "videoAlreadyUploaded": "A video is already uploaded. Choose a new file only to replace it.",
+      "videoTooLarge": "The video is larger than 5 GB.",
+      "uploading": "Uploading video…",
+      "article": "Article",
+      "articleHint": "Write in Markdown. Use the preview to check formatting.",
+      "uploadResource": "Upload file",
+      "resourceHint": "PDF, Office, ZIP, text or image, up to 50 MB.",
+      "resourceLink": "File link",
+      "resourceTooLarge": "The file is larger than 50 MB.",
+      "resourceRequired": "Upload a file or paste a link for this resource.",
+      "uploadFailed": "Upload failed",
+      "quizNext": "After saving, you'll add questions in the quiz builder.",
+      "quizExists": "This lesson has a quiz. Edit its questions from the curriculum.",
+      "quizInstructions": "Instructions for students (optional)",
+      "duration": "Duration (minutes)",
+      "freePreview": "Free preview",
+      "freePreviewHint": "Signed-in visitors can open it without enrolling.",
+      "visible": "Visible to students",
+      "visibleHint": "Untick to keep it hidden while you work on it.",
+      "titleRequired": "Give the lesson a title.",
+      "invalidLink": "Links must start with http:// or https://.",
+      "invalidDuration": "Duration must be a positive number.",
+      "create": "Add lesson",
+      "createAndBuild": "Add and build quiz",
+      "save": "Save lesson",
+      "created": "Lesson added",
+      "updated": "Lesson saved"
+    },
+    "quiz": {
+      "backToCurriculum": "Back to curriculum",
+      "heading": "Quiz for “{title}”",
+      "lessonNotFound": "This lesson no longer exists.",
+      "settings": "Quiz settings",
+      "title": "Quiz title",
+      "description": "Description",
+      "passingScore": "Passing score (%)",
+      "timeLimit": "Time limit (minutes)",
+      "timeLimitHint": "Leave empty for no limit.",
+      "attempts": "Attempts allowed",
+      "attemptsHint": "Leave empty for unlimited.",
+      "showAnswers": "Show the correct answers after a student submits",
+      "questions": "Questions",
+      "totals": "{count, plural, one {# question} other {# questions}} · {points, plural, one {# point} other {# points}}",
+      "questionNumber": "Question {n}",
+      "questionType": "Question type",
+      "types": {
+        "MULTIPLE_CHOICE": "Multiple choice",
+        "TRUE_FALSE": "True / false",
+        "SHORT_ANSWER": "Short answer"
+      },
+      "add": {
+        "MULTIPLE_CHOICE": "Multiple choice",
+        "TRUE_FALSE": "True / false",
+        "SHORT_ANSWER": "Short answer"
+      },
+      "points": "Points",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "duplicate": "Duplicate question",
+      "removeQuestion": "Remove question",
+      "questionText": "Question",
+      "questionPlaceholder": "Type the question",
+      "expectedAnswer": "Expected answer",
+      "expectedAnswerHint": "Matched exactly, ignoring capital letters and extra spaces.",
+      "markCorrect": "Tick every correct option",
+      "pickCorrectOne": "Pick the correct answer",
+      "correctOption": "Option {n} is correct",
+      "optionPlaceholder": "Option {n}",
+      "addOption": "Add option",
+      "removeOption": "Remove option",
+      "true": "True",
+      "false": "False",
+      "fixErrors": "Fix these before saving:",
+      "errors": {
+        "title": "The quiz needs a title.",
+        "passingScore": "The passing score must be between 0 and 100.",
+        "noQuestions": "Add at least one question.",
+        "questionText": "Question {n} has no text.",
+        "shortAnswer": "Question {n} needs an expected answer.",
+        "emptyOption": "Question {n} has an empty option.",
+        "multipleChoice": "Question {n} needs at least two options and one correct answer.",
+        "trueFalse": "Question {n} needs exactly one correct answer."
+      },
+      "unsaved": "Unsaved changes",
+      "allSaved": "All changes saved",
+      "notCreated": "Not saved yet",
+      "save": "Save quiz",
+      "saved": "Quiz saved",
+      "deleteQuiz": "Delete quiz",
+      "deleted": "Quiz deleted",
+      "deleteTitle": "Delete this quiz?",
+      "deleteDescription": "The questions and every student attempt will be permanently removed. The lesson stays."
+    },
+    "coupons": {
+      "title": "Coupons",
+      "description": "Discount codes for your courses."
+    },
+    "analytics": {
+      "title": "Analytics",
+      "description": "Enrollments, progress and revenue across your courses.",
+      "range": "Date range",
+      "lastDays": "Last {count} days",
+      "kpi": {
+        "students": "Students",
+        "allTime": "All time",
+        "newEnrollments": "New enrollments",
+        "progress": "Average progress",
+        "progressHint": "Across enrolled students",
+        "quizScore": "Average quiz score",
+        "quizHint": "Submitted attempts"
+      },
+      "enrollmentsChart": "New enrollments",
+      "revenueChart": "Revenue",
+      "noRevenue": "No completed payments in this period.",
+      "inRange": "in this period",
+      "byCourse": "By course",
+      "noCourses": "No courses yet.",
+      "draft": "Draft",
+      "cols": {
+        "course": "Course",
+        "students": "Students",
+        "newEnrollments": "New",
+        "progress": "Avg. progress",
+        "completed": "Completed",
+        "quizScore": "Quiz avg.",
+        "revenue": "Revenue"
+      }
+    },
+    "courseAnalytics": {
+      "students": "Enrolled students",
+      "reachedEnd": "Finished the last lesson",
+      "reachedEndHint": "Share of enrolled students",
+      "quizAttempts": "Quiz attempts",
+      "funnel": "Lesson completion",
+      "funnelHint": "Share of enrolled students who completed each lesson, in course order. A sharp drop shows where students stop.",
+      "noLessons": "No visible lessons yet.",
+      "quizzes": "Quizzes",
+      "noQuizzes": "No quizzes in this course yet.",
+      "cols": {
+        "quiz": "Quiz",
+        "lesson": "Lesson",
+        "questions": "Questions",
+        "attempts": "Attempts",
+        "average": "Average score",
+        "passRate": "Pass rate"
+      }
+    },
+    "couponManager": {
+      "title": "Course Coupons",
+      "noCourses": "Create a course first to manage coupons.",
+      "courseLabel": "Course",
+      "codePlaceholder": "Code (optional)",
+      "discountPlaceholder": "Discount %",
+      "usageLimitPlaceholder": "Usage limit",
+      "create": "Create Coupon",
+      "existing": "Existing coupons",
+      "empty": "No coupons for this course yet.",
+      "summary": "{percent}% off · used {used}",
+      "summaryWithLimit": "{percent}% off · used {used} / {limit}",
+      "deactivate": "Deactivate",
+      "delete": "Delete",
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "toasts": {
+        "created": "Coupon created",
+        "createdDescription": "The coupon has been created successfully.",
+        "createFailed": "Failed to create coupon",
+        "createFailedDescription": "Please review your input and try again.",
+        "deactivateFailed": "Failed to deactivate coupon",
+        "tryAgain": "Please try again.",
+        "deleted": "Coupon deleted",
+        "deleteFailed": "Failed to delete coupon"
+      }
+    }
+  },
+  "catalog": {
+    "free": "Free",
+    "ratingLabel": "Rated {rating} out of 5",
+    "newCourse": "New course",
+    "lessons": "{count, plural, one {# lesson} other {# lessons}}",
+    "hours": "{count, plural, one {# hour} other {# hours}}",
+    "students": "{count, plural, one {# student} other {# students}}",
+    "wishlist": {
+      "add": "Save for later",
+      "remove": "Remove from saved",
+      "added": "Saved to your wishlist",
+      "removed": "Removed from your wishlist",
+      "failed": "Couldn't update your wishlist"
+    },
+    "filters": {
+      "toggle": "Filters",
+      "category": "Category",
+      "allCategories": "All categories",
+      "level": "Level",
+      "allLevels": "All levels",
+      "price": "Price",
+      "anyPrice": "Any price",
+      "free": "Free",
+      "paid": "Paid",
+      "sort": "Sort by"
+    },
+    "sort": {
+      "newest": "Newest",
+      "popular": "Most popular",
+      "rating": "Highest rated",
+      "price_asc": "Price: low to high",
+      "price_desc": "Price: high to low"
+    },
+    "searchPlaceholder": "Search courses, topics or instructors",
+    "resultCount": "{count, plural, =0 {No courses} one {# course} other {# courses}}",
+    "clearFilters": "Clear filters",
+    "noResults": "No courses match your search",
+    "noResultsHint": "Try other words or remove some filters.",
+    "pagination": "Pages",
+    "previous": "Previous page",
+    "next": "Next page"
+  },
+  "reviews": {
+    "title": "Student reviews",
+    "stars": "{count, plural, one {# star} other {# stars}}",
+    "average": "Average rating {rating} out of 5",
+    "count": "{count, plural, one {# review} other {# reviews}}",
+    "distribution": "Rating breakdown",
+    "beFirst": "No reviews yet. Be the first to share what you think.",
+    "none": "No reviews yet.",
+    "rateCourse": "Rate this course",
+    "yourRating": "Your rating",
+    "youRated": "You rated this course",
+    "pickRating": "Choose a star rating first.",
+    "commentPlaceholder": "What did you like, and what could be better? (optional)",
+    "submit": "Post review",
+    "update": "Update review",
+    "edit": "Edit review",
+    "delete": "Delete",
+    "thanks": "Thanks for your review!",
+    "updated": "Review updated",
+    "deleted": "Review deleted",
+    "failed": "Couldn't save your review",
+    "anonymous": "Student",
+    "more": "Show more reviews"
+  },
+  "courseDetail": {
+    "breadcrumb": "Breadcrumb",
+    "allCourses": "All courses",
+    "updated": "Updated {date}",
+    "watchPreview": "Watch preview",
+    "previewTitle": "Preview: {title}",
+    "share": "Share",
+    "linkCopied": "Link copied",
+    "staffNote": "You're signed in as staff. Students see the enroll button here.",
+    "includes": {
+      "lessons": "{count, plural, one {# lesson} other {# lessons}}",
+      "hours": "{count, plural, one {# hour of content} other {# hours of content}}"
+    },
+    "whatYouLearn": "What you'll learn",
+    "requirements": "Requirements",
+    "instructor": "Your instructor",
+    "allInstructors": "Meet all instructors",
+    "related": "Students also looked at",
+    "browseOthers": "Browse other courses"
+  },
+  "certificate": {
+    "heading": "Certificate of completion",
+    "certifies": "This certifies that",
+    "completed": "has successfully completed",
+    "instructor": "Taught by {name}",
+    "issued": "Issued on",
+    "code": "Certificate ID",
+    "verifyAt": "Verify at",
+    "verified": "Verified certificate",
+    "copyLink": "Copy link",
+    "linkCopied": "Link copied",
+    "print": "Print or save as PDF",
+    "notFound": "Certificate not found",
+    "notFoundHint": "No certificate matches the code {code}. Check it and try again."
+  },
+  "theme": {
+    "label": "Color theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "errors": {
+    "notFound": {
+      "title": "We couldn't find that page",
+      "description": "The link may be broken, or the page may have moved. Try the home page or browse our courses.",
+      "home": "Go to the home page",
+      "courses": "Browse courses"
+    },
+    "generic": {
+      "title": "Something went wrong",
+      "description": "This page hit an unexpected error. Try again, and if it keeps happening, come back a little later.",
+      "reference": "Reference",
+      "retry": "Try again",
+      "home": "Go to the home page"
+    }
+  },
+  "pages": {
+    "about": {
+      "eyebrow": "About us",
+      "title": "About Itqan",
+      "intro": "Itqan is an academy for authentic Islamic knowledge and the Arabic language. We bring trusted scholars and careful teaching together on one platform, in Arabic and English.",
+      "sections": [
+        {
+          "title": "Our mission",
+          "body": "We want sound, well-sourced knowledge to be within reach of every learner, wherever they live. Itqan means mastery: we aim for lessons that are precise, clear and faithful to the sources."
+        },
+        {
+          "title": "What we teach",
+          "body": "Courses in Tafsir, Hadith, Fiqh, Aqeedah, Seerah, Tajweed, Usool al-Fiqh and the Arabic language, from first steps to advanced study. Every course is structured into sections and lessons, with quizzes to check your understanding and a certificate when you finish."
+        },
+        {
+          "title": "Our teachers",
+          "body": "Lessons are taught by qualified scholars and experienced teachers. Each instructor builds and maintains their own courses on Itqan, so the material stays current and connected to the person teaching it."
+        },
+        {
+          "title": "Scholarly and teaching services",
+          "body": "Beyond courses, the Itqan team offers manuscript editing, review of books and theses, Arabic proofreading, Quran teaching and Arabic for non-native speakers. See the Services page for details."
+        },
+        {
+          "title": "Get in touch",
+          "body": "Questions, suggestions or partnership ideas are welcome. You will find our contact details at the bottom of every page."
+        }
+      ]
+    },
+    "privacy": {
+      "eyebrow": "Legal",
+      "title": "Privacy policy",
+      "intro": "This policy explains what personal information Itqan collects, why, and the choices you have.",
+      "sections": [
+        {
+          "title": "Information we collect",
+          "body": "Account details you give us (name, email address, and optionally phone number). Your learning activity: enrollments, completed lessons, video positions, quiz answers, reviews and certificates. Payment records (amount, status, course); card details are handled by our payment provider and never stored on our servers. Basic technical data such as your IP address, used to protect the service."
+        },
+        {
+          "title": "How we use it",
+          "body": "To run your account and give you access to the courses you enrolled in; to save your progress and issue certificates; to process payments and refunds; to answer your messages; and to keep the platform secure, for example by limiting repeated sign-in attempts."
+        },
+        {
+          "title": "What others can see",
+          "body": "Reviews show your first name and the initial of your last name. A certificate page shows your name, the course and the issue date to anyone who has its link or code. Instructors see enrollment and progress figures for their own courses."
+        },
+        {
+          "title": "Sharing",
+          "body": "We do not sell your personal information. We share it only with services that help us run Itqan (such as payment processing, email delivery and file storage), and only as much as they need, or when the law requires it."
+        },
+        {
+          "title": "Retention and your choices",
+          "body": "We keep your data while your account is active so you can return to your courses. You can update your profile at any time, and you can ask us to export or delete your account by contacting us."
+        },
+        {
+          "title": "Cookies and local storage",
+          "body": "We use your browser's storage to keep you signed in and to remember preferences such as language and color theme. We do not use advertising trackers."
+        }
+      ],
+      "footnote": "If this policy changes in a meaningful way, we will say so on this page and update the date below. Last updated: October 2026."
+    },
+    "terms": {
+      "eyebrow": "Legal",
+      "title": "Terms of use",
+      "intro": "By creating an account or using Itqan you agree to these terms. Please read them carefully.",
+      "sections": [
+        {
+          "title": "Your account",
+          "body": "Keep your sign-in details private and give accurate information. You are responsible for activity on your account. We may suspend accounts that break these terms or put other users at risk."
+        },
+        {
+          "title": "Courses and access",
+          "body": "Enrolling gives you personal, non-transferable access to the course for as long as it is offered on Itqan. Do not share your account, or download, copy or redistribute course videos and materials without permission."
+        },
+        {
+          "title": "Payments and refunds",
+          "body": "Prices are shown before you pay. Paid enrollments are activated once payment is confirmed. If a payment is refunded, access to that course ends. Contact us about any billing problem."
+        },
+        {
+          "title": "Reviews and conduct",
+          "body": "Reviews must be honest, respectful and about the course. We may hide content that is abusive, misleading or unrelated."
+        },
+        {
+          "title": "Certificates",
+          "body": "Certificates confirm that you completed a course's lessons and quizzes on Itqan. They are not academic degrees unless a course states otherwise."
+        },
+        {
+          "title": "Changes and availability",
+          "body": "We work to keep Itqan available and accurate, but courses and features may change over time. We may update these terms; continued use after an update means you accept the new version."
+        }
+      ],
+      "footnote": "Last updated: October 2026."
+    }
+  },
+  "clipsPage": {
+    "title": "Clips",
+    "subtitle": "Free video and audio clips, open to everyone",
+    "search": "Search clips…",
+    "empty": "No clips available yet.",
+    "tabs": {
+      "all": "All",
+      "video": "Video",
+      "audio": "Audio"
+    }
+  },
+  "offline": {
+    "title": "You're offline",
+    "description": "Check your internet connection, then try again. Pages will load normally once you're back online.",
+    "retry": "Try again"
   }
 }

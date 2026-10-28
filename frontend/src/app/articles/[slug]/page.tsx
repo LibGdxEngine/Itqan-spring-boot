@@ -3,6 +3,7 @@ import { getLocale, getTranslations } from "next-intl/server"
 
 import type { Article } from "@/lib/articles"
 import ArticleDetailClient from "../_components/ArticleDetailClient"
+import { jsonLdHtml } from "@/lib/seo"
 
 const API_URL =
   process.env.BACKEND_INTERNAL_URL ||
@@ -193,11 +194,11 @@ export default async function ArticleDetailPage({
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdHtml(articleJsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdHtml(breadcrumbJsonLd) }}
       />
       <ArticleDetailClient />
     </>

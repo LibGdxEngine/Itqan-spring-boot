@@ -49,7 +49,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 
-                if (!jwtTokenProvider.validateToken(jwt, userDetails)) {
+                if (!userDetails.isEnabled() || !jwtTokenProvider.validateToken(jwt, userDetails)) {
                     writeUnauthorized(response, "Token is invalid or expired");
                     return;
                 }

@@ -38,7 +38,7 @@
     </appender>
 
     <!-- Development: human readable console only -->
-    <springProfile name="default | dev">
+    <springProfile name="default | dev | test">
         <root level="INFO">
             <appender-ref ref="CONSOLE"/>
         </root>

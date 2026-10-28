@@ -55,10 +55,107 @@
   /* Pattern tint (warm charcoal, low opacity) */
   --pattern-islamic-color: rgba(48, 48, 46, 0.045);
 
+
+  /* ===== Semantic color tokens (used as Tailwind utilities: bg-canvas, text-ink, ...) ===== */
+  --c-canvas: #f5f4ed;        /* page background */
+  --c-surface: #faf9f5;       /* cards, panels */
+  --c-paper: #ffffff;         /* inputs and inner panels */
+  --c-subtle: #f0eee6;        /* muted fills */
+  --c-sand: #e8e6dc;          /* chips, pressed fills */
+  --c-grid: #ebe9e0;          /* chart grids, progress tracks */
+  --c-line: #f0eee6;          /* hairline borders */
+  --c-line-strong: #e8e6dc;   /* stronger borders */
+  --c-ring-warm: #d1cfc5;     /* ring shadows, empty stars */
+  --c-ink: #141413;           /* primary text */
+  --c-ink-2: #5e5d59;         /* secondary text */
+  --c-ink-3: #87867f;         /* tertiary text */
+  --c-ink-button: #4d4c48;
+  --c-ink-emphasis: #3d3d3a;
+  --c-night: #141413;         /* always-dark sections (heroes, player) */
+  --c-night-2: #30302e;
+  --c-on-night: #faf9f5;      /* text on night and on brand */
+  --c-on-night-2: #b0aea5;
+  --c-on-night-soft: #e8e6dc;
+  --c-brand: #c96442;
+  --c-brand-hover: #b55836;
+  --c-coral: #d97757;
+  --c-brand-soft: #fdf3ef;
+  --c-danger: #b53333;
+  --c-danger-hover: #9b2b2b;
+  --c-danger-soft: #fbeeeb;
+  --c-danger-line: #f3d2cc;
+  --c-success: #3d6b35;
+  --c-success-soft: #e9f2e6;
+  --c-success-line: #9cc29a;
+  --c-warning: #8a5a12;
+  --c-warning-soft: #fbf0dc;
+  --c-warning-line: #f1dfb8;
+  --c-star: #d4a017;
+  --c-focus: #3898ec;
+
   /* Font variables — --font-serif-ar and --font-sans-ar are injected by next/font on <html> */
   --font-geist-sans: "Geist", system-ui, sans-serif;
   --font-geist-mono: "Geist Mono", monospace;
 }
+
+
+/* ===== Dark theme: same tokens, darker surfaces, lighter ink ===== */
+:root.dark {
+  color-scheme: dark;
+  --background: #1a1917;
+  --card: #23221f;
+  --card-foreground: #f5f4ed;
+  --foreground: #f5f4ed;
+  --surface-white: #201f1c;
+  --text-secondary: #c2c0b6;
+  --text-tertiary: #9a988f;
+  --primary: #d97757;
+  --secondary: #34332f;
+  --secondary-foreground: #e8e6dc;
+  --muted: #2b2a27;
+  --muted-foreground: #c2c0b6;
+  --border: #33322e;
+  --border-strong: #3f3e39;
+  --input: #3f3e39;
+  --ring: #4a4944;
+  --ring-deep: #57564f;
+  --destructive: #e5736b;
+  --shadow-whisper: rgba(0, 0, 0, 0.35) 0 4px 24px;
+  --pattern-islamic-color: rgba(250, 249, 245, 0.04);
+
+  --c-canvas: #1a1917;
+  --c-surface: #23221f;
+  --c-paper: #2a2926;
+  --c-subtle: #2b2a27;
+  --c-sand: #34332f;
+  --c-grid: #36352f;
+  --c-line: #33322e;
+  --c-line-strong: #3f3e39;
+  --c-ring-warm: #4a4944;
+  --c-ink: #f5f4ed;
+  --c-ink-2: #c2c0b6;
+  --c-ink-3: #9a988f;
+  --c-ink-button: #d1cfc5;
+  --c-ink-emphasis: #e8e6dc;
+  --c-night: #0f0e0d;
+  --c-night-2: #2a2926;
+  --c-brand: #d97757;
+  --c-brand-hover: #e08a6c;
+  --c-coral: #e08a6c;
+  --c-brand-soft: #3a2620;
+  --c-danger: #e5736b;
+  --c-danger-hover: #ee8a83;
+  --c-danger-soft: #3b1f1d;
+  --c-danger-line: #5c2b27;
+  --c-success: #8fc486;
+  --c-success-soft: #1f2e1c;
+  --c-success-line: #4b6b44;
+  --c-warning: #e0b36a;
+  --c-warning-soft: #33281a;
+  --c-warning-line: #5a4626;
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
   --color-background: var(--background);
@@ -78,6 +175,41 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-canvas: var(--c-canvas);
+  --color-surface: var(--c-surface);
+  --color-paper: var(--c-paper);
+  --color-subtle: var(--c-subtle);
+  --color-sand: var(--c-sand);
+  --color-grid: var(--c-grid);
+  --color-line: var(--c-line);
+  --color-line-strong: var(--c-line-strong);
+  --color-ring-warm: var(--c-ring-warm);
+  --color-ink: var(--c-ink);
+  --color-ink-2: var(--c-ink-2);
+  --color-ink-3: var(--c-ink-3);
+  --color-ink-button: var(--c-ink-button);
+  --color-ink-emphasis: var(--c-ink-emphasis);
+  --color-night: var(--c-night);
+  --color-night-2: var(--c-night-2);
+  --color-on-night: var(--c-on-night);
+  --color-on-night-2: var(--c-on-night-2);
+  --color-on-night-soft: var(--c-on-night-soft);
+  --color-brand: var(--c-brand);
+  --color-brand-hover: var(--c-brand-hover);
+  --color-coral: var(--c-coral);
+  --color-brand-soft: var(--c-brand-soft);
+  --color-danger: var(--c-danger);
+  --color-danger-hover: var(--c-danger-hover);
+  --color-danger-soft: var(--c-danger-soft);
+  --color-danger-line: var(--c-danger-line);
+  --color-success: var(--c-success);
+  --color-success-soft: var(--c-success-soft);
+  --color-success-line: var(--c-success-line);
+  --color-warning: var(--c-warning);
+  --color-warning-soft: var(--c-warning-soft);
+  --color-warning-line: var(--c-warning-line);
+  --color-star: var(--c-star);
+  --color-focus: var(--c-focus);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-serif: var(--font-serif-ar);

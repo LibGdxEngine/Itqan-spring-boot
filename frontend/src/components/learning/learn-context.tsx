@@ -8,6 +8,7 @@ import {
     EnrollmentsService,
     StudentsService,
 } from "@/lib/api";
+import { learningApi } from "@/lib/learning-api";
 
 interface LearnContextValue {
     course: CourseResponse | null;
@@ -17,8 +18,16 @@ interface LearnContextValue {
     orderedLessons: LessonResponse[];
     completedLessonIds: Set<number>;
     studentId: number | null;
+    /** Whether the signed-in student is enrolled (free-preview visitors are not). */
+    enrolled: boolean;
+    /** Saved video positions in seconds, by lesson id. */
+    positions: Record<number, number>;
+    /** The lesson the student opened most recently in this course. */
+    lastLessonId: number | null;
     /** Marks a lesson complete on the backend and updates local state. No-op if no student. */
     markComplete: (lessonId: number) => Promise<void>;
+    /** Saves the resume point for a video lesson (fire-and-forget). */
+    savePosition: (lessonId: number, seconds: number) => void;
 }
 
 const LearnContext = React.createContext<LearnContextValue | undefined>(undefined);
@@ -39,6 +48,9 @@ export function LearnProvider({
     const [completedLessonIds, setCompletedLessonIds] = React.useState<Set<number>>(
         () => new Set<number>(),
     );
+    const [enrolled, setEnrolled] = React.useState(false);
+    const [positions, setPositions] = React.useState<Record<number, number>>({});
+    const [lastLessonId, setLastLessonId] = React.useState<number | null>(null);
 
     // Load the current student and their completed lessons for this course.
     React.useEffect(() => {
@@ -50,12 +62,16 @@ export function LearnProvider({
             if (cancelled || !student?.id) return;
             setStudentId(student.id);
 
-            const completed = await EnrollmentsService.getCompletedLessons(
-                student.id,
-                courseId,
-            ).catch(() => [] as number[]);
-            if (cancelled) return;
-            setCompletedLessonIds(new Set(completed));
+            const state = await learningApi.courseState(courseId).catch(() => null);
+            if (cancelled || !state) return;
+            setCompletedLessonIds(new Set(state.completedLessonIds));
+            setEnrolled(state.enrolled);
+            setLastLessonId(state.lastLessonId);
+            setPositions(
+                Object.fromEntries(
+                    Object.entries(state.positions).map(([id, seconds]) => [Number(id), seconds]),
+                ),
+            );
         };
 
         loadProgress();
@@ -90,6 +106,16 @@ export function LearnProvider({
         [studentId],
     );
 
+    const savePosition = React.useCallback(
+        (lessonId: number, seconds: number) => {
+            if (!enrolled) return;
+            const rounded = Math.max(0, Math.floor(seconds));
+            setPositions((prev) => ({ ...prev, [lessonId]: rounded }));
+            void learningApi.activity(lessonId, rounded).catch(() => undefined);
+        },
+        [enrolled],
+    );
+
     const value = React.useMemo<LearnContextValue>(
         () => ({
             course,
@@ -97,9 +123,24 @@ export function LearnProvider({
             orderedLessons,
             completedLessonIds,
             studentId,
+            enrolled,
+            positions,
+            lastLessonId,
             markComplete,
+            savePosition,
         }),
-        [course, orderedModules, orderedLessons, completedLessonIds, studentId, markComplete],
+        [
+            course,
+            orderedModules,
+            orderedLessons,
+            completedLessonIds,
+            studentId,
+            enrolled,
+            positions,
+            lastLessonId,
+            markComplete,
+            savePosition,
+        ],
     );
 
     return <LearnContext.Provider value={value}>{children}</LearnContext.Provider>;

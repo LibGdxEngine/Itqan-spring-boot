@@ -2,6 +2,8 @@ package com.itqan.edu.features.students;
 
 import com.itqan.edu.common.exception.BusinessException;
 import com.itqan.edu.common.exception.ErrorCode;
+import com.itqan.edu.features.auth.AuthRepository;
+import com.itqan.edu.features.auth.RefreshTokenService;
 import com.itqan.edu.features.students.dto.StudentRequest;
 import com.itqan.edu.features.students.dto.StudentResponse;
 import com.itqan.edu.features.students.mapper.StudentMapper;
@@ -21,6 +23,8 @@ public class StudentService {
 
     private final StudentRepository studentRepository;
     private final StudentMapper studentMapper;
+    private final AuthRepository authRepository;
+    private final RefreshTokenService refreshTokenService;
 
     @Transactional
     public StudentResponse createStudent(StudentRequest request) {
@@ -40,6 +44,16 @@ public class StudentService {
     public StudentResponse getStudentById(Long id) {
         Student student = studentRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STUDENT_NOT_FOUND));
+        return studentMapper.toResponse(student);
+    }
+
+    /** Students may only read their own record; staff may read any. */
+    public StudentResponse getStudentById(Long id, String requesterEmail, boolean requesterIsStaff) {
+        Student student = studentRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(ErrorCode.STUDENT_NOT_FOUND));
+        if (!requesterIsStaff && !student.getEmail().equalsIgnoreCase(requesterEmail)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
         return studentMapper.toResponse(student);
     }
 
@@ -112,10 +126,27 @@ public class StudentService {
 
     @Transactional
     public StudentResponse deactivateStudent(Long id) {
+        return setStudentActive(id, false);
+    }
+
+    @Transactional
+    public StudentResponse activateStudent(Long id) {
+        return setStudentActive(id, true);
+    }
+
+    /** Keeps the student profile and the login account in sync; deactivation also ends sessions. */
+    private StudentResponse setStudentActive(Long id, boolean active) {
         Student student = studentRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STUDENT_NOT_FOUND));
-        student.setActive(false);
+        student.setActive(active);
         student = studentRepository.save(student);
+        authRepository.findByEmail(student.getEmail()).ifPresent(user -> {
+            user.setEnabled(active);
+            authRepository.save(user);
+            if (!active) {
+                refreshTokenService.revokeAllUserTokens(user.getId());
+            }
+        });
         return studentMapper.toResponse(student);
     }
 }

@@ -2,6 +2,7 @@ package com.itqan.edu.features.quizzes;
 
 import com.itqan.edu.common.exception.BusinessException;
 import com.itqan.edu.common.exception.ErrorCode;
+import com.itqan.edu.common.security.CurrentUserService;
 import com.itqan.edu.features.students.StudentRepository;
 import com.itqan.edu.features.quizzes.dto.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,12 +25,14 @@ public class QuizController {
 
     private final QuizService quizService;
     private final StudentRepository studentRepository;
+    private final CurrentUserService currentUserService;
 
     @PostMapping
     @PreAuthorize("hasRole('INSTRUCTOR') or hasRole('ADMIN')")
     @Operation(summary = "Create a new quiz")
-    public ResponseEntity<QuizResponse> createQuiz(@Valid @RequestBody QuizRequest request) {
-        QuizResponse response = quizService.createQuiz(request);
+    public ResponseEntity<QuizResponse> createQuiz(@Valid @RequestBody QuizRequest request,
+                                                   Authentication authentication) {
+        QuizResponse response = quizService.createQuiz(request, currentUserService.getCurrentUser(authentication));
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -38,9 +41,17 @@ public class QuizController {
     public ResponseEntity<QuizResponse> getQuiz(
             @PathVariable Long quizId,
             Authentication authentication) {
-        Long studentId = getCurrentStudentId(authentication);
-        QuizResponse response = quizService.getQuiz(quizId, studentId);
+        QuizResponse response = quizService.getQuiz(quizId, currentUserService.getCurrentUser(authentication));
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{quizId}/edit")
+    @PreAuthorize("hasRole('INSTRUCTOR') or hasRole('ADMIN')")
+    @Operation(summary = "Get quiz with answer key for editing")
+    public ResponseEntity<QuizResponse> getQuizForEditing(
+            @PathVariable Long quizId,
+            Authentication authentication) {
+        return ResponseEntity.ok(quizService.getQuizForEditing(quizId, currentUserService.getCurrentUser(authentication)));
     }
 
     @PutMapping("/{quizId}")
@@ -48,16 +59,17 @@ public class QuizController {
     @Operation(summary = "Update quiz")
     public ResponseEntity<QuizResponse> updateQuiz(
             @PathVariable Long quizId,
-            @Valid @RequestBody QuizRequest request) {
-        QuizResponse response = quizService.updateQuiz(quizId, request);
+            @Valid @RequestBody QuizRequest request,
+            Authentication authentication) {
+        QuizResponse response = quizService.updateQuiz(quizId, request, currentUserService.getCurrentUser(authentication));
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{quizId}")
     @PreAuthorize("hasRole('INSTRUCTOR') or hasRole('ADMIN')")
     @Operation(summary = "Delete quiz")
-    public ResponseEntity<Void> deleteQuiz(@PathVariable Long quizId) {
-        quizService.deleteQuiz(quizId);
+    public ResponseEntity<Void> deleteQuiz(@PathVariable Long quizId, Authentication authentication) {
+        quizService.deleteQuiz(quizId, currentUserService.getCurrentUser(authentication));
         return ResponseEntity.noContent().build();
     }
 
@@ -67,7 +79,8 @@ public class QuizController {
             @PathVariable Long quizId,
             Authentication authentication) {
         Long studentId = getCurrentStudentId(authentication);
-        QuizAttemptResponse response = quizService.startQuizAttempt(quizId, studentId);
+        QuizAttemptResponse response = quizService.startQuizAttempt(
+                quizId, studentId, currentUserService.getCurrentUser(authentication));
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

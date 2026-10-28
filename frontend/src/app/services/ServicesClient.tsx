@@ -28,6 +28,7 @@ import {
   type Variants,
 } from "framer-motion"
 import { Navbar } from "@/components/Navbar"
+import { useSiteSettings, whatsappLink } from "@/lib/use-site-currency"
 import { SiteFooter } from "@/components/SiteFooter"
 import { Button } from "@/components/ui/button"
 import {
@@ -38,19 +39,11 @@ import {
   type Service,
   type ServiceIcon,
 } from "./servicesContent"
+import { EASE, fadeUp, staggerParent } from "@/lib/motion"
 
 /* ===== Animation variants ===== */
-const EASE = [0.22, 1, 0.36, 1] as const
 
-const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 16 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE } },
-}
 
-const staggerParent: Variants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
-}
 
 const cardReveal: Variants = {
   hidden: { opacity: 0, y: 20, scale: 0.96 },
@@ -95,8 +88,17 @@ function toArabicDigits(n: number): string {
     .join("")
 }
 
-function whatsappHref(message: string): string {
-  return `https://wa.me/${CONTACT.whatsapp}?text=${encodeURIComponent(message)}`
+/** Contact details from the admin site settings, falling back to the built-in defaults. */
+function useContact() {
+  const settings = useSiteSettings()
+  const email = settings.contactEmail || CONTACT.email
+  return {
+    email,
+    // Without a WhatsApp number configured, requests go by email instead.
+    whatsappHref: (message: string) =>
+      whatsappLink(settings.whatsappNumber, message) ??
+      `mailto:${email}?body=${encodeURIComponent(message)}`,
+  }
 }
 
 function serviceRequestMessage(title: string): string {
@@ -106,6 +108,7 @@ function serviceRequestMessage(title: string): string {
 const GENERAL_MESSAGE = "السلام عليكم، أرغب في الاستفسار عن خدمات الأكاديمية."
 
 export default function ServicesClient() {
+  const { email, whatsappHref } = useContact()
   const reduced = useReducedMotion()
   const heroRef = useRef<HTMLElement>(null)
   const { scrollYProgress: heroProgress } = useScroll({
@@ -115,7 +118,7 @@ export default function ServicesClient() {
   const patternY = useTransform(heroProgress, [0, 1], [0, 80])
 
   return (
-    <div className="min-h-screen bg-[#f5f4ed] text-[#141413]">
+    <div className="min-h-screen bg-canvas text-ink">
       <ScrollProgress />
       <Navbar />
 
@@ -138,7 +141,7 @@ export default function ServicesClient() {
         {/* floating star accents */}
         <motion.div
           aria-hidden
-          className="pointer-events-none absolute top-28 right-[10%] hidden text-[#c96442]/25 sm:block"
+          className="pointer-events-none absolute top-28 end-[10%] hidden text-brand/25 sm:block"
           animate={reduced ? undefined : { y: [0, -12, 0], rotate: [0, 12, 0] }}
           transition={reduced ? undefined : { duration: 6, repeat: Infinity, ease: "easeInOut" }}
         >
@@ -146,7 +149,7 @@ export default function ServicesClient() {
         </motion.div>
         <motion.div
           aria-hidden
-          className="pointer-events-none absolute bottom-28 left-[12%] hidden text-[#d97757]/25 sm:block"
+          className="pointer-events-none absolute bottom-28 start-[12%] hidden text-coral/25 sm:block"
           animate={reduced ? undefined : { y: [0, 10, 0], rotate: [0, -10, 0] }}
           transition={reduced ? undefined : { duration: 7.5, repeat: Infinity, ease: "easeInOut" }}
         >
@@ -162,18 +165,18 @@ export default function ServicesClient() {
           >
             <motion.span
               variants={fadeUp}
-              className="inline-flex items-center gap-2 text-xs tracking-[0.12px] uppercase text-[#87867f]"
+              className="inline-flex items-center gap-2 text-xs tracking-[0.12px] uppercase text-ink-3"
             >
               <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#c96442] opacity-60" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-[#c96442]" />
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand opacity-60" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-brand" />
               </span>
               خدمات إتقان
             </motion.span>
 
             <motion.h1
               variants={wordContainer}
-              className="text-display text-[#141413]"
+              className="text-display text-ink"
               style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
             >
               {"خدمات الأكاديمية".split(" ").map((word, i, arr) => (
@@ -186,7 +189,7 @@ export default function ServicesClient() {
 
             <motion.p
               variants={fadeUp}
-              className="text-[20px] leading-[1.6] text-[#5e5d59] max-w-2xl mx-auto"
+              className="text-[20px] leading-[1.6] text-ink-2 max-w-2xl mx-auto"
             >
               خدمات علمية وتحريرية وتعليمية يقدّمها فريق إتقان بإتقان وأمانة: من تحقيق المخطوطات
               ومراجعة الكتب والرسائل والتدقيق اللغوي، إلى تعليم القرآن الكريم والعربية لغير الناطقين بها.
@@ -212,7 +215,7 @@ export default function ServicesClient() {
         {/* scroll cue */}
         <motion.div
           aria-hidden
-          className="pointer-events-none absolute bottom-7 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-[#87867f]"
+          className="pointer-events-none absolute bottom-7 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-ink-3"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.1, duration: 0.6 }}
@@ -228,7 +231,7 @@ export default function ServicesClient() {
       </section>
 
       {/* ===== 2. GROUPED OVERVIEW GRID ===== */}
-      <section className="py-20 bg-[#faf9f5] border-y border-[#f0eee6]">
+      <section className="py-20 bg-surface border-y border-line">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
           {SERVICE_GROUPS.map((group) => {
             const items = SERVICES.filter((s) => s.group === group.key)
@@ -239,7 +242,7 @@ export default function ServicesClient() {
                   whileInView="visible"
                   viewport={{ once: true, amount: 0.6 }}
                   variants={fadeUp}
-                  className="text-subhead-lg text-[#141413]"
+                  className="text-subhead-lg text-ink"
                   style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
                 >
                   {group.label}
@@ -267,7 +270,7 @@ export default function ServicesClient() {
       ))}
 
       {/* ===== 4. HOW WE WORK ===== */}
-      <section className="py-20 bg-[#faf9f5] border-y border-[#f0eee6]">
+      <section className="py-20 bg-surface border-y border-line">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             className="text-center mb-14 space-y-3"
@@ -278,12 +281,12 @@ export default function ServicesClient() {
           >
             <motion.h2
               variants={fadeUp}
-              className="text-subhead-lg text-[#141413]"
+              className="text-subhead-lg text-ink"
               style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
             >
               كيف نعمل
             </motion.h2>
-            <motion.p variants={fadeUp} className="text-[#5e5d59] text-[17px] leading-[1.6]">
+            <motion.p variants={fadeUp} className="text-ink-2 text-[17px] leading-[1.6]">
               خطوات واضحة من أول تواصل حتى تسليم العمل.
             </motion.p>
           </motion.div>
@@ -292,11 +295,11 @@ export default function ServicesClient() {
             {/* connector track (lg only) */}
             <div
               aria-hidden
-              className="hidden lg:block absolute top-6 left-[12.5%] right-[12.5%] h-[2px] bg-[#e8e6dc]"
+              className="hidden lg:block absolute top-6 start-[12.5%] end-[12.5%] h-[2px] bg-sand"
             />
             <motion.div
               aria-hidden
-              className="hidden lg:block absolute top-6 left-[12.5%] right-[12.5%] h-[2px] origin-right bg-gradient-to-l from-[#c96442] to-[#d97757]"
+              className="hidden lg:block absolute top-6 start-[12.5%] end-[12.5%] h-[2px] origin-right bg-gradient-to-l from-brand to-coral"
               initial={{ scaleX: 0 }}
               whileInView={{ scaleX: 1 }}
               viewport={{ once: true, amount: 0.6 }}
@@ -318,18 +321,18 @@ export default function ServicesClient() {
       </section>
 
       {/* ===== 5. CTA (dark chapter) ===== */}
-      <section className="relative overflow-hidden py-24 bg-[#141413]">
+      <section className="relative overflow-hidden py-24 bg-night">
         {/* aurora */}
         <motion.div
           aria-hidden
-          className="pointer-events-none absolute -top-1/3 right-[15%] h-[480px] w-[480px] rounded-full blur-3xl"
+          className="pointer-events-none absolute -top-1/3 end-[15%] h-[480px] w-[480px] rounded-full blur-3xl"
           style={{ background: "radial-gradient(circle, rgba(201,100,66,0.35), transparent 60%)" }}
           animate={reduced ? undefined : { x: [0, 40, 0], y: [0, 30, 0], scale: [1, 1.15, 1] }}
           transition={reduced ? undefined : { duration: 14, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div
           aria-hidden
-          className="pointer-events-none absolute -bottom-1/3 left-[15%] h-[440px] w-[440px] rounded-full blur-3xl"
+          className="pointer-events-none absolute -bottom-1/3 start-[15%] h-[440px] w-[440px] rounded-full blur-3xl"
           style={{ background: "radial-gradient(circle, rgba(217,119,87,0.28), transparent 60%)" }}
           animate={reduced ? undefined : { x: [0, -30, 0], y: [0, -20, 0], scale: [1.1, 1, 1.1] }}
           transition={reduced ? undefined : { duration: 16, repeat: Infinity, ease: "easeInOut" }}
@@ -344,14 +347,14 @@ export default function ServicesClient() {
         >
           <motion.h2
             variants={fadeUp}
-            className="text-section text-[#faf9f5]"
+            className="text-section text-on-night"
             style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
           >
             هل تحتاج إلى إحدى خدماتنا؟
           </motion.h2>
           <motion.p
             variants={fadeUp}
-            className="text-[18px] leading-[1.6] text-[#b0aea5] max-w-2xl mx-auto"
+            className="text-[18px] leading-[1.6] text-on-night-2 max-w-2xl mx-auto"
           >
             تواصل معنا اليوم وسيسعد فريقنا بمناقشة طلبك وتقديم العرض المناسب لك.
           </motion.p>
@@ -366,7 +369,7 @@ export default function ServicesClient() {
               </a>
             </Button>
             <Button size="lg" variant="white" asChild className="text-base px-7">
-              <a href={`mailto:${CONTACT.email}?subject=${encodeURIComponent("استفسار عن خدمات الأكاديمية")}`}>
+              <a href={`mailto:${email}?subject=${encodeURIComponent("استفسار عن خدمات الأكاديمية")}`}>
                 <Mail className="w-4 h-4" />
                 راسلنا بالبريد
               </a>
@@ -390,7 +393,7 @@ function ScrollProgress() {
     <motion.div
       aria-hidden
       style={{ scaleX }}
-      className="fixed inset-x-0 top-0 z-[60] h-1 origin-right bg-gradient-to-l from-[#c96442] to-[#d97757]"
+      className="fixed inset-x-0 top-0 z-[60] h-1 origin-right bg-gradient-to-l from-brand to-coral"
     />
   )
 }
@@ -426,7 +429,7 @@ function TiltSpotlightCard({ service }: { service: Service }) {
         onMouseMove={reduced ? undefined : handleMove}
         onMouseLeave={reduced ? undefined : handleLeave}
         style={reduced ? undefined : { rotateX, rotateY, transformStyle: "preserve-3d" }}
-        className="group relative h-full overflow-hidden rounded-2xl border border-[#f0eee6] bg-[#faf9f5] p-6 shadow-[0_0_0_1px_#d1cfc5] transition-shadow duration-300 hover:border-[#c96442] hover:shadow-whisper"
+        className="group relative h-full overflow-hidden rounded-2xl border border-line bg-surface p-6 shadow-[0_0_0_1px_var(--color-ring-warm)] transition-shadow duration-300 hover:border-brand hover:shadow-whisper"
       >
         {/* cursor spotlight */}
         <motion.div
@@ -436,22 +439,22 @@ function TiltSpotlightCard({ service }: { service: Service }) {
         />
         <div className="relative z-10 flex h-full flex-col">
           <motion.div
-            className="w-12 h-12 rounded-xl bg-[#c96442]/10 text-[#c96442] flex items-center justify-center mb-5"
+            className="w-12 h-12 rounded-xl bg-brand/10 text-brand flex items-center justify-center mb-5"
             whileHover={{ scale: 1.08, rotate: -4 }}
             transition={{ type: "spring", stiffness: 300, damping: 15 }}
           >
             <Icon className="w-6 h-6" />
           </motion.div>
           <h3
-            className="text-[20px] leading-snug text-[#141413] mb-2"
+            className="text-[20px] leading-snug text-ink mb-2"
             style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
           >
             {service.title}
           </h3>
-          <p className="text-sm leading-[1.7] text-[#5e5d59] flex-1">{service.summary}</p>
+          <p className="text-sm leading-[1.7] text-ink-2 flex-1">{service.summary}</p>
           <a
             href={`#${service.slug}`}
-            className="group/link inline-flex items-center gap-1.5 text-sm font-medium text-[#c96442] hover:text-[#b55836] transition-colors mt-5 ltr-flex"
+            className="group/link inline-flex items-center gap-1.5 text-sm font-medium text-brand hover:text-brand-hover transition-colors mt-5 ltr-flex"
           >
             اعرف المزيد
             <ChevronLeft className="w-4 h-4 rtl:rotate-180 transition-transform duration-200 group-hover/link:-translate-x-1 rtl:group-hover/link:translate-x-1" />
@@ -463,6 +466,7 @@ function TiltSpotlightCard({ service }: { service: Service }) {
 }
 
 function ServiceDetailRow({ service, index }: { service: Service; index: number }) {
+  const { whatsappHref } = useContact()
   const Icon = ICONS[service.icon]
   const reduced = useReducedMotion()
   const reverse = index % 2 === 1
@@ -476,7 +480,7 @@ function ServiceDetailRow({ service, index }: { service: Service; index: number 
     <section
       id={service.slug}
       className={`scroll-mt-24 py-20 ${
-        darkBg ? "bg-[#faf9f5] border-y border-[#f0eee6]" : "bg-[#f5f4ed]"
+        darkBg ? "bg-surface border-y border-line" : "bg-canvas"
       }`}
     >
       <div ref={ref} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -490,7 +494,7 @@ function ServiceDetailRow({ service, index }: { service: Service; index: number 
           {/* Visual panel */}
           <motion.div
             variants={fadeUp}
-            className={`relative aspect-[4/3] rounded-3xl overflow-hidden border border-[#f0eee6] shadow-whisper bg-gradient-to-br from-[#c96442]/12 via-[#d97757]/8 to-transparent flex items-center justify-center ${
+            className={`relative aspect-[4/3] rounded-3xl overflow-hidden border border-line shadow-whisper bg-gradient-to-br from-brand/12 via-coral/8 to-transparent flex items-center justify-center ${
               reverse ? "lg:order-2" : ""
             }`}
           >
@@ -501,7 +505,7 @@ function ServiceDetailRow({ service, index }: { service: Service; index: number 
             />
             <motion.div style={{ y: reduced ? 0 : iconY }} className="relative">
               <motion.div
-                className="w-24 h-24 rounded-2xl bg-[#faf9f5] text-[#c96442] flex items-center justify-center shadow-[0_0_0_1px_#f0eee6]"
+                className="w-24 h-24 rounded-2xl bg-surface text-brand flex items-center justify-center shadow-[0_0_0_1px_var(--color-line)]"
                 animate={reduced ? undefined : { y: [0, -8, 0] }}
                 transition={reduced ? undefined : { duration: 4, repeat: Infinity, ease: "easeInOut" }}
               >
@@ -514,23 +518,23 @@ function ServiceDetailRow({ service, index }: { service: Service; index: number 
           <motion.div variants={fadeUp} className="space-y-5">
             <div className="space-y-3">
               <h2
-                className="text-subhead text-[#141413]"
+                className="text-subhead text-ink"
                 style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
               >
                 {service.title}
               </h2>
               <motion.span
-                className="block h-[3px] w-16 rounded-full bg-gradient-to-l from-[#c96442] to-[#d97757] origin-right"
+                className="block h-[3px] w-16 rounded-full bg-gradient-to-l from-brand to-coral origin-right"
                 initial={{ scaleX: 0 }}
                 whileInView={{ scaleX: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.7, ease: EASE, delay: 0.15 }}
               />
             </div>
-            <p className="text-[17px] leading-[1.8] text-[#5e5d59]">{service.description}</p>
+            <p className="text-[17px] leading-[1.8] text-ink-2">{service.description}</p>
 
             <div className="space-y-2 pt-1">
-              <p className="text-sm font-medium text-[#87867f]">ماذا تشمل الخدمة</p>
+              <p className="text-sm font-medium text-ink-3">ماذا تشمل الخدمة</p>
               <motion.ul
                 className="space-y-2.5"
                 initial="hidden"
@@ -542,11 +546,11 @@ function ServiceDetailRow({ service, index }: { service: Service; index: number 
                   <motion.li key={i} variants={checkItem} className="flex items-start gap-2.5 ltr-flex">
                     <motion.span
                       variants={popIn}
-                      className="mt-0.5 shrink-0 w-5 h-5 rounded-full bg-[#c96442]/10 text-[#c96442] flex items-center justify-center"
+                      className="mt-0.5 shrink-0 w-5 h-5 rounded-full bg-brand/10 text-brand flex items-center justify-center"
                     >
                       <Check className="w-3 h-3" />
                     </motion.span>
-                    <span className="text-[15px] leading-[1.6] text-[#4d4c48]">{item}</span>
+                    <span className="text-[15px] leading-[1.6] text-ink-button">{item}</span>
                   </motion.li>
                 ))}
               </motion.ul>
@@ -577,12 +581,12 @@ function StepItem({ number, text }: { number: number; text: string }) {
     <motion.div variants={fadeUp} className="relative flex flex-col items-center text-center gap-4">
       <motion.div
         variants={popIn}
-        className="relative z-10 w-12 h-12 rounded-full bg-[#c96442] text-[#faf9f5] flex items-center justify-center text-[18px] shadow-[0_0_0_6px_#faf9f5]"
+        className="relative z-10 w-12 h-12 rounded-full bg-brand text-on-night flex items-center justify-center text-[18px] shadow-[0_0_0_6px_var(--color-surface)]"
         style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
       >
         {toArabicDigits(number)}
       </motion.div>
-      <p className="text-[15px] leading-[1.6] text-[#4d4c48] max-w-[14rem]">{text}</p>
+      <p className="text-[15px] leading-[1.6] text-ink-button max-w-[14rem]">{text}</p>
     </motion.div>
   )
 }

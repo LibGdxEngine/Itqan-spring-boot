@@ -61,7 +61,7 @@ function ToastContainer({
   removeToast: (id: string) => void 
 }) {
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
+    <div className="fixed bottom-4 end-4 z-50 flex flex-col gap-2">
       {toasts.map(toast => (
         <ToastItem key={toast.id} toast={toast} onRemove={removeToast} />
       ))}
@@ -83,14 +83,14 @@ function ToastItem({
   }
   
   const styles = {
-    success: 'bg-[#f0eee6] border-[#e8e6dc] text-[#c96442]',
-    error: 'bg-red-50 border-red-200 text-red-800',
+    success: 'bg-subtle border-line-strong text-brand',
+    error: 'bg-danger-soft border-danger-line text-danger',
     info: 'bg-sky-50 border-sky-200 text-sky-800',
   }
 
   const iconStyles = {
-    success: 'text-[#d97757]',
-    error: 'text-red-500',
+    success: 'text-coral',
+    error: 'text-danger',
     info: 'text-sky-500',
   }
 

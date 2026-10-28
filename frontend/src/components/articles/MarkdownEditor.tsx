@@ -225,9 +225,9 @@ export function MarkdownEditor({ value, onChange }: MarkdownEditorProps) {
   ]
 
   return (
-    <div className="overflow-hidden rounded-xl border border-[#e8e6dc] bg-[#faf9f5]">
+    <div className="overflow-hidden rounded-xl border border-line-strong bg-surface">
       {/* Tabs */}
-      <div className="flex items-center justify-between border-b border-[#f0eee6] bg-[#f5f4ed] px-2">
+      <div className="flex items-center justify-between border-b border-line bg-canvas px-2">
         <div className="flex">
           <button
             type="button"
@@ -235,8 +235,8 @@ export function MarkdownEditor({ value, onChange }: MarkdownEditorProps) {
             className={cn(
               "px-4 py-2.5 text-sm font-medium transition-colors",
               tab === "write"
-                ? "border-b-2 border-[#c96442] text-[#141413]"
-                : "text-[#87867f] hover:text-[#141413]",
+                ? "border-b-2 border-brand text-ink"
+                : "text-ink-3 hover:text-ink",
             )}
           >
             {t("articles.write")}
@@ -247,8 +247,8 @@ export function MarkdownEditor({ value, onChange }: MarkdownEditorProps) {
             className={cn(
               "px-4 py-2.5 text-sm font-medium transition-colors",
               tab === "preview"
-                ? "border-b-2 border-[#c96442] text-[#141413]"
-                : "text-[#87867f] hover:text-[#141413]",
+                ? "border-b-2 border-brand text-ink"
+                : "text-ink-3 hover:text-ink",
             )}
           >
             {t("articles.preview")}
@@ -259,7 +259,7 @@ export function MarkdownEditor({ value, onChange }: MarkdownEditorProps) {
       {tab === "write" ? (
         <>
           {/* Toolbar */}
-          <div className="flex flex-wrap items-center gap-1 border-b border-[#f0eee6] px-2 py-1.5">
+          <div className="flex flex-wrap items-center gap-1 border-b border-line px-2 py-1.5">
             {actions.map((action) => {
               const Icon = action.icon
               return (
@@ -269,7 +269,7 @@ export function MarkdownEditor({ value, onChange }: MarkdownEditorProps) {
                   title={action.label}
                   aria-label={action.label}
                   onClick={() => applyAction(action)}
-                  className="flex h-8 w-8 items-center justify-center rounded-md text-[#5e5d59] transition-colors hover:bg-[#e8e6dc] hover:text-[#141413]"
+                  className="flex h-8 w-8 items-center justify-center rounded-md text-ink-2 transition-colors hover:bg-sand hover:text-ink"
                 >
                   <Icon className="h-4 w-4" />
                 </button>
@@ -282,7 +282,7 @@ export function MarkdownEditor({ value, onChange }: MarkdownEditorProps) {
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder={t("articles.contentPlaceholder")}
-            className="block min-h-[360px] w-full resize-y bg-[#faf9f5] px-4 py-3 font-mono text-sm text-[#141413] placeholder:text-[#87867f] focus:outline-none"
+            className="block min-h-[360px] w-full resize-y bg-surface px-4 py-3 font-mono text-sm text-ink placeholder:text-ink-3 focus:outline-none"
           />
         </>
       ) : (
@@ -290,7 +290,7 @@ export function MarkdownEditor({ value, onChange }: MarkdownEditorProps) {
           {value.trim() ? (
             <MarkdownRenderer content={value} />
           ) : (
-            <p className="text-sm text-[#87867f]">
+            <p className="text-sm text-ink-3">
               {t("articles.previewEmpty")}
             </p>
           )}
@@ -298,7 +298,7 @@ export function MarkdownEditor({ value, onChange }: MarkdownEditorProps) {
       )}
 
       {/* Footer */}
-      <div className="flex items-center justify-between border-t border-[#f0eee6] bg-[#f5f4ed] px-4 py-2 text-xs text-[#87867f] ltr-flex">
+      <div className="flex items-center justify-between border-t border-line bg-canvas px-4 py-2 text-xs text-ink-3 ltr-flex">
         <span>{t("articles.charCount", { count: charCount })}</span>
         <span>{t("articles.readingTime", { minutes: readingMinutes })}</span>
       </div>

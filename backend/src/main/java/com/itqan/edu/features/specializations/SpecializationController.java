@@ -6,12 +6,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,7 +25,9 @@ public class SpecializationController {
     @GetMapping("/api/specializations")
     @Operation(summary = "List active specializations")
     public ResponseEntity<List<SpecializationResponse>> listPublic() {
-        return ResponseEntity.ok(specializationService.getActive());
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.maxAge(300, TimeUnit.SECONDS).cachePublic())
+                .body(specializationService.getActive());
     }
 
     @GetMapping("/api/admin/specializations")

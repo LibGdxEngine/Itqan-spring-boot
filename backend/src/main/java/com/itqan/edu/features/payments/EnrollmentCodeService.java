@@ -78,7 +78,8 @@ public class EnrollmentCodeService {
 
     @Transactional(readOnly = true)
     public EnrollmentCode validateCode(String code) {
-        EnrollmentCode enrollmentCode = enrollmentCodeRepository.findByCodeAndIsActiveTrue(code)
+        String normalized = code == null ? "" : code.trim().toUpperCase(java.util.Locale.ROOT);
+        EnrollmentCode enrollmentCode = enrollmentCodeRepository.findByCodeAndIsActiveTrue(normalized)
                 .orElseThrow(() -> new BusinessException(ErrorCode.CODE_INVALID));
 
         if (!enrollmentCode.isValid()) {
@@ -97,18 +98,18 @@ public class EnrollmentCodeService {
 
         Course course = enrollmentCode.getCourse();
 
-        // Check if already enrolled
-        if (enrollmentRepository.existsByStudentIdAndCourseId(studentId, course.getId())) {
+        // Students who already have (non-dropped) access must not burn a code use
+        var existing = enrollmentRepository.findByStudentIdAndCourseId(studentId, course.getId());
+        if (existing.isPresent() && existing.get().getStatus() != EnrollmentStatus.DROPPED) {
             throw new BusinessException(ErrorCode.ENROLLMENT_ALREADY_EXISTS);
         }
 
-        // Create enrollment
-        Enrollment enrollment = Enrollment.builder()
+        Enrollment enrollment = existing.orElseGet(() -> Enrollment.builder()
                 .student(student)
                 .course(course)
-                .status(EnrollmentStatus.ACTIVE)
-                .build();
-
+                .progress(0)
+                .build());
+        enrollment.setStatus(EnrollmentStatus.ACTIVE);
         enrollment = enrollmentRepository.save(enrollment);
 
         // Increment code usage

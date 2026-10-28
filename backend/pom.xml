@@ -23,7 +23,7 @@
         <mapstruct.version>1.5.5.Final</mapstruct.version>
         <jjwt.version>0.12.3</jjwt.version>
         <springdoc.version>2.8.0</springdoc.version>
-        <testcontainers.version>1.20.4</testcontainers.version>
+        <testcontainers.version>1.21.4</testcontainers.version>
         <aws.sdk.version>2.25.67</aws.sdk.version>
         <stripe.version>24.19.0</stripe.version>
     </properties>
@@ -54,6 +54,16 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
+        <!-- Error reporting; a no-op until SENTRY_DSN is set -->
+        <dependency>
+            <groupId>io.sentry</groupId>
+            <artifactId>sentry-spring-boot-starter-jakarta</artifactId>
+            <version>8.13.2</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -74,6 +84,16 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
+        </dependency>
+
+        <!-- Schema migrations (versions managed by Spring Boot) -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
         </dependency>
         
         <!-- JWT -->
@@ -259,4 +279,34 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!--
+          Runs the whole test suite against a real PostgreSQL 16 (Testcontainers) with the
+          Flyway migrations applied and Hibernate in validate mode, so a migration that drifts
+          from the entities fails CI. Needs Docker. Usage: mvn -Ppostgres verify
+        -->
+        <profile>
+            <id>postgres</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <spring.datasource.url>jdbc:tc:postgresql:16-alpine:///itqan_test?TC_DAEMON=true</spring.datasource.url>
+                                <spring.datasource.driver-class-name>org.testcontainers.jdbc.ContainerDatabaseDriver</spring.datasource.driver-class-name>
+                                <spring.datasource.username>test</spring.datasource.username>
+                                <spring.datasource.password>test</spring.datasource.password>
+                                <spring.jpa.properties.hibernate.dialect>org.hibernate.dialect.PostgreSQLDialect</spring.jpa.properties.hibernate.dialect>
+                                <spring.jpa.hibernate.ddl-auto>validate</spring.jpa.hibernate.ddl-auto>
+                                <spring.flyway.enabled>true</spring.flyway.enabled>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

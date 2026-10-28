@@ -1,332 +1,202 @@
 "use client"
 
-import { ChangeEvent, useCallback, useEffect, useRef, useState } from "react"
-import { useAuth } from "@/components/auth-context"
-import { Navbar } from "@/components/Navbar"
-import { CourseResponse, CoursesService } from "@/lib/api"
-import {
-  uploadCourseThumbnail,
-  validateThumbnailFile,
-} from "@/lib/courseThumbnail"
-import { ImageIcon, Loader2, Plus, LayoutDashboard, Film, Trash2, Newspaper } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import * as React from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { CourseCreatorForm } from "@/components/instructor/CourseCreatorForm"
-import { CouponManager } from "@/components/instructor/CouponManager"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
+import { BookOpen, ImageIcon, Percent, Plus, Trash2, TrendingUp, Users, Wallet } from "lucide-react"
+
+import { Badge, ConfirmDialog, PageHeader, StatCard, formatMoney } from "@/components/admin/ui"
+import { StudioShell, useSiteCurrency } from "@/components/studio/StudioShell"
+import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
-import api from "@/lib/api-axios"
+import { getErrorMessage } from "@/lib/api-axios"
+import { InstructorOverview, StudioCourse, instructorAnalyticsApi, studioApi } from "@/lib/studio-api"
 
-export default function InstructorDashboardPage() {
-  const { user, isAuthenticated, isLoading: authLoading } = useAuth()
-  const [courses, setCourses] = useState<CourseResponse[]>([])
-  const [loading, setLoading] = useState(true)
-  const [updatingThumbnailId, setUpdatingThumbnailId] = useState<number | null>(null)
-  const [courseToDelete, setCourseToDelete] = useState<CourseResponse | null>(null)
-  const [isDeletingCourse, setIsDeletingCourse] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const targetCourseIdRef = useRef<number | null>(null)
-  const router = useRouter()
-  const t = useTranslations()
+function formatRevenue(byCurrency: Record<string, number> | undefined, fallback: string, locale: string) {
+  const entries = Object.entries(byCurrency ?? {})
+  if (entries.length === 0) return formatMoney(0, fallback, locale)
+  return entries.map(([currency, amount]) => formatMoney(amount, currency, locale)).join(" · ")
+}
+
+function StudioHome() {
+  const t = useTranslations("studio.home")
+  const tc = useTranslations("admin.common")
+  const locale = useLocale()
+  const currency = useSiteCurrency()
   const { toast } = useToast()
+  const [courses, setCourses] = React.useState<StudioCourse[] | null>(null)
+  const [overview, setOverview] = React.useState<InstructorOverview | null>(null)
+  const [error, setError] = React.useState<string | null>(null)
+  const [toDelete, setToDelete] = React.useState<StudioCourse | null>(null)
+  const [deleting, setDeleting] = React.useState(false)
 
-  const fetchInstructorCourses = useCallback(async () => {
-    try {
-      const response = await api.get<{ content: CourseResponse[] } | CourseResponse[]>("/api/courses/mine")
-      const data = response.data
-      setCourses(Array.isArray(data) ? data : data?.content ?? [])
-      setLoading(false)
-    } catch (error) {
-      console.error("Failed to fetch courses", error)
-      setLoading(false)
-    }
+  React.useEffect(() => {
+    studioApi
+      .myCourses()
+      .then(setCourses)
+      .catch((err) => setError(getErrorMessage(err)))
+    instructorAnalyticsApi
+      .overview({})
+      .then(setOverview)
+      .catch(() => setOverview(null))
   }, [])
 
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      router.push("/login")
-    } else if (!authLoading && user?.role !== 'INSTRUCTOR') {
-      router.push("/dashboard") // Redirect non-instructors
-    } else if (isAuthenticated && user?.role === 'INSTRUCTOR') {
-      const timer = window.setTimeout(() => {
-        fetchInstructorCourses()
-      }, 0)
-      return () => window.clearTimeout(timer)
-    }
-  }, [isAuthenticated, user, authLoading, router, fetchInstructorCourses])
+  const statsById = new Map(overview?.courses.map((c) => [c.courseId, c]) ?? [])
 
-  const startThumbnailChange = (courseId: number) => {
-    targetCourseIdRef.current = courseId
-    fileInputRef.current?.click()
-  }
-
-  const onThumbnailFilePicked = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    const courseId = targetCourseIdRef.current
-    event.target.value = ""
-    targetCourseIdRef.current = null
-    if (!file || courseId == null) return
-
-    const validation = validateThumbnailFile(file)
-    if (!validation.ok) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description:
-          validation.reason === "size"
-            ? t("instructor.thumbnailTooLarge") || "Image is larger than 5 MB."
-            : t("instructor.thumbnailUnsupportedType") || "Use JPEG, PNG, or WebP.",
-      })
-      return
-    }
-
-    const course = courses.find((c) => c.id === courseId)
-    if (!course) return
-
-    setUpdatingThumbnailId(courseId)
+  const remove = async () => {
+    if (!toDelete) return
+    setDeleting(true)
     try {
-      const uploaded = await uploadCourseThumbnail(file)
-      await CoursesService.updateCourse(courseId, {
-        title: course.title ?? "",
-        description: course.description,
-        instructor: course.instructor ?? "",
-        price: course.price ?? 0,
-        duration: course.duration ?? 0,
-        level: course.level ?? "BEGINNER",
-        category: course.category ?? "GENERAL",
-        thumbnailUrl: uploaded.url,
-        tags: course.tags,
-      })
-      setCourses((prev) =>
-        prev.map((c) =>
-          c.id === courseId ? { ...c, thumbnailUrl: uploaded.url } : c,
-        ),
-      )
-      toast({
-        title: t("instructor.thumbnailUpdated") || "Thumbnail updated",
-      })
-    } catch (error) {
-      console.error("Failed to update thumbnail", error)
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description:
-          t("instructor.thumbnailUploadFailed") ||
-          "Couldn't upload the thumbnail. Try a different image.",
-      })
+      await studioApi.deleteCourse(toDelete.id)
+      setCourses((list) => list?.filter((c) => c.id !== toDelete.id) ?? null)
+      setToDelete(null)
+      toast({ title: t("deleted") })
+    } catch (err) {
+      toast({ variant: "destructive", title: tc("failed"), description: getErrorMessage(err) })
     } finally {
-      setUpdatingThumbnailId(null)
+      setDeleting(false)
     }
-  }
-
-  const handleDeleteCourse = async () => {
-    if (courseToDelete?.id == null) return
-    setIsDeletingCourse(true)
-    try {
-      await CoursesService.deleteCourse(courseToDelete.id)
-      setCourses((prev) => prev.filter((c) => c.id !== courseToDelete.id))
-      setCourseToDelete(null)
-      toast({ title: t("instructor.courseDeleted") || "Course deleted" })
-    } catch (error) {
-      console.error("Failed to delete course", error)
-      toast({ variant: "destructive", title: "Error", description: t("instructor.courseDeleteFailed") || "Failed to delete course" })
-    } finally {
-      setIsDeletingCourse(false)
-    }
-  }
-
-  if (authLoading || loading) {
-    return (
-      <div className="min-h-screen bg-[#f5f4ed]">
-        <Navbar />
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <Loader2 className="w-8 h-8 animate-spin text-[#c96442]" />
-        </div>
-      </div>
-    )
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f4ed]">
-      <Navbar />
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/jpeg,image/png,image/webp"
-        className="hidden"
-        onChange={onThumbnailFilePicked}
-      />
-    <div className="container max-w-7xl mx-auto px-4 pt-24 pb-10">
-      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-semibold text-[#141413] flex items-center gap-2" style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}>
-            <LayoutDashboard className="w-8 h-8 text-[#c96442]" />
-            {t("instructor.dashboard") || "Instructor Dashboard"}
-          </h1>
-          <p className="text-[#5e5d59] mt-2">
-            {t("instructor.welcome", { name: user?.firstName || "" }) || "Manage your courses and content."}
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          <Button variant="outline" className="gap-2" asChild>
-            <Link href="/instructor/articles">
-              <Newspaper className="w-4 h-4" />
-              {t("articles.manageArticles")}
+    <>
+      <PageHeader
+        title={t("title")}
+        description={t("description")}
+        actions={
+          <Button asChild>
+            <Link href="/instructor/courses/new">
+              <Plus /> {t("newCourse")}
             </Link>
           </Button>
+        }
+      />
 
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button className="gap-2">
-                <Plus className="w-4 h-4" />
-                {t("instructor.createCourse") || "Create New Course"}
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px]">
-              <DialogHeader>
-                <DialogTitle>{t("instructor.createCourse") || "Create New Course"}</DialogTitle>
-              </DialogHeader>
-              <CourseCreatorForm />
-            </DialogContent>
-          </Dialog>
+      {overview ? (
+        <div className="mb-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <StatCard label={t("kpi.students")} value={overview.summary.totalStudents.toLocaleString(locale)} icon={<Users className="h-4 w-4" />} />
+          <StatCard
+            label={t("kpi.newEnrollments")}
+            value={overview.summary.newEnrollments.toLocaleString(locale)}
+            hint={t("kpi.last30")}
+            icon={<TrendingUp className="h-4 w-4" />}
+          />
+          <StatCard
+            label={t("kpi.revenue")}
+            value={formatRevenue(overview.summary.revenueByCurrency, currency, locale)}
+            hint={t("kpi.last30")}
+            icon={<Wallet className="h-4 w-4" />}
+          />
+          <StatCard
+            label={t("kpi.progress")}
+            value={`${Math.round(overview.summary.averageProgress)}%`}
+            icon={<Percent className="h-4 w-4" />}
+          />
         </div>
-      </div>
+      ) : null}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-        {courses.map((course) => {
-          const isUpdating = updatingThumbnailId === course.id
-          return (
-          <div key={course.id} className="bg-[#faf9f5] rounded-xl border border-[#f0eee6] shadow-[0_0_0_1px_#f0eee6] overflow-hidden hover:shadow-[0_4px_24px_rgba(0,0,0,0.05)] transition-shadow">
-            <div className="relative group">
-              {course.thumbnailUrl ? (
-                <img
-                  src={course.thumbnailUrl}
-                  alt={course.title || ""}
-                  className="aspect-video w-full object-cover"
-                />
-              ) : (
-                <div className="aspect-video w-full flex items-center justify-center bg-[#f0eee6] text-[#87867f]">
-                  <ImageIcon className="w-10 h-10" />
-                </div>
-              )}
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                disabled={isUpdating || course.id == null}
-                onClick={() => course.id != null && startThumbnailChange(course.id)}
-                className="absolute bottom-2 right-2 gap-1 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 md:focus:opacity-100"
-              >
-                {isUpdating ? (
-                  <Loader2 className="w-3 h-3 animate-spin" />
-                ) : (
-                  <ImageIcon className="w-3 h-3" />
-                )}
-                {t("instructor.changeThumbnail") || "Change thumbnail"}
-              </Button>
-            </div>
-
-            <div className="p-5">
-              <div className="flex justify-between items-start mb-4">
-                 <h3 className="text-lg line-clamp-1 text-[#141413]" style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }} title={course.title}>
-                   {course.title}
-                 </h3>
-                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${course.active ? 'bg-[#e8e6dc] text-[#4d4c48]' : 'bg-[#f0eee6] text-[#87867f]'}`}>
-                   {course.active ? (t("common.active") || "Active") : (t("common.draft") || "Draft")}
-                 </span>
-              </div>
-
-              <p className="text-sm text-[#87867f] mb-4 line-clamp-2">
-                {course.description || "No description provided."}
-              </p>
-
-              <div className="flex items-center justify-between mt-4 border-t border-[#f0eee6] pt-4">
-                <div className="text-sm text-[#87867f]">
-                   {course.modules?.length || 0} {t("common.modules") || "Modules"}
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" asChild>
-                    <Link href={`/instructor/courses/${course.id}/lessons`}>
-                      <Film className="w-4 h-4 mr-2" />
-                      {t("instructor.manageContent") || "Manage Content"}
+      {error ? (
+        <p className="rounded-lg border border-danger-line bg-danger-soft px-4 py-3 text-sm text-danger">{error}</p>
+      ) : courses === null ? (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3" aria-busy="true">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="h-72 animate-pulse rounded-xl bg-subtle" />
+          ))}
+        </div>
+      ) : courses.length === 0 ? (
+        <div className="rounded-xl border-2 border-dashed border-line-strong px-6 py-14 text-center">
+          <BookOpen className="mx-auto h-10 w-10 text-brand" />
+          <p className="mt-3 text-lg font-semibold text-ink">{t("emptyTitle")}</p>
+          <p className="mx-auto mt-1 max-w-md text-sm text-ink-3">{t("emptyDescription")}</p>
+          <Button className="mt-5" asChild>
+            <Link href="/instructor/courses/new">
+              <Plus /> {t("newCourse")}
+            </Link>
+          </Button>
+        </div>
+      ) : (
+        <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {courses.map((course) => {
+            const stats = statsById.get(course.id)
+            const lessons = course.modules.reduce((sum, m) => sum + m.lessons.length, 0)
+            return (
+              <li key={course.id} className="flex flex-col overflow-hidden rounded-xl border border-line bg-surface transition-shadow hover:shadow-[0_4px_24px_rgba(0,0,0,0.06)]">
+                <Link href={`/instructor/courses/${course.id}/lessons`} className="block">
+                  {course.thumbnailUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={course.thumbnailUrl} alt="" className="aspect-video w-full object-cover" />
+                  ) : (
+                    <div className="flex aspect-video w-full items-center justify-center bg-subtle text-ink-3">
+                      <ImageIcon className="h-10 w-10" />
+                    </div>
+                  )}
+                </Link>
+                <div className="flex flex-1 flex-col p-4">
+                  <div className="mb-2 flex items-start justify-between gap-2">
+                    <Link href={`/instructor/courses/${course.id}/lessons`} className="line-clamp-2 font-semibold text-ink hover:text-brand">
+                      {course.title}
                     </Link>
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-8 w-8 text-[#b53333] hover:bg-[#f4e3e3] hover:text-[#b53333]"
-                    title={t("instructor.deleteCourse") || "Delete course"}
-                    onClick={() => setCourseToDelete(course)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-          )
-        })}
-
-        {courses.length === 0 && (
-            <div className="col-span-full text-center py-12 border-2 border-dashed border-[#e8e6dc] rounded-xl">
-                <p className="text-[#87867f] mb-4">{t("instructor.noCourses") || "You haven't created any courses yet."}</p>
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant="outline">
-                      <Plus className="w-4 h-4 mr-2" />
-                      {t("instructor.createFirstCourse") || "Create Your First Course"}
+                    {course.active ? <Badge tone="green">{t("published")}</Badge> : <Badge tone="amber">{t("draft")}</Badge>}
+                  </div>
+                  <dl className="mt-auto grid grid-cols-3 gap-2 border-t border-line pt-3 text-center text-xs text-ink-3">
+                    <div>
+                      <dt>{t("students")}</dt>
+                      <dd className="text-base font-semibold text-ink" dir="ltr">{stats?.students ?? 0}</dd>
+                    </div>
+                    <div>
+                      <dt>{t("lessons")}</dt>
+                      <dd className="text-base font-semibold text-ink" dir="ltr">{lessons}</dd>
+                    </div>
+                    <div>
+                      <dt>{t("price")}</dt>
+                      <dd className="text-base font-semibold text-ink">
+                        {course.price > 0 ? formatMoney(course.price, currency, locale) : t("free")}
+                      </dd>
+                    </div>
+                  </dl>
+                  <div className="mt-3 flex gap-2">
+                    <Button size="sm" className="flex-1" asChild>
+                      <Link href={`/instructor/courses/${course.id}/lessons`}>{t("edit")}</Link>
                     </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[600px]">
-                     <DialogHeader>
-                       <DialogTitle>{t("instructor.createCourse") || "Create New Course"}</DialogTitle>
-                     </DialogHeader>
-                     <CourseCreatorForm />
-                   </DialogContent>
-                </Dialog>
-            </div>
-        )}
-      </div>
+                    <Button size="sm" variant="outline" asChild>
+                      <Link href={`/instructor/courses/${course.id}/analytics`}>{t("insights")}</Link>
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8 text-danger hover:bg-danger-soft hover:text-danger"
+                      aria-label={t("delete")}
+                      onClick={() => setToDelete(course)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </li>
+            )
+          })}
+        </ul>
+      )}
 
-      <div className="mt-10">
-        <CouponManager />
-      </div>
-    </div>
+      <ConfirmDialog
+        open={!!toDelete}
+        onOpenChange={(open) => !open && setToDelete(null)}
+        title={t("deleteTitle")}
+        description={t("deleteDescription", { title: toDelete?.title ?? "" })}
+        confirmLabel={tc("delete")}
+        cancelLabel={tc("cancel")}
+        destructive
+        busy={deleting}
+        onConfirm={() => void remove()}
+      />
+    </>
+  )
+}
 
-    <Dialog open={!!courseToDelete} onOpenChange={(open) => !open && !isDeletingCourse && setCourseToDelete(null)}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t("instructor.deleteCourse") || "Delete course"}</DialogTitle>
-        </DialogHeader>
-        <p className="text-sm text-[#5e5d59]">
-          {t("instructor.deleteCourseConfirm") || "Are you sure you want to delete this course? All modules, lessons, and enrollments will be permanently removed."}
-          {courseToDelete?.title ? ` (${courseToDelete.title})` : ""}
-        </p>
-        <div className="mt-4 flex justify-end gap-2">
-          <Button variant="outline" onClick={() => setCourseToDelete(null)} disabled={isDeletingCourse}>
-            {t("common.cancel") || "Cancel"}
-          </Button>
-          <Button
-            className="bg-[#b53333] text-white hover:bg-[#9e2c2c]"
-            onClick={() => void handleDeleteCourse()}
-            disabled={isDeletingCourse}
-          >
-            {isDeletingCourse && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {t("common.delete") || "Delete"}
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
-    </div>
+export default function InstructorStudioPage() {
+  return (
+    <StudioShell>
+      <StudioHome />
+    </StudioShell>
   )
 }

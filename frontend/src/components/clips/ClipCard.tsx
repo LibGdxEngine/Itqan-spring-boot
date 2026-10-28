@@ -23,26 +23,26 @@ export function ClipCard({ clip }: ClipCardProps) {
     <>
       <div
         onClick={() => setOpen(true)}
-        className="group cursor-pointer rounded-xl border border-[#e8e6dc] bg-[#faf9f5] hover:border-[#c9c7bc] hover:shadow-md transition-all duration-200 overflow-hidden"
+        className="group cursor-pointer rounded-xl border border-line-strong bg-surface hover:border-ring-warm hover:shadow-md transition-all duration-200 overflow-hidden"
       >
         {/* Thumbnail / icon area */}
-        <div className="relative flex items-center justify-center h-40 bg-[#f0ede3]">
+        <div className="relative flex items-center justify-center h-40 bg-subtle">
           {isVideo ? (
-            <div className="flex flex-col items-center gap-2 text-[#87867f]">
-              <div className="w-14 h-14 rounded-full bg-[#e8e6dc] flex items-center justify-center group-hover:bg-[#d4d1c6] transition-colors">
-                <Play className="w-6 h-6 text-[#141413] translate-x-0.5" />
+            <div className="flex flex-col items-center gap-2 text-ink-3">
+              <div className="w-14 h-14 rounded-full bg-sand flex items-center justify-center group-hover:bg-ring-warm transition-colors">
+                <Play className="w-6 h-6 text-ink translate-x-0.5" />
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center gap-2 text-[#87867f]">
-              <div className="w-14 h-14 rounded-full bg-[#e8e6dc] flex items-center justify-center group-hover:bg-[#d4d1c6] transition-colors">
-                <Music2 className="w-6 h-6 text-[#141413]" />
+            <div className="flex flex-col items-center gap-2 text-ink-3">
+              <div className="w-14 h-14 rounded-full bg-sand flex items-center justify-center group-hover:bg-ring-warm transition-colors">
+                <Music2 className="w-6 h-6 text-ink" />
               </div>
             </div>
           )}
-          <span className={`absolute top-2 right-2 text-xs font-medium px-2 py-0.5 rounded-full ${
+          <span className={`absolute top-2 end-2 text-xs font-medium px-2 py-0.5 rounded-full ${
             isVideo
-              ? "bg-[#141413] text-[#f5f4ed]"
+              ? "bg-night text-on-night"
               : "bg-[#3b5e9e] text-white"
           }`}>
             {isVideo ? "فيديو" : "صوت"}
@@ -51,11 +51,11 @@ export function ClipCard({ clip }: ClipCardProps) {
 
         {/* Info */}
         <div className="p-4">
-          <p className="font-medium text-[#141413] text-sm leading-snug line-clamp-2 text-right" dir="auto">
+          <p className="font-medium text-ink text-sm leading-snug line-clamp-2 text-end" dir="auto">
             {clip.title}
           </p>
           {clip.sizeBytes != null && (
-            <p className="mt-1 text-xs text-[#87867f] text-right">{formatBytes(clip.sizeBytes)}</p>
+            <p className="mt-1 text-xs text-ink-3 text-end">{formatBytes(clip.sizeBytes)}</p>
           )}
         </div>
       </div>
@@ -67,16 +67,16 @@ export function ClipCard({ clip }: ClipCardProps) {
           onClick={() => setOpen(false)}
         >
           <div
-            className="relative w-full max-w-3xl bg-[#141413] rounded-2xl overflow-hidden shadow-2xl"
+            className="relative w-full max-w-3xl bg-night rounded-2xl overflow-hidden shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={() => setOpen(false)}
-              className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center text-white transition-colors"
+              className="absolute top-3 end-3 z-10 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center text-white transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
-            <p className="px-4 pt-4 pb-2 text-sm font-medium text-[#e8e6dc] text-right" dir="auto">
+            <p className="px-4 pt-4 pb-2 text-sm font-medium text-on-night-soft text-end" dir="auto">
               {clip.title}
             </p>
             {isVideo ? (

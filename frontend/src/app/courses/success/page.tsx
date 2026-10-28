@@ -70,20 +70,20 @@ export default function CheckoutSuccessPage() {
   }, [sessionId, t]);
 
   return (
-    <div className="min-h-screen bg-[#f5f4ed]">
+    <div className="min-h-screen bg-canvas">
       <Navbar />
-      <main className="mx-auto flex max-w-xl flex-col items-center px-4 py-24 text-center">
-        {status === "loading" && <Loader2 className="mb-4 h-10 w-10 animate-spin text-[#c96442]" />}
-        {status === "pending" && <Loader2 className="mb-4 h-10 w-10 animate-spin text-[#c96442]" />}
-        {status === "success" && <CheckCircle2 className="mb-4 h-12 w-12 text-[#c96442]" />}
-        {status === "failed" && <AlertCircle className="mb-4 h-12 w-12 text-red-600" />}
+      <main id="main-content" className="mx-auto flex max-w-xl flex-col items-center px-4 py-24 text-center">
+        {status === "loading" && <Loader2 className="mb-4 h-10 w-10 animate-spin text-brand" />}
+        {status === "pending" && <Loader2 className="mb-4 h-10 w-10 animate-spin text-brand" />}
+        {status === "success" && <CheckCircle2 className="mb-4 h-12 w-12 text-brand" />}
+        {status === "failed" && <AlertCircle className="mb-4 h-12 w-12 text-danger" />}
 
         {status === "loading" && <h1 className="text-2xl font-semibold">{t("checkout.success.verifying")}</h1>}
         {status === "pending" && <h1 className="text-2xl font-semibold">{t("checkout.success.finalizing")}</h1>}
         {status === "success" && <h1 className="text-2xl font-semibold">{t("checkout.success.success")}</h1>}
         {status === "failed" && <h1 className="text-2xl font-semibold">{t("checkout.success.couldNotVerify")}</h1>}
 
-        {status === "failed" && <p className="mt-2 text-[#5e5d59]">{errorMessage}</p>}
+        {status === "failed" && <p className="mt-2 text-ink-2">{errorMessage}</p>}
 
         <div className="mt-6 flex gap-3">
           {status === "success" && courseId !== null && (

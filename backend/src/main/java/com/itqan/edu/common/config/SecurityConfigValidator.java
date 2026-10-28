@@ -129,26 +129,23 @@ public class SecurityConfigValidator {
             log.warn("WARNING: {}", msg);
         }
 
-        // MinIO / S3 credentials — default values are insecure
-        if ("minioadmin".equals(s3AccessKey)) {
-            log.warn("WARNING: APP_STORAGE_S3_ACCESS_KEY is using the default 'minioadmin' value.{}",
-                    isProduction ? " This is a security risk in production." : "");
+        // Well-known default credentials must never reach production.
+        if ("minioadmin".equals(s3AccessKey) || "minioadmin".equals(s3SecretKey)) {
+            failInProduction(isProduction,
+                    "APP_STORAGE_S3_ACCESS_KEY / APP_STORAGE_S3_SECRET_KEY use the default 'minioadmin' value.");
         }
-        if ("minioadmin".equals(s3SecretKey)) {
-            log.warn("WARNING: APP_STORAGE_S3_SECRET_KEY is using the default 'minioadmin' value.{}",
-                    isProduction ? " This is a security risk in production." : "");
-        }
-
-        // Meilisearch master key
         if ("masterKey123".equals(meiliMasterKey)) {
-            log.warn("WARNING: MEILI_MASTER_KEY is using the default 'masterKey123' value.{}",
-                    isProduction ? " This is a security risk in production." : "");
+            failInProduction(isProduction, "MEILI_MASTER_KEY uses the default 'masterKey123' value.");
         }
-
-        // Super-admin password
         if ("Admin@123456".equals(superAdminPassword)) {
-            log.warn("WARNING: APP_SUPER_ADMIN_PASSWORD is using the default 'Admin@123456' value.{}",
-                    isProduction ? " Change this immediately in production." : "");
+            failInProduction(isProduction, "APP_SUPER_ADMIN_PASSWORD uses the default 'Admin@123456' value.");
         }
+    }
+
+    private void failInProduction(boolean isProduction, String msg) {
+        if (isProduction) {
+            throw new IllegalStateException("FATAL: " + msg);
+        }
+        log.warn("WARNING: {}", msg);
     }
 }

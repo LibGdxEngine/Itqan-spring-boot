@@ -1,10 +1,11 @@
+import { getAccessToken } from '@/lib/token-store';
 import { VideoBookmark, VideoBookmarkRequest } from '@/types/video';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
 export class VideoBookmarkService {
   private static getAuthHeaders(): HeadersInit {
-    const token = localStorage.getItem('auth_token');
+    const token = getAccessToken();
     return {
       'Content-Type': 'application/json',
       'Authorization': token ? `Bearer ${token}` : '',

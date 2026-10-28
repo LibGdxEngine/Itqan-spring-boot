@@ -5,6 +5,7 @@ import { GoogleOAuthProvider } from "@react-oauth/google"
 
 import { AuthProvider } from "@/components/auth-context"
 import { ToastProvider } from "@/components/ui/toast"
+import { ServiceWorkerRegister } from "@/components/providers/ServiceWorkerRegister"
 
 export function ClientProviders({ children }: { children: React.ReactNode }) {
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
@@ -12,6 +13,7 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
   const tree = (
     <AuthProvider>
       <ToastProvider>{children}</ToastProvider>
+      <ServiceWorkerRegister />
     </AuthProvider>
   )
 

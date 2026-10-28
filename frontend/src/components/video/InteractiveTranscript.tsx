@@ -55,7 +55,7 @@ export function InteractiveTranscript({
                 ref={isActive ? activeSegmentRef : null}
                 className={`p-3 rounded-lg cursor-pointer transition ${
                   isActive
-                    ? 'bg-[#c96442] text-[#faf9f5]'
+                    ? 'bg-brand text-on-night'
                     : 'bg-gray-700 text-gray-200 hover:bg-gray-650'
                 }`}
                 onClick={() => onSeek(segment.startTime)}

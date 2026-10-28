@@ -3,19 +3,11 @@
 import Link from "next/link"
 import Image from "next/image"
 import { useTranslations } from "next-intl"
-import { motion, useReducedMotion, type Variants } from "framer-motion"
+import { motion, useReducedMotion } from "framer-motion"
+import { fadeUp, staggerParent } from "@/lib/motion"
 
-const EASE = [0.22, 1, 0.36, 1] as const
 
-const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 16 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE } },
-}
 
-const staggerParent: Variants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
-}
 
 const stats = [
   { value: "10K+", labelKey: "home.stats.activeStudents" },
@@ -31,7 +23,7 @@ export function AuthBrandPanel() {
   const itemVariants = prefersReduced ? undefined : fadeUp
 
   return (
-    <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-[#141413]">
+    <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-night">
       {/* Soft radial terracotta glow — landing-hero idiom */}
       <div
         aria-hidden
@@ -64,7 +56,7 @@ export function AuthBrandPanel() {
 
       {/* Content */}
       <motion.div
-        className="relative z-10 flex flex-col justify-between p-12 text-[#faf9f5] w-full"
+        className="relative z-10 flex flex-col justify-between p-12 text-on-night w-full"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
@@ -75,7 +67,7 @@ export function AuthBrandPanel() {
             href="/"
             className="inline-flex items-center gap-3 group ltr-flex"
           >
-            <span className="bg-[#faf9f5] rounded-2xl p-2 shadow-whisper transition-transform group-hover:scale-[1.03]">
+            <span className="bg-surface rounded-2xl p-2 shadow-whisper transition-transform group-hover:scale-[1.03]">
               <Image
                 src="/itqan_logo.png"
                 alt={t("nav.brand")}
@@ -102,7 +94,7 @@ export function AuthBrandPanel() {
           </motion.h1>
           <motion.p
             variants={itemVariants}
-            className="text-lg text-[#b0aea5] max-w-md leading-relaxed"
+            className="text-lg text-on-night-2 max-w-md leading-relaxed"
           >
             {t("auth.branding.description")}
           </motion.p>
@@ -115,7 +107,7 @@ export function AuthBrandPanel() {
             {stats.map((stat) => (
               <div key={stat.value}>
                 <div className="text-3xl font-bold">{stat.value}</div>
-                <div className="text-sm text-[#b0aea5]">
+                <div className="text-sm text-on-night-2">
                   {t(stat.labelKey)}
                 </div>
               </div>
@@ -124,7 +116,7 @@ export function AuthBrandPanel() {
         </div>
 
         {/* Footer */}
-        <motion.div variants={itemVariants} className="text-sm text-[#b0aea5]">
+        <motion.div variants={itemVariants} className="text-sm text-on-night-2">
           © {new Date().getFullYear()} {t("nav.brand")}.{" "}
           {t("common.allRightsReserved")}
         </motion.div>

@@ -97,7 +97,7 @@ export default function VideoPlayerDemo() {
             </div>
             <h3 className="text-white font-semibold text-xl mb-2">Smart Bookmarks</h3>
             <p className="text-gray-400">
-              Save notes at specific timestamps. Click the bookmark icon or press 'B' to add a new bookmark at the current position.
+              Save notes at specific timestamps. Click the bookmark icon or press &apos;B&apos; to add a new bookmark at the current position.
             </p>
           </div>
 

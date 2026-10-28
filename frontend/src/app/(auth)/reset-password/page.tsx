@@ -103,16 +103,16 @@ function ResetPasswordContent() {
     return (
       <div className="space-y-8 text-center">
         <div className="flex justify-center">
-          <div className="p-4 bg-red-500 rounded-full shadow-[0_0_0_1px_#d1cfc5]">
-            <X className="w-12 h-12 text-[#faf9f5]" />
+          <div className="p-4 bg-danger rounded-full shadow-[0_0_0_1px_var(--color-ring-warm)]">
+            <X className="w-12 h-12 text-on-night" />
           </div>
         </div>
 
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight text-[#141413]">
+          <h1 className="text-3xl font-bold tracking-tight text-ink">
             {t("auth.resetPassword.missingEmailTitle")}
           </h1>
-          <p className="text-[#87867f]">
+          <p className="text-ink-3">
             {t("auth.resetPassword.missingEmailDescription")}
           </p>
         </div>
@@ -132,17 +132,17 @@ function ResetPasswordContent() {
       <div className="space-y-8 text-center">
         {/* Success icon */}
         <div className="flex justify-center">
-          <div className="p-4 bg-[#c96442] rounded-full shadow-[0_0_0_1px_#d1cfc5]">
-            <CheckCircle2 className="w-12 h-12 text-[#faf9f5]" />
+          <div className="p-4 bg-brand rounded-full shadow-[0_0_0_1px_var(--color-ring-warm)]">
+            <CheckCircle2 className="w-12 h-12 text-on-night" />
           </div>
         </div>
 
         {/* Header */}
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight text-[#141413]">
+          <h1 className="text-3xl font-bold tracking-tight text-ink">
             {t("auth.resetPassword.successTitle")}
           </h1>
-          <p className="text-[#87867f]">
+          <p className="text-ink-3">
             {t("auth.resetPassword.successLine1")}<br />
             {t("auth.resetPassword.successLine2")}
           </p>
@@ -164,15 +164,15 @@ function ResetPasswordContent() {
       {/* Header */}
       <div className="space-y-2 text-center">
         <h1
-          className="text-3xl tracking-tight text-[#141413]"
+          className="text-3xl tracking-tight text-ink"
           style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
         >
           {t("auth.resetPassword.title")}
         </h1>
-        <p className="text-[#87867f]">
+        <p className="text-ink-3">
           {t.rich("auth.resetPassword.description", {
             email,
-            mark: (chunks) => <span className="font-medium text-[#4d4c48]">{chunks}</span>,
+            mark: (chunks) => <span className="font-medium text-ink-button">{chunks}</span>,
           })}
         </p>
       </div>
@@ -183,7 +183,7 @@ function ResetPasswordContent() {
         <div className="space-y-2">
           <Label htmlFor="otp">{t("auth.resetPassword.otpLabel")}</Label>
           <div className="relative">
-            <KeyRound className="absolute start-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
+            <KeyRound className="absolute start-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-3" />
             <Input
               id="otp"
               type="text"
@@ -194,7 +194,7 @@ function ResetPasswordContent() {
             />
           </div>
           {errors.otp && (
-            <p className="text-sm text-red-500">{errors.otp.message}</p>
+            <p className="text-sm text-danger">{errors.otp.message}</p>
           )}
         </div>
 
@@ -202,7 +202,7 @@ function ResetPasswordContent() {
         <div className="space-y-2">
           <Label htmlFor="password">{t("auth.resetPassword.newPassword")}</Label>
           <div className="relative">
-            <Lock className="absolute start-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
+            <Lock className="absolute start-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-3" />
             <Input
               id="password"
               type={showPassword ? "text" : "password"}
@@ -213,7 +213,7 @@ function ResetPasswordContent() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute end-3.5 top-1/2 -translate-y-1/2 text-[#87867f] hover:text-[#5e5d59] transition-colors"
+              className="absolute end-3.5 top-1/2 -translate-y-1/2 text-ink-3 hover:text-ink-2 transition-colors"
             >
               {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
@@ -229,7 +229,7 @@ function ResetPasswordContent() {
                     key={i}
                     className={cn(
                       "flex items-center gap-1.5 text-xs transition-colors",
-                      isMet ? "text-[#c96442]" : "text-[#87867f]"
+                      isMet ? "text-brand" : "text-ink-3"
                     )}
                   >
                     {isMet ? (
@@ -249,7 +249,7 @@ function ResetPasswordContent() {
         <div className="space-y-2">
           <Label htmlFor="confirmPassword">{t("auth.resetPassword.confirmNewPassword")}</Label>
           <div className="relative">
-            <Lock className="absolute start-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
+            <Lock className="absolute start-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-3" />
             <Input
               id="confirmPassword"
               type={showConfirmPassword ? "text" : "password"}
@@ -260,13 +260,13 @@ function ResetPasswordContent() {
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute end-3.5 top-1/2 -translate-y-1/2 text-[#87867f] hover:text-[#5e5d59] transition-colors"
+              className="absolute end-3.5 top-1/2 -translate-y-1/2 text-ink-3 hover:text-ink-2 transition-colors"
             >
               {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
           </div>
           {errors.confirmPassword && (
-            <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>
+            <p className="text-sm text-danger">{errors.confirmPassword.message}</p>
           )}
         </div>
 
@@ -290,7 +290,7 @@ function ResetPasswordContent() {
       <div className="text-center">
         <Link
           href="/forgot-password"
-          className="text-sm font-medium text-[#87867f] hover:text-[#4d4c48] transition-colors"
+          className="text-sm font-medium text-ink-3 hover:text-ink-button transition-colors"
         >
           {t("auth.resetPassword.didntReceiveCode")}
         </Link>
@@ -303,19 +303,19 @@ function LoadingFallback() {
   return (
     <div className="space-y-8">
       <div className="space-y-2 text-center">
-        <div className="h-9 w-48 mx-auto bg-[#e8e6dc] rounded animate-pulse" />
-        <div className="h-5 w-72 mx-auto bg-[#f0eee6] rounded animate-pulse" />
+        <div className="h-9 w-48 mx-auto bg-sand rounded animate-pulse" />
+        <div className="h-5 w-72 mx-auto bg-subtle rounded animate-pulse" />
       </div>
       <div className="space-y-5">
         <div className="space-y-2">
-          <div className="h-4 w-24 bg-[#f0eee6] rounded animate-pulse" />
-          <div className="h-11 w-full bg-[#f0eee6] rounded-xl animate-pulse" />
+          <div className="h-4 w-24 bg-subtle rounded animate-pulse" />
+          <div className="h-11 w-full bg-subtle rounded-xl animate-pulse" />
         </div>
         <div className="space-y-2">
-          <div className="h-4 w-32 bg-[#f0eee6] rounded animate-pulse" />
-          <div className="h-11 w-full bg-[#f0eee6] rounded-xl animate-pulse" />
+          <div className="h-4 w-32 bg-subtle rounded animate-pulse" />
+          <div className="h-11 w-full bg-subtle rounded-xl animate-pulse" />
         </div>
-        <div className="h-12 w-full bg-[#e8e6dc] rounded-xl animate-pulse" />
+        <div className="h-12 w-full bg-sand rounded-xl animate-pulse" />
       </div>
     </div>
   )

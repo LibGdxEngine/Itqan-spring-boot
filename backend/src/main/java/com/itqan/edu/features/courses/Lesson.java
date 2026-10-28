@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
@@ -30,6 +32,7 @@ public class Lesson {
     @Column(nullable = false)
     private LessonType type;
 
+    @Column(length = 1000)
     private String videoUrl;
 
     private String videoObjectKey;
@@ -48,6 +51,7 @@ public class Lesson {
     @Column(columnDefinition = "TEXT")
     private String content;
 
+    @Column(length = 1000)
     private String resourceUrl;
 
     private Integer duration; // in minutes
@@ -63,10 +67,14 @@ public class Lesson {
     @Builder.Default
     private Boolean active = true;
 
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "module_id", nullable = false)
     private Module module;
 
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @OneToOne(mappedBy = "lesson", cascade = CascadeType.ALL, orphanRemoval = true)
     private com.itqan.edu.features.quizzes.Quiz quiz;
 

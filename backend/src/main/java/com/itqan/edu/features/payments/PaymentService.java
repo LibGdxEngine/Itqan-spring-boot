@@ -165,6 +165,8 @@ public class PaymentService {
             processCompletedSession(event);
         } else if ("checkout.session.expired".equals(eventType)) {
             processExpiredSession(event);
+        } else if ("charge.refunded".equals(eventType)) {
+            processRefundedCharge(event);
         }
 
         processedStripeEventRepository.save(ProcessedStripeEvent.builder()
@@ -284,8 +286,36 @@ public class PaymentService {
         couponRedemptionRepository.save(redemption);
     }
 
+    /** Refunds issued from the Stripe dashboard (or confirmed for admin-initiated ones) revoke access. */
+    private void processRefundedCharge(StripeWebhookEvent event) {
+        if (event.getPaymentIntentId() == null) {
+            return;
+        }
+        paymentRepository.findFirstByStripePaymentIntentId(event.getPaymentIntentId()).ifPresent(payment -> {
+            if (payment.getStatus() == PaymentStatus.REFUNDED) {
+                return;
+            }
+            payment.setStatus(PaymentStatus.REFUNDED);
+            paymentRepository.save(payment);
+            enrollmentRepository.findByStudentIdAndCourseId(payment.getStudent().getId(), payment.getCourse().getId())
+                    .ifPresent(enrollment -> {
+                        enrollment.setStatus(EnrollmentStatus.DROPPED);
+                        enrollmentRepository.save(enrollment);
+                    });
+            auditLogService.recordSuccess("PAYMENT_REFUNDED", "PAYMENT", String.valueOf(payment.getId()),
+                    Map.of("source", "stripe-webhook"));
+        });
+    }
+
     private Enrollment enrollIfNeeded(Student student, Course course) {
         return enrollmentRepository.findByStudentIdAndCourseId(student.getId(), course.getId())
+                .map(existing -> {
+                    if (existing.getStatus() == EnrollmentStatus.DROPPED) {
+                        existing.setStatus(EnrollmentStatus.ACTIVE);
+                        return enrollmentRepository.save(existing);
+                    }
+                    return existing;
+                })
                 .orElseGet(() -> enrollmentRepository.save(Enrollment.builder()
                         .student(student)
                         .course(course)

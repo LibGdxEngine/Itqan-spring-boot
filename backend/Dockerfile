@@ -18,5 +18,8 @@ WORKDIR /app
 # curl is required by the container healthcheck and scripts/deploy.sh readiness probe.
 RUN apk add --no-cache curl
 COPY --from=build /app/target/*.jar app.jar
+# Run as an unprivileged user; logs go to /app/logs (LOG_PATH), so it must be writable.
+RUN addgroup -S app && adduser -S app -G app && mkdir -p /app/logs && chown -R app:app /app
+USER app
 EXPOSE 8080
 ENTRYPOINT ["java", "--enable-preview", "-jar", "app.jar"]

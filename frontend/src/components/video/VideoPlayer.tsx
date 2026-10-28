@@ -15,6 +15,7 @@ export function VideoPlayer({
   lessonId,
   transcript,
   autoPlay = false,
+  startAt,
   onTimeUpdate,
   onEnded,
   onPlaybackError,
@@ -31,6 +32,15 @@ export function VideoPlayer({
   const [showTranscript, setShowTranscript] = useState(false);
   const [bookmarks, setBookmarks] = useState<VideoBookmark[]>([]);
   const [isPiPActive, setIsPiPActive] = useState(false);
+  // Resume once per mount, then let the student seek freely.
+  const resumedRef = useRef(false);
+  const seekYouTubeRef = useRef<(seconds: number) => void>(() => {});
+  const resumeTarget = (videoDuration: number) => {
+    if (resumedRef.current) return null;
+    resumedRef.current = true;
+    if (!startAt || startAt < 5 || (videoDuration > 0 && startAt > videoDuration - 10)) return null;
+    return startAt;
+  };
 
   // A pasted YouTube link can't load in a <video> element — it must be driven
   // through the IFrame Player API instead. Everything else is a plain file.
@@ -44,7 +54,14 @@ export function VideoPlayer({
     initialVolume: volume,
     initialMuted: isMuted,
     initialPlaybackRate: playbackSpeed,
-    onReady: (videoDuration) => setDuration(videoDuration),
+    onReady: (videoDuration) => {
+      setDuration(videoDuration);
+      const target = resumeTarget(videoDuration);
+      if (target !== null) {
+        seekYouTubeRef.current(target);
+        setCurrentTime(target);
+      }
+    },
     onPlayingChange: (playing) => setIsPlaying(playing),
     onTime: (time) => {
       setCurrentTime(time);
@@ -57,51 +74,14 @@ export function VideoPlayer({
     onError: (code) => console.error('YouTube player error', code),
   });
 
-  // Load bookmarks on mount
+  const { containerRef: ytContainerRef, seekTo: ytSeekTo } = yt;
   useEffect(() => {
-    loadBookmarks();
-  }, [lessonId]);
-
-  // Setup keyboard shortcuts
-  useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-        return;
-      }
-
-      switch (e.key) {
-        case ' ':
-          e.preventDefault();
-          togglePlay();
-          break;
-        case 'ArrowLeft':
-          e.preventDefault();
-          skipBackward();
-          break;
-        case 'ArrowRight':
-          e.preventDefault();
-          skipForward();
-          break;
-        case 'm':
-        case 'M':
-          toggleMute();
-          break;
-        case 'f':
-        case 'F':
-          toggleFullscreen();
-          break;
-        case 'b':
-        case 'B':
-          setShowBookmarks(!showBookmarks);
-          break;
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyPress);
-    return () => document.removeEventListener('keydown', handleKeyPress);
-  }, [isPlaying, showBookmarks]);
+    seekYouTubeRef.current = ytSeekTo;
+  });
 
   const loadBookmarks = async () => {
+    // Previews (no lesson) have no bookmarks.
+    if (!lessonId) return;
     try {
       const data = await VideoBookmarkService.getBookmarksByLesson(lessonId);
       setBookmarks(data);
@@ -137,6 +117,11 @@ export function VideoPlayer({
   const handleLoadedMetadata = () => {
     if (videoRef.current) {
       setDuration(videoRef.current.duration);
+      const target = resumeTarget(videoRef.current.duration);
+      if (target !== null) {
+        videoRef.current.currentTime = target;
+        setCurrentTime(target);
+      }
     }
   };
 
@@ -281,11 +266,66 @@ export function VideoPlayer({
 
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
+
+  // Effects sit below the handlers they call (they must be declared first).
+  // Load bookmarks when the lesson changes
+  useEffect(() => {
+    if (!lessonId) return;
+    let cancelled = false;
+    VideoBookmarkService.getBookmarksByLesson(lessonId)
+      .then((data) => {
+        if (!cancelled) setBookmarks(data);
+      })
+      .catch((error) => console.error('Failed to load bookmarks:', error));
+    return () => {
+      cancelled = true;
+    };
+  }, [lessonId]);
+
+  // Setup keyboard shortcuts
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
+      switch (e.key) {
+        case ' ':
+          e.preventDefault();
+          togglePlay();
+          break;
+        case 'ArrowLeft':
+          e.preventDefault();
+          skipBackward();
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          skipForward();
+          break;
+        case 'm':
+        case 'M':
+          toggleMute();
+          break;
+        case 'f':
+        case 'F':
+          toggleFullscreen();
+          break;
+        case 'b':
+        case 'B':
+          setShowBookmarks(!showBookmarks);
+          break;
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyPress);
+    return () => document.removeEventListener('keydown', handleKeyPress);
+  }, [isPlaying, showBookmarks]);
+
   return (
     <div className="w-full bg-gray-900 rounded-xl overflow-hidden shadow-2xl">
       <div className="relative aspect-video bg-black">
         {isYouTube ? (
-          <div ref={yt.containerRef} className="w-full h-full" />
+          <div ref={ytContainerRef} className="w-full h-full" />
         ) : (
           <video
             ref={videoRef}
@@ -302,13 +342,13 @@ export function VideoPlayer({
         )}
 
         {/* Bookmark markers on progress bar */}
-        <div className="absolute bottom-20 left-0 right-0 h-2 pointer-events-none px-4">
+        <div className="absolute bottom-20 start-0 end-0 h-2 pointer-events-none px-4">
           {bookmarks.map((bookmark) => {
             const position = duration > 0 ? (bookmark.timestamp / duration) * 100 : 0;
             return (
               <div
                 key={bookmark.id}
-                className="absolute w-2 h-4 -mt-1 bg-[#c96442] rounded-sm"
+                className="absolute w-2 h-4 -mt-1 bg-brand rounded-sm"
                 style={{ left: `${position}%` }}
                 title={bookmark.note}
               />
@@ -326,7 +366,7 @@ export function VideoPlayer({
           onClick={handleProgressClick}
         >
           <div 
-            className="h-full bg-[#c96442] rounded-full transition-all group-hover:bg-[#d97757]"
+            className="h-full bg-brand rounded-full transition-all group-hover:bg-coral"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -374,7 +414,7 @@ export function VideoPlayer({
             </select>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className={`flex items-center gap-2 ${lessonId ? '' : 'hidden'}`}>
             <button
               onClick={handleCreateBookmark}
               className="p-2 hover:bg-gray-700 rounded-full transition"
@@ -386,7 +426,7 @@ export function VideoPlayer({
             <button
               onClick={() => setShowBookmarks(!showBookmarks)}
               className={`px-3 py-1 rounded text-sm transition ${
-                showBookmarks ? 'bg-[#c96442]' : 'bg-gray-700 hover:bg-gray-600'
+                showBookmarks ? 'bg-brand' : 'bg-gray-700 hover:bg-gray-600'
               }`}
             >
               {t('bookmarks')} ({bookmarks.length})
@@ -396,7 +436,7 @@ export function VideoPlayer({
               <button
                 onClick={() => setShowTranscript(!showTranscript)}
                 className={`px-3 py-1 rounded text-sm transition ${
-                  showTranscript ? 'bg-[#c96442]' : 'bg-gray-700 hover:bg-gray-600'
+                  showTranscript ? 'bg-brand' : 'bg-gray-700 hover:bg-gray-600'
                 }`}
               >
                 {t('transcript')}

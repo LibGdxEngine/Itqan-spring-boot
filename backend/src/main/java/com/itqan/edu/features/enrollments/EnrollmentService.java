@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -89,7 +90,40 @@ public class EnrollmentService {
     }
 
     public boolean checkEnrollment(Long studentId, Long courseId) {
-        return enrollmentRepository.existsByStudentIdAndCourseId(studentId, courseId);
+        return enrollmentRepository.findByStudentIdAndCourseId(studentId, courseId)
+                .filter(e -> e.getStatus() != EnrollmentStatus.DROPPED)
+                .isPresent();
+    }
+
+    /**
+     * Gives a student access to a course regardless of payment (used after a confirmed payment
+     * or a manual admin grant). Reactivates a dropped enrollment; no-op for an active one.
+     */
+    @Transactional
+    public Enrollment grantAccess(Student student, Course course) {
+        return enrollmentRepository.findByStudentIdAndCourseId(student.getId(), course.getId())
+                .map(existing -> {
+                    if (existing.getStatus() == EnrollmentStatus.DROPPED) {
+                        existing.setStatus(EnrollmentStatus.ACTIVE);
+                        return enrollmentRepository.save(existing);
+                    }
+                    return existing;
+                })
+                .orElseGet(() -> enrollmentRepository.save(Enrollment.builder()
+                        .student(student)
+                        .course(course)
+                        .status(EnrollmentStatus.ACTIVE)
+                        .progress(0)
+                        .build()));
+    }
+
+    /** Revokes access (e.g. after a refund) while keeping the progress history. */
+    @Transactional
+    public void revokeAccess(Long studentId, Long courseId) {
+        enrollmentRepository.findByStudentIdAndCourseId(studentId, courseId).ifPresent(enrollment -> {
+            enrollment.setStatus(EnrollmentStatus.DROPPED);
+            enrollmentRepository.save(enrollment);
+        });
     }
 
     @Transactional
@@ -108,12 +142,13 @@ public class EnrollmentService {
         var student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STUDENT_NOT_FOUND));
 
-        // Check if student is enrolled in the course that contains this lesson
-        // Assuming lesson has a link to course or module -> course.
-        // For simplicity, we check if lesson's course is enrolled.
-        // But Lesson entity might just have module...
-        // Let's assume we can traverse relevant checks later or just trust relation for
-        // now if enrolled in course.
+        Long courseId = lesson.getModule().getCourse().getId();
+        boolean enrolled = enrollmentRepository.findByStudentIdAndCourseId(studentId, courseId)
+                .filter(e -> e.getStatus() != EnrollmentStatus.DROPPED)
+                .isPresent();
+        if (!enrolled) {
+            throw new BusinessException(ErrorCode.COURSE_ACCESS_DENIED);
+        }
 
         // Find existing lesson enrollment or create new
         var lessonEnrollment = lessonEnrollmentRepository.findByStudentAndLesson(student, lesson)
@@ -174,34 +209,38 @@ public class EnrollmentService {
     }
 
     private void updateCourseProgress(Student student, com.itqan.edu.features.courses.Lesson lesson) {
-        // Find enrollment for the course
         Course course = lesson.getModule().getCourse();
         var enrollment = enrollmentRepository.findByStudentIdAndCourseId(student.getId(), course.getId())
                 .orElse(null);
-
-        if (enrollment != null) {
-            // Calculate progress
-            // Total lessons in course
-            long totalLessons = course.getModules().stream()
-                    .mapToLong(m -> m.getLessons().size())
-                    .sum();
-
-            if (totalLessons == 0)
-                return;
-
-            // Completed lessons for this course
-            long completedLessons = lessonEnrollmentRepository.findByStudent(student).stream()
-                    .filter(le -> Boolean.TRUE.equals(le.getIsCompleted()))
-                    .filter(le -> le.getLesson().getModule().getCourse().getId().equals(course.getId()))
-                    .count();
-
-            int progress = (int) ((completedLessons * 100) / totalLessons);
-            enrollment.setProgress(progress);
-            if (progress == 100) {
-                // enrollment.setStatus(EnrollmentStatus.COMPLETED); // If we have Completed
-                // status
-            }
-            enrollmentRepository.save(enrollment);
+        if (enrollment == null) {
+            return;
         }
+
+        // Only lessons students can see count towards progress.
+        java.util.Set<Long> visibleLessonIds = course.getModules().stream()
+                .filter(m -> !Boolean.FALSE.equals(m.getActive()))
+                .flatMap(m -> m.getLessons().stream())
+                .filter(l -> !Boolean.FALSE.equals(l.getActive()))
+                .map(com.itqan.edu.features.courses.Lesson::getId)
+                .collect(java.util.stream.Collectors.toSet());
+        if (visibleLessonIds.isEmpty()) {
+            return;
+        }
+
+        long completedLessons = lessonEnrollmentRepository.findByStudent(student).stream()
+                .filter(le -> Boolean.TRUE.equals(le.getIsCompleted()))
+                .filter(le -> visibleLessonIds.contains(le.getLesson().getId()))
+                .count();
+
+        int progress = (int) ((completedLessons * 100) / visibleLessonIds.size());
+        enrollment.setProgress(progress);
+        if (progress == 100 && enrollment.getStatus() == EnrollmentStatus.ACTIVE) {
+            enrollment.setStatus(EnrollmentStatus.COMPLETED);
+            enrollment.setCompletedAt(LocalDateTime.now());
+        } else if (progress < 100 && enrollment.getStatus() == EnrollmentStatus.COMPLETED) {
+            enrollment.setStatus(EnrollmentStatus.ACTIVE);
+            enrollment.setCompletedAt(null);
+        }
+        enrollmentRepository.save(enrollment);
     }
 }

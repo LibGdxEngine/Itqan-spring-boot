@@ -10,7 +10,7 @@
 // TODO: replace with the academy's real contact details before shipping.
 // `whatsapp` must be digits only in international format (no +, spaces or dashes).
 export const CONTACT = {
-  whatsapp: "9665XXXXXXXX",
+  // Real numbers come from Admin → Settings; this is only the email fallback.
   email: "info@itqan.academy",
 } as const
 

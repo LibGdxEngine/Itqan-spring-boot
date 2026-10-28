@@ -4,6 +4,7 @@ import api from './api-axios';
 export interface AuthResponse {
   id: number;
   token: string;
+  refreshToken?: string;
   email: string;
   firstName: string;
   lastName: string;

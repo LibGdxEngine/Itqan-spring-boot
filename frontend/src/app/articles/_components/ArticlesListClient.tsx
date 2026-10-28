@@ -46,22 +46,22 @@ export default function ArticlesListClient() {
   }, [query, t])
 
   return (
-    <div className="min-h-screen bg-[#f5f4ed]">
+    <div className="min-h-screen bg-canvas">
       <Navbar />
 
-      <main className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
+      <main id="main-content" className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1
-            className="text-3xl text-[#141413]"
+            className="text-3xl text-ink"
             style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
           >
             {t("articles.exploreTitle")}
           </h1>
-          <p className="mt-2 text-[#5e5d59]">{t("articles.exploreSubtitle")}</p>
+          <p className="mt-2 text-ink-2">{t("articles.exploreSubtitle")}</p>
         </div>
 
         <div className="relative mb-8 max-w-md">
-          <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#87867f]" />
+          <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-3" />
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -72,12 +72,12 @@ export default function ArticlesListClient() {
 
         {loading ? (
           <div className="flex h-64 items-center justify-center">
-            <Loader2 className="h-10 w-10 animate-spin text-[#c96442]" />
+            <Loader2 className="h-10 w-10 animate-spin text-brand" />
           </div>
         ) : error ? (
-          <div className="py-12 text-center text-red-500">{error}</div>
+          <div className="py-12 text-center text-danger">{error}</div>
         ) : articles.length === 0 ? (
-          <div className="py-12 text-center text-[#87867f]">
+          <div className="py-12 text-center text-ink-3">
             {t("articles.noArticles")}
           </div>
         ) : (

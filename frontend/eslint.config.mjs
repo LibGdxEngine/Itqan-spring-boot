@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Node CommonJS build helper, not app code.
+    "scripts/**",
+    "playwright-report/**",
+    "test-results/**",
   ]),
 ]);
 

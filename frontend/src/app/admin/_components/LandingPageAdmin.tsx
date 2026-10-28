@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { Loader2, Trash2, ChevronUp, ChevronDown, Upload } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -32,6 +33,7 @@ const emptySpecForm: SpecializationRequest = {
 
 export function LandingPageAdmin() {
   const { toast } = useToast()
+  const t = useTranslations("admin.landingEditor")
 
   const [, setData] = useState<LandingPageData | null>(null)
   const [specializations, setSpecializations] = useState<LandingSpecialization[]>([])
@@ -84,14 +86,14 @@ export function LandingPageAdmin() {
       setFeaturedArticleIds((landing.featuredArticles ?? []).map((a) => a.id))
     } catch (error) {
       toast({
-        title: "Failed to load landing page",
+        title: t("toasts.loadFailed"),
         description: getErrorMessage(error),
         variant: "destructive",
       })
     } finally {
       setLoading(false)
     }
-  }, [toast])
+  }, [toast, t])
 
   useEffect(() => {
     void fetchAll()
@@ -102,10 +104,10 @@ export function LandingPageAdmin() {
     try {
       const result = await landingPageApi.uploadHeroVideo(file)
       setHeroVideoUrl(result.url)
-      toast({ title: "Video uploaded" })
+      toast({ title: t("toasts.videoUploaded") })
     } catch (error) {
       toast({
-        title: "Upload failed",
+        title: t("toasts.uploadFailed"),
         description: getErrorMessage(error),
         variant: "destructive",
       })
@@ -131,10 +133,10 @@ export function LandingPageAdmin() {
       }
       const updated = await landingPageApi.update(payload)
       setData(updated)
-      toast({ title: "Landing page saved" })
+      toast({ title: t("toasts.saved") })
     } catch (error) {
       toast({
-        title: "Save failed",
+        title: t("toasts.saveFailed"),
         description: getErrorMessage(error),
         variant: "destructive",
       })
@@ -145,7 +147,7 @@ export function LandingPageAdmin() {
 
   const submitSpec = async () => {
     if (!specForm.nameAr.trim() || !specForm.nameEn.trim() || !specForm.slug.trim()) {
-      toast({ title: "Name (Ar/En) and slug are required", variant: "destructive" })
+      toast({ title: t("toasts.specRequired"), variant: "destructive" })
       return
     }
     try {
@@ -158,10 +160,10 @@ export function LandingPageAdmin() {
       setEditingSpecId(null)
       const refreshed = await specializationsApi.getAll()
       setSpecializations(refreshed)
-      toast({ title: editingSpecId == null ? "Specialization created" : "Specialization updated" })
+      toast({ title: editingSpecId == null ? t("toasts.specCreated") : t("toasts.specUpdated") })
     } catch (error) {
       toast({
-        title: "Failed to save specialization",
+        title: t("toasts.specSaveFailed"),
         description: getErrorMessage(error),
         variant: "destructive",
       })
@@ -169,14 +171,14 @@ export function LandingPageAdmin() {
   }
 
   const deleteSpec = async (id: number) => {
-    if (!confirm("Delete this specialization?")) return
+    if (!confirm(t("specs.confirmDelete"))) return
     try {
       await specializationsApi.delete(id)
       setSpecializations((prev) => prev.filter((s) => s.id !== id))
-      toast({ title: "Specialization deleted" })
+      toast({ title: t("toasts.specDeleted") })
     } catch (error) {
       toast({
-        title: "Failed to delete",
+        title: t("toasts.deleteFailed"),
         description: getErrorMessage(error),
         variant: "destructive",
       })
@@ -190,29 +192,29 @@ export function LandingPageAdmin() {
 
   if (loading) {
     return (
-      <div className="rounded-xl border border-[#f0eee6] bg-[#faf9f5] p-6 text-sm text-[#87867f]">
-        <Loader2 className="inline h-4 w-4 animate-spin" /> Loading landing page settings…
+      <div className="rounded-xl border border-line bg-surface p-6 text-sm text-ink-3">
+        <Loader2 className="inline h-4 w-4 animate-spin" /> {t("loading")}
       </div>
     )
   }
 
   return (
-    <section className="rounded-xl border border-[#f0eee6] bg-[#faf9f5]">
-      <div className="flex items-center justify-between border-b border-[#f0eee6] px-4 py-3">
-        <h2 className="text-lg font-semibold text-[#141413]">Landing Page</h2>
+    <section className="rounded-xl border border-line bg-surface">
+      <div className="flex items-center justify-between border-b border-line px-4 py-3">
+        <h2 className="text-lg font-semibold text-ink">{t("title")}</h2>
         <Button onClick={() => void saveLandingPage()} disabled={saving} size="sm">
-          {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-          Save changes
+          {saving ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : null}
+          {t("save")}
         </Button>
       </div>
 
       <div className="space-y-8 px-4 py-5">
         {/* Hero video */}
         <div className="space-y-3">
-          <h3 className="font-medium text-[#141413]">Hero video</h3>
+          <h3 className="font-medium text-ink">{t("hero.heading")}</h3>
           <div className="grid gap-3 md:grid-cols-2">
             <div>
-              <Label>Video URL</Label>
+              <Label>{t("hero.videoUrl")}</Label>
               <Input
                 value={heroVideoUrl}
                 onChange={(e) => setHeroVideoUrl(e.target.value)}
@@ -220,7 +222,7 @@ export function LandingPageAdmin() {
               />
             </div>
             <div>
-              <Label>Upload new (MP4/WebM)</Label>
+              <Label>{t("hero.uploadNew")}</Label>
               <div className="flex items-center gap-2">
                 <Input
                   type="file"
@@ -231,31 +233,31 @@ export function LandingPageAdmin() {
                   }}
                   disabled={uploading}
                 />
-                {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4 text-[#87867f]" />}
+                {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4 text-ink-3" />}
               </div>
             </div>
             <div>
-              <Label>Title (AR)</Label>
+              <Label>{t("hero.titleAr")}</Label>
               <Input value={heroTitleAr} onChange={(e) => setHeroTitleAr(e.target.value)} />
             </div>
             <div>
-              <Label>Title (EN)</Label>
+              <Label>{t("hero.titleEn")}</Label>
               <Input value={heroTitleEn} onChange={(e) => setHeroTitleEn(e.target.value)} />
             </div>
             <div>
-              <Label>Teacher (AR)</Label>
+              <Label>{t("hero.teacherAr")}</Label>
               <Input value={heroTeacherAr} onChange={(e) => setHeroTeacherAr(e.target.value)} />
             </div>
             <div>
-              <Label>Teacher (EN)</Label>
+              <Label>{t("hero.teacherEn")}</Label>
               <Input value={heroTeacherEn} onChange={(e) => setHeroTeacherEn(e.target.value)} />
             </div>
             <div>
-              <Label>Duration label (AR)</Label>
+              <Label>{t("hero.durationAr")}</Label>
               <Input value={heroDurationAr} onChange={(e) => setHeroDurationAr(e.target.value)} />
             </div>
             <div>
-              <Label>Duration label (EN)</Label>
+              <Label>{t("hero.durationEn")}</Label>
               <Input value={heroDurationEn} onChange={(e) => setHeroDurationEn(e.target.value)} />
             </div>
           </div>
@@ -266,7 +268,7 @@ export function LandingPageAdmin() {
 
         {/* Featured courses */}
         <OrderedPicker
-          title="Featured courses"
+          title={t("featuredCourses")}
           options={courseOptions.map((c) => ({ id: c.id as number, label: `${c.title} — ${c.instructor ?? ""}` }))}
           selected={featuredCourseIds}
           onChange={setFeaturedCourseIds}
@@ -274,7 +276,7 @@ export function LandingPageAdmin() {
 
         {/* Featured instructors */}
         <OrderedPicker
-          title="Featured instructors"
+          title={t("featuredInstructors")}
           options={allInstructors.map((i) => ({
             id: i.id,
             label: `${i.firstName} ${i.lastName}`.trim() || i.email,
@@ -285,7 +287,7 @@ export function LandingPageAdmin() {
 
         {/* Featured articles */}
         <OrderedPicker
-          title="Featured articles"
+          title={t("featuredArticles")}
           options={allArticles.map((a) => ({
             id: a.id,
             label: a.authorName ? `${a.title} — ${a.authorName}` : a.title,
@@ -296,23 +298,23 @@ export function LandingPageAdmin() {
 
         {/* Specializations */}
         <div className="space-y-3">
-          <h3 className="font-medium text-[#141413]">Specializations (chips)</h3>
+          <h3 className="font-medium text-ink">{t("specs.heading")}</h3>
 
           <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-6 items-end">
             <div className="md:col-span-2">
-              <Label>Name (AR)</Label>
+              <Label>{t("specs.nameAr")}</Label>
               <Input value={specForm.nameAr} onChange={(e) => setSpecForm({ ...specForm, nameAr: e.target.value })} />
             </div>
             <div className="md:col-span-2">
-              <Label>Name (EN)</Label>
+              <Label>{t("specs.nameEn")}</Label>
               <Input value={specForm.nameEn} onChange={(e) => setSpecForm({ ...specForm, nameEn: e.target.value })} />
             </div>
             <div>
-              <Label>Slug</Label>
+              <Label>{t("specs.slug")}</Label>
               <Input value={specForm.slug} onChange={(e) => setSpecForm({ ...specForm, slug: e.target.value })} />
             </div>
             <div>
-              <Label>Order</Label>
+              <Label>{t("specs.order")}</Label>
               <Input
                 type="number"
                 value={specForm.displayOrder ?? 0}
@@ -322,7 +324,7 @@ export function LandingPageAdmin() {
           </div>
           <div className="flex gap-2">
             <Button size="sm" onClick={() => void submitSpec()}>
-              {editingSpecId == null ? "Add specialization" : "Update specialization"}
+              {editingSpecId == null ? t("specs.add") : t("specs.update")}
             </Button>
             {editingSpecId != null ? (
               <Button
@@ -333,7 +335,7 @@ export function LandingPageAdmin() {
                   setSpecForm(emptySpecForm)
                 }}
               >
-                Cancel
+                {t("specs.cancel")}
               </Button>
             ) : null}
           </div>
@@ -343,18 +345,18 @@ export function LandingPageAdmin() {
             getRowKey={(s, i) => s.id ?? i}
             bordered
             emptyState={
-              <p className="rounded-lg border border-[#f0eee6] px-3 py-4 text-center text-sm text-[#87867f]">
-                No specializations yet
+              <p className="rounded-lg border border-line px-3 py-4 text-center text-sm text-ink-3">
+                {t("specs.empty")}
               </p>
             }
             columns={[
-              { header: "Order", cell: (s) => s.displayOrder },
-              { header: "Name (AR)", cell: (s) => <span className="text-[#141413]">{s.nameAr}</span> },
-              { header: "Name (EN)", cell: (s) => s.nameEn },
-              { header: "Slug", cell: (s) => <span className="font-mono text-xs text-[#87867f]">{s.slug}</span> },
-              { header: "Active", cell: (s) => (s.active ? "Yes" : "No") },
+              { header: t("specs.order"), cell: (s) => s.displayOrder },
+              { header: t("specs.nameAr"), cell: (s) => <span className="text-ink">{s.nameAr}</span> },
+              { header: t("specs.nameEn"), cell: (s) => s.nameEn },
+              { header: t("specs.slug"), cell: (s) => <span className="font-mono text-xs text-ink-3">{s.slug}</span> },
+              { header: t("specs.active"), cell: (s) => (s.active ? t("specs.yes") : t("specs.no")) },
             ]}
-            actionsHeader="Actions"
+            actionsHeader={t("specs.actions")}
             actions={(s) => (
               <>
                 <Button
@@ -372,7 +374,7 @@ export function LandingPageAdmin() {
                     })
                   }}
                 >
-                  Edit
+                  {t("specs.edit")}
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => void deleteSpec(s.id)}>
                   <Trash2 className="h-3.5 w-3.5" />
@@ -397,6 +399,7 @@ function OrderedPicker({
   selected: number[]
   onChange: (next: number[]) => void
 }) {
+  const t = useTranslations("admin.landingEditor")
   const optionsById = useMemo(() => {
     const m = new Map<number, string>()
     options.forEach((o) => m.set(o.id, o.label))
@@ -415,12 +418,12 @@ function OrderedPicker({
 
   return (
     <div className="space-y-2">
-      <h3 className="font-medium text-[#141413]">{title}</h3>
+      <h3 className="font-medium text-ink">{title}</h3>
       <div className="grid gap-3 md:grid-cols-2">
         <div>
-          <Label>Add</Label>
+          <Label>{t("picker.add")}</Label>
           <select
-            className="w-full rounded-md border border-[#e8e6dc] bg-white px-3 py-2 text-sm"
+            className="w-full rounded-md border border-line-strong bg-paper px-3 py-2 text-sm"
             onChange={(e) => {
               const id = Number(e.target.value)
               if (!Number.isNaN(id) && id > 0) {
@@ -431,7 +434,7 @@ function OrderedPicker({
             defaultValue=""
           >
             <option value="" disabled>
-              Pick an option…
+              {t("picker.placeholder")}
             </option>
             {available.map((o) => (
               <option key={o.id} value={o.id}>
@@ -441,17 +444,17 @@ function OrderedPicker({
           </select>
         </div>
         <div className="space-y-2">
-          <Label>Selected ({selected.length})</Label>
+          <Label>{t("picker.selected", { count: selected.length })}</Label>
           <ul className="space-y-1.5">
             {selected.length === 0 ? (
-              <li className="text-sm text-[#87867f]">None selected</li>
+              <li className="text-sm text-ink-3">{t("picker.noneSelected")}</li>
             ) : null}
             {selected.map((id, idx) => (
               <li
                 key={id}
-                className="flex items-center gap-2 rounded-md border border-[#e8e6dc] bg-white px-2 py-1.5 text-sm"
+                className="flex items-center gap-2 rounded-md border border-line-strong bg-paper px-2 py-1.5 text-sm"
               >
-                <span className="w-6 text-[#87867f]">{idx + 1}.</span>
+                <span className="w-6 text-ink-3">{idx + 1}.</span>
                 <span className="flex-1 truncate">{optionsById.get(id) ?? `#${id}`}</span>
                 <Button variant="outline" size="sm" onClick={() => move(idx, -1)} disabled={idx === 0}>
                   <ChevronUp className="h-3.5 w-3.5" />

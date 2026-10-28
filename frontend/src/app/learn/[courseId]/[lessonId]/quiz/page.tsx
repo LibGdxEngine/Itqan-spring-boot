@@ -67,26 +67,26 @@ export default function QuizPage() {
     <div className="mx-auto max-w-3xl p-6 md:p-8">
       <Link
         href={backHref}
-        className="mb-4 inline-flex items-center gap-1 text-sm text-[#5e5d59] hover:text-[#c96442]"
+        className="mb-4 inline-flex items-center gap-1 text-sm text-ink-2 hover:text-brand"
       >
         <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
         {t("quiz.page.backToLesson")}
       </Link>
 
       {loading ? (
-        <div className="flex items-center justify-center rounded-xl border border-[#f0eee6] bg-[#faf9f5] p-10">
-          <Loader2 className="h-6 w-6 animate-spin text-[#c96442]" />
+        <div className="flex items-center justify-center rounded-xl border border-line bg-surface p-10">
+          <Loader2 className="h-6 w-6 animate-spin text-brand" />
         </div>
       ) : error ? (
-        <div className="rounded-xl border border-[#f3c9be] bg-[#fdf3ef] p-4 text-sm text-[#b53333]">
+        <div className="rounded-xl border border-danger-line bg-brand-soft p-4 text-sm text-danger">
           {error}
         </div>
       ) : quiz ? (
         <div className="space-y-6">
           <div>
-            <h1 className="text-2xl font-bold text-[#141413]">{quiz.title}</h1>
+            <h1 className="text-2xl font-bold text-ink">{quiz.title}</h1>
             {quiz.description && (
-              <p className="mt-2 text-sm text-[#5e5d59]">{quiz.description}</p>
+              <p className="mt-2 text-sm text-ink-2">{quiz.description}</p>
             )}
           </div>
           <QuizPlayer quiz={quiz} backHref={backHref} />

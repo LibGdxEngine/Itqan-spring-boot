@@ -66,19 +66,19 @@ export default function ForgotPasswordPage() {
       <div className="space-y-8 text-center">
         {/* Success icon */}
         <div className="flex justify-center">
-          <div className="p-4 bg-[#c96442] rounded-full shadow-[0_0_0_1px_#d1cfc5]">
-            <CheckCircle2 className="w-12 h-12 text-[#faf9f5]" />
+          <div className="p-4 bg-brand rounded-full shadow-[0_0_0_1px_var(--color-ring-warm)]">
+            <CheckCircle2 className="w-12 h-12 text-on-night" />
           </div>
         </div>
 
         {/* Header */}
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight text-[#141413]">
+          <h1 className="text-3xl font-bold tracking-tight text-ink">
             {t("auth.forgotPassword.checkEmailTitle")}
           </h1>
-          <p className="text-[#87867f] leading-relaxed">
+          <p className="text-ink-3 leading-relaxed">
             {t("auth.forgotPassword.sentCodeTo")}<br />
-            <span className="font-medium text-[#4d4c48]">{submittedEmail}</span>
+            <span className="font-medium text-ink-button">{submittedEmail}</span>
           </p>
         </div>
 
@@ -89,11 +89,11 @@ export default function ForgotPasswordPage() {
         </Button>
 
         {/* Instructions */}
-        <div className="bg-[#f0eee6] rounded-xl p-4 text-sm text-[#5e5d59] space-y-2">
+        <div className="bg-subtle rounded-xl p-4 text-sm text-ink-2 space-y-2">
           <p>{t("auth.forgotPassword.didntReceive")}</p>
           <button
             onClick={() => setIsSubmitted(false)}
-            className="font-medium text-[#c96442] hover:text-[#b55836] transition-colors"
+            className="font-medium text-brand hover:text-brand-hover transition-colors"
           >
             {t("auth.forgotPassword.tryAnotherEmail")}
           </button>
@@ -114,10 +114,10 @@ export default function ForgotPasswordPage() {
     <div className="space-y-8">
       {/* Header */}
       <div className="space-y-2 text-center">
-        <h1 className="text-3xl tracking-tight text-[#141413]" style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}>
+        <h1 className="text-3xl tracking-tight text-ink" style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}>
           {t("auth.forgotPassword.title")}
         </h1>
-        <p className="text-[#87867f]">
+        <p className="text-ink-3">
           {t("auth.forgotPassword.description")}
         </p>
       </div>
@@ -128,7 +128,7 @@ export default function ForgotPasswordPage() {
         <div className="space-y-2">
           <Label htmlFor="email">{t("auth.forgotPassword.email")}</Label>
           <div className="relative">
-            <Mail className="absolute start-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#87867f]" />
+            <Mail className="absolute start-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-3" />
             <Input
               id="email"
               type="email"
@@ -138,7 +138,7 @@ export default function ForgotPasswordPage() {
             />
           </div>
           {errors.email && (
-            <p className="text-sm text-red-500">{errors.email.message}</p>
+            <p className="text-sm text-danger">{errors.email.message}</p>
           )}
         </div>
 
@@ -162,7 +162,7 @@ export default function ForgotPasswordPage() {
       <div className="text-center">
         <Link
           href="/login"
-          className="inline-flex items-center gap-2 text-sm font-medium text-[#87867f] hover:text-[#4d4c48] transition-colors"
+          className="inline-flex items-center gap-2 text-sm font-medium text-ink-3 hover:text-ink-button transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>{t("auth.forgotPassword.backToSignIn")}</span>

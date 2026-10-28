@@ -36,20 +36,20 @@ function InfoRow({
   value?: string | null
 }) {
   return (
-    <div className="flex items-center gap-3 p-3 rounded-xl bg-[#f0eee6] border border-[#f0eee6]">
-      <Icon className="w-4 h-4 text-[#87867f] shrink-0" />
+    <div className="flex items-center gap-3 p-3 rounded-xl bg-subtle border border-line">
+      <Icon className="w-4 h-4 text-ink-3 shrink-0" />
       <div className="min-w-0">
-        <p className="text-xs text-[#87867f] font-medium">{label}</p>
-        <p className="text-sm font-medium text-[#141413] truncate">{value || "—"}</p>
+        <p className="text-xs text-ink-3 font-medium">{label}</p>
+        <p className="text-sm font-medium text-ink truncate">{value || "—"}</p>
       </div>
     </div>
   )
 }
 
 const ROLE_BADGE: Record<string, { labelKey: string; className: string; icon: React.ComponentType<{ className?: string }> }> = {
-  STUDENT: { labelKey: "profile.roles.student", className: "bg-[#f0eee6] text-[#c96442]", icon: GraduationCap },
-  INSTRUCTOR: { labelKey: "profile.roles.instructor", className: "bg-[#f0eee6] text-[#c96442]", icon: GraduationCap },
-  ADMIN: { labelKey: "profile.roles.admin", className: "bg-[#e8e6dc] text-[#c96442]", icon: ShieldCheck },
+  STUDENT: { labelKey: "profile.roles.student", className: "bg-subtle text-brand", icon: GraduationCap },
+  INSTRUCTOR: { labelKey: "profile.roles.instructor", className: "bg-subtle text-brand", icon: GraduationCap },
+  ADMIN: { labelKey: "profile.roles.admin", className: "bg-sand text-brand", icon: ShieldCheck },
 }
 
 export default function ProfilePage() {
@@ -166,10 +166,10 @@ export default function ProfilePage() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-[#f5f4ed]">
+      <div className="min-h-screen bg-canvas">
         <Navbar />
         <div className="flex items-center justify-center min-h-[60vh]">
-          <Loader2 className="w-8 h-8 animate-spin text-[#c96442]" />
+          <Loader2 className="w-8 h-8 animate-spin text-brand" />
         </div>
       </div>
     )
@@ -180,28 +180,28 @@ export default function ProfilePage() {
   const BadgeIcon = badge.icon
 
   return (
-    <div className="min-h-screen bg-[#f5f4ed]">
+    <div className="min-h-screen bg-canvas">
       <Navbar />
-      <main className="max-w-3xl mx-auto px-4 pt-24 pb-12">
+      <main id="main-content" className="max-w-3xl mx-auto px-4 pt-24 pb-12">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[#141413]">{t("profile.title")}</h1>
-          <p className="text-[#5e5d59] mt-1">{t("profile.subtitle")}</p>
+          <h1 className="text-3xl font-bold text-ink">{t("profile.title")}</h1>
+          <p className="text-ink-2 mt-1">{t("profile.subtitle")}</p>
         </div>
 
         {/* Profile Card */}
-        <div className="bg-[#faf9f5] rounded-2xl border border-[#e8e6dc] shadow-sm overflow-hidden">
+        <div className="bg-surface rounded-2xl border border-line-strong shadow-sm overflow-hidden">
           {/* Header banner */}
-          <div className="bg-[#c96442] px-6 py-8">
+          <div className="bg-brand px-6 py-8">
             <div className="flex items-center gap-5">
-              <div className="w-16 h-16 rounded-full bg-[#30302e] border-2 border-[#30302e] flex items-center justify-center text-[#faf9f5] text-2xl font-bold shrink-0 select-none">
+              <div className="w-16 h-16 rounded-full bg-night-2 border-2 border-night-2 flex items-center justify-center text-on-night text-2xl font-bold shrink-0 select-none">
                 {user?.firstName?.[0]?.toUpperCase()}
                 {user?.lastName?.[0]?.toUpperCase()}
               </div>
               <div>
-                <h2 className="text-xl font-semibold text-[#faf9f5]">
+                <h2 className="text-xl font-semibold text-on-night">
                   {user?.firstName} {user?.lastName}
                 </h2>
-                <p className="text-[#faf9f5] text-sm mt-0.5">{user?.email}</p>
+                <p className="text-on-night text-sm mt-0.5">{user?.email}</p>
                 <span
                   className={`inline-flex items-center gap-1 mt-2 px-2.5 py-0.5 rounded-full text-xs font-medium ${badge.className}`}
                 >

@@ -33,6 +33,9 @@ public class PasswordResetToken {
     @Builder.Default
     private Boolean used = false;
 
+    /** Wrong guesses against this OTP; the code is burned once the limit is reached. */
+    private Integer failedAttempts;
+
     @Column(nullable = false)
     private LocalDateTime createdAt;
 

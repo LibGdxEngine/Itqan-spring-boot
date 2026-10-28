@@ -9,10 +9,10 @@ const alertVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-[#f0eee6] border-[#e8e6dc] text-[#3d3d3a]",
-        success: "bg-[#f0eee6] border-[#e8e6dc] text-[#c96442]",
-        error: "bg-red-50 border-red-200 text-red-800",
-        warning: "bg-[#e8e6dc] border-[#e8e6dc] text-[#c96442]",
+        default: "bg-subtle border-line-strong text-ink-emphasis",
+        success: "bg-subtle border-line-strong text-brand",
+        error: "bg-danger-soft border-danger-line text-danger",
+        warning: "bg-sand border-line-strong text-brand",
         info: "bg-sky-50 border-sky-200 text-sky-800",
       },
     },

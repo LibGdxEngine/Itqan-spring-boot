@@ -88,26 +88,26 @@ export default function InstructorArticlesPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-[#f5f4ed]">
+      <div className="min-h-screen bg-canvas">
         <Navbar />
         <div className="flex min-h-[60vh] items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-[#c96442]" />
+          <Loader2 className="h-8 w-8 animate-spin text-brand" />
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f4ed]">
+    <div className="min-h-screen bg-canvas">
       <Navbar />
       <div className="mx-auto max-w-7xl px-4 pb-10 pt-24">
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1
-              className="flex items-center gap-2 text-2xl sm:text-3xl text-[#141413]"
+              className="flex items-center gap-2 text-2xl sm:text-3xl text-ink"
               style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
             >
-              <Newspaper className="h-8 w-8 text-[#c96442]" />
+              <Newspaper className="h-8 w-8 text-brand" />
               {t("articles.manageArticles")}
             </h1>
           </div>
@@ -123,9 +123,9 @@ export default function InstructorArticlesPage() {
           {articles.map((article) => (
             <div
               key={article.id}
-              className="overflow-hidden rounded-xl border border-[#f0eee6] bg-[#faf9f5] shadow-[0_0_0_1px_#f0eee6] transition-shadow hover:shadow-[0_4px_24px_rgba(0,0,0,0.05)]"
+              className="overflow-hidden rounded-xl border border-line bg-surface shadow-[0_0_0_1px_var(--color-line)] transition-shadow hover:shadow-[0_4px_24px_rgba(0,0,0,0.05)]"
             >
-              <div className="aspect-video w-full overflow-hidden bg-[#c96442]">
+              <div className="aspect-video w-full overflow-hidden bg-brand">
                 {article.coverImageUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -135,7 +135,7 @@ export default function InstructorArticlesPage() {
                   />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center">
-                    <Newspaper className="h-10 w-10 text-[#faf9f5] opacity-80" />
+                    <Newspaper className="h-10 w-10 text-on-night opacity-80" />
                   </div>
                 )}
               </div>
@@ -143,7 +143,7 @@ export default function InstructorArticlesPage() {
               <div className="p-5">
                 <div className="mb-3 flex items-start justify-between gap-2">
                   <h3
-                    className="line-clamp-1 text-lg text-[#141413]"
+                    className="line-clamp-1 text-lg text-ink"
                     style={{
                       fontFamily: "var(--font-serif-ar)",
                       fontWeight: 500,
@@ -155,8 +155,8 @@ export default function InstructorArticlesPage() {
                   <span
                     className={`shrink-0 rounded-full px-2 py-1 text-xs font-medium ${
                       article.published
-                        ? "bg-[#e8e6dc] text-[#4d4c48]"
-                        : "bg-[#f0eee6] text-[#87867f]"
+                        ? "bg-sand text-ink-button"
+                        : "bg-subtle text-ink-3"
                     }`}
                   >
                     {article.published
@@ -166,13 +166,13 @@ export default function InstructorArticlesPage() {
                 </div>
 
                 {article.description ? (
-                  <p className="mb-4 line-clamp-2 text-sm text-[#87867f]">
+                  <p className="mb-4 line-clamp-2 text-sm text-ink-3">
                     {article.description}
                   </p>
                 ) : null}
 
-                <div className="mt-4 flex items-center justify-between border-t border-[#f0eee6] pt-4">
-                  <div className="flex items-center gap-1 text-sm text-[#87867f]">
+                <div className="mt-4 flex items-center justify-between border-t border-line pt-4">
+                  <div className="flex items-center gap-1 text-sm text-ink-3">
                     <Clock className="h-3.5 w-3.5" />
                     {t("articles.readingTime", {
                       minutes: article.readingTimeMinutes,
@@ -192,14 +192,14 @@ export default function InstructorArticlesPage() {
                     ) : null}
                     <Button variant="outline" size="sm" asChild>
                       <Link href={`/instructor/articles/${article.id}/edit`}>
-                        <Pencil className="mr-2 h-4 w-4" />
+                        <Pencil className="me-2 h-4 w-4" />
                         {t("articles.edit")}
                       </Link>
                     </Button>
                     <Button
                       size="icon"
                       variant="ghost"
-                      className="h-8 w-8 text-[#b53333] hover:bg-[#f4e3e3] hover:text-[#b53333]"
+                      className="h-8 w-8 text-danger hover:bg-danger-soft hover:text-danger"
                       title={t("articles.deleteArticle")}
                       onClick={() => setArticleToDelete(article)}
                     >
@@ -212,11 +212,11 @@ export default function InstructorArticlesPage() {
           ))}
 
           {articles.length === 0 ? (
-            <div className="col-span-full rounded-xl border-2 border-dashed border-[#e8e6dc] py-12 text-center">
-              <p className="mb-4 text-[#87867f]">{t("articles.noArticles")}</p>
+            <div className="col-span-full rounded-xl border-2 border-dashed border-line-strong py-12 text-center">
+              <p className="mb-4 text-ink-3">{t("articles.noArticles")}</p>
               <Button asChild variant="outline">
                 <Link href="/instructor/articles/new">
-                  <Plus className="mr-2 h-4 w-4" />
+                  <Plus className="me-2 h-4 w-4" />
                   {t("articles.createArticle")}
                 </Link>
               </Button>
@@ -233,7 +233,7 @@ export default function InstructorArticlesPage() {
           <DialogHeader>
             <DialogTitle>{t("articles.deleteArticle")}</DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-[#5e5d59]">
+          <p className="text-sm text-ink-2">
             {t("articles.deleteConfirm")}
             {articleToDelete?.title ? ` (${articleToDelete.title})` : ""}
           </p>
@@ -246,11 +246,11 @@ export default function InstructorArticlesPage() {
               {t("common.cancel")}
             </Button>
             <Button
-              className="bg-[#b53333] text-white hover:bg-[#9e2c2c]"
+              className="bg-danger text-white hover:bg-danger-hover"
               onClick={() => void handleDelete()}
               disabled={deleting}
             >
-              {deleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {deleting && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
               {t("common.delete")}
             </Button>
           </div>

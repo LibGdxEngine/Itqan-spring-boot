@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 import { Loader2, Search } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { Navbar } from "@/components/Navbar"
 import { ClipCard } from "@/components/clips/ClipCard"
 import { clipsApi, ClipResponse, ClipType } from "@/lib/clips"
@@ -9,13 +10,14 @@ import { Input } from "@/components/ui/input"
 
 type FilterType = "" | ClipType
 
-const TABS: { label: string; value: FilterType }[] = [
-  { label: "الكل", value: "" },
-  { label: "فيديو", value: "VIDEO" },
-  { label: "صوت", value: "AUDIO" },
+const TABS: { label: "all" | "video" | "audio"; value: FilterType }[] = [
+  { label: "all", value: "" },
+  { label: "video", value: "VIDEO" },
+  { label: "audio", value: "AUDIO" },
 ]
 
 export default function MuqtatafatPage() {
+  const t = useTranslations("clipsPage")
   const [clips, setClips] = useState<ClipResponse[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -68,25 +70,26 @@ export default function MuqtatafatPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f4ed]">
+    <div className="min-h-screen bg-canvas">
       <Navbar />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+      <main id="main-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         {/* Header */}
-        <div className="mb-8 text-right" dir="rtl">
-          <h1 className="text-3xl font-bold text-[#141413] font-serif-ar">مقطتفات</h1>
-          <p className="mt-2 text-[#5e5d59]">مقاطع مرئية وصوتية متاحة للجميع </p>
+        <div className="mb-8 text-end" dir="rtl">
+          <h1 className="text-3xl font-bold text-ink font-serif-ar">{t("title")}</h1>
+          <p className="mt-2 text-ink-2">{t("subtitle")}</p>
         </div>
 
         {/* Search + Filter row */}
         <div className="flex flex-col sm:flex-row gap-4 mb-8" dir="rtl">
           <div className="relative flex-1">
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#87867f]" />
+            <Search className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-3" />
             <Input
               value={search}
               onChange={(e) => handleSearch(e.target.value)}
-              placeholder="ابحث عن مقطع..."
-              className="pr-9 text-right bg-white border-[#e8e6dc] focus:border-[#141413]"
+              placeholder={t("search")}
+              aria-label={t("search")}
+              className="pe-9 text-end bg-paper border-line-strong focus:border-ink"
               dir="rtl"
             />
           </div>
@@ -99,11 +102,11 @@ export default function MuqtatafatPage() {
                 onClick={() => setActiveType(tab.value)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   activeType === tab.value
-                    ? "bg-[#141413] text-[#f5f4ed]"
-                    : "bg-white border border-[#e8e6dc] text-[#5e5d59] hover:border-[#141413]"
+                    ? "bg-night text-on-night"
+                    : "bg-paper border border-line-strong text-ink-2 hover:border-ink"
                 }`}
               >
-                {tab.label}
+                {t(`tabs.${tab.label}`)}
               </button>
             ))}
           </div>
@@ -112,13 +115,13 @@ export default function MuqtatafatPage() {
         {/* Content */}
         {loading ? (
           <div className="flex justify-center items-center h-64">
-            <Loader2 className="h-10 w-10 text-[#c96442] animate-spin" />
+            <Loader2 className="h-10 w-10 text-brand animate-spin" />
           </div>
         ) : error ? (
-          <div className="text-center text-red-500 py-12">{error}</div>
+          <div className="text-center text-danger py-12">{error}</div>
         ) : clips.length === 0 ? (
-          <div className="text-center text-[#87867f] py-12" dir="rtl">
-            لا توجد مقتطفات متاحة حالياً.
+          <div className="text-center text-ink-3 py-12" dir="rtl">
+            {t("empty")}
           </div>
         ) : (
           <>
@@ -133,7 +136,7 @@ export default function MuqtatafatPage() {
                 <button
                   onClick={handleLoadMore}
                   disabled={loadingMore}
-                  className="px-6 py-2.5 rounded-lg bg-[#141413] text-[#f5f4ed] text-sm font-medium hover:bg-[#2a2925] disabled:opacity-60 transition-colors flex items-center gap-2"
+                  className="px-6 py-2.5 rounded-lg bg-night text-on-night text-sm font-medium hover:bg-[#2a2925] disabled:opacity-60 transition-colors flex items-center gap-2"
                 >
                   {loadingMore && <Loader2 className="w-4 h-4 animate-spin" />}
                   تحميل المزيد

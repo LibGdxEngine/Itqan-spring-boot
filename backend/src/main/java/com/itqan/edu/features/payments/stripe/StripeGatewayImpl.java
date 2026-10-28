@@ -6,7 +6,10 @@ import com.itqan.edu.common.exception.ErrorCode;
 import com.stripe.Stripe;
 import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
+import com.stripe.model.Charge;
 import com.stripe.model.Event;
+import com.stripe.model.Refund;
+import com.stripe.param.RefundCreateParams;
 import com.stripe.model.StripeObject;
 import com.stripe.model.checkout.Session;
 import com.stripe.net.Webhook;
@@ -77,6 +80,8 @@ public class StripeGatewayImpl implements StripeGateway {
             if (objectOpt.isPresent() && objectOpt.get() instanceof Session session) {
                 sessionId = session.getId();
                 paymentIntentId = session.getPaymentIntent();
+            } else if (objectOpt.isPresent() && objectOpt.get() instanceof Charge charge) {
+                paymentIntentId = charge.getPaymentIntent();
             }
 
             return StripeWebhookEvent.builder()
@@ -87,6 +92,16 @@ public class StripeGatewayImpl implements StripeGateway {
                     .build();
         } catch (SignatureVerificationException ex) {
             throw new BusinessException(ErrorCode.STRIPE_SIGNATURE_INVALID);
+        }
+    }
+
+    @Override
+    public void refundPaymentIntent(String paymentIntentId) {
+        Stripe.apiKey = stripeProperties.getSecretKey();
+        try {
+            Refund.create(RefundCreateParams.builder().setPaymentIntent(paymentIntentId).build());
+        } catch (StripeException ex) {
+            throw new BusinessException(ErrorCode.PAYMENT_GATEWAY_ERROR, ex.getMessage());
         }
     }
 }

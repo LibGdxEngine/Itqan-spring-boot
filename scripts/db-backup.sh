@@ -2,7 +2,7 @@
 set -e
 
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-BACKUP_DIR="/backups"
+BACKUP_DIR="/backups/db"
 BACKUP_FILE="${BACKUP_DIR}/itqan_edu_${TIMESTAMP}.sql.gz"
 RETENTION_DAYS="${BACKUP_RETENTION_DAYS:-7}"
 
@@ -15,11 +15,7 @@ pg_dump --clean --if-exists --no-owner --no-privileges "$PGDATABASE" | gzip > "$
 BACKUP_SIZE=$(du -h "$BACKUP_FILE" | cut -f1)
 echo "[$(date)] Backup complete: ${BACKUP_FILE} (${BACKUP_SIZE})"
 
-# Optionally upload to S3 if AWS CLI is available and S3_BACKUP_BUCKET is set
-if [ -n "$S3_BACKUP_BUCKET" ] && command -v aws >/dev/null 2>&1; then
-    echo "[$(date)] Uploading to s3://${S3_BACKUP_BUCKET}/"
-    aws s3 cp "$BACKUP_FILE" "s3://${S3_BACKUP_BUCKET}/$(basename "$BACKUP_FILE")"
-fi
+# Off-site copies are made by the minio-backup service (BACKUP_S3_* settings).
 
 # Purge old backups
 echo "[$(date)] Purging backups older than ${RETENTION_DAYS} days"

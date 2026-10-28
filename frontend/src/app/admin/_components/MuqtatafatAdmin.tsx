@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 import { Check, Loader2, Music2, Pencil, Trash2, Upload, Video, X } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { Field } from "@/components/ui/field-row"
 import { useToast } from "@/components/ui/use-toast"
@@ -23,6 +24,7 @@ function formatDate(value: string): string {
 
 export function MuqtatafatAdmin() {
   const { toast } = useToast()
+  const t = useTranslations("admin.clipsEditor")
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [clips, setClips] = useState<ClipResponse[]>([])
@@ -42,11 +44,11 @@ export function MuqtatafatAdmin() {
       const page = await clipsApi.list({ size: 500 })
       setClips(page.content)
     } catch (err) {
-      toast({ title: "خطأ", description: getErrorMessage(err), variant: "destructive" })
+      toast({ title: t("toasts.error"), description: getErrorMessage(err), variant: "destructive" })
     } finally {
       setLoading(false)
     }
-  }, [toast])
+  }, [toast, t])
 
   useEffect(() => {
     void fetchClips()
@@ -58,13 +60,13 @@ export function MuqtatafatAdmin() {
     if (fileInputRef.current) fileInputRef.current.value = ""
 
     setUploading(true)
-    setUploadProgress(`جارٍ رفع ${files.length} ملف...`)
+    setUploadProgress(t("uploadingFiles", { count: files.length }))
     try {
       const uploaded = await clipsApi.bulkUpload(files)
-      toast({ title: "تم الرفع", description: `تم رفع ${uploaded.length} مقطع بنجاح` })
+      toast({ title: t("toasts.uploaded"), description: t("toasts.uploadedDescription", { count: uploaded.length }) })
       setClips((prev) => [...uploaded, ...prev])
     } catch (err) {
-      toast({ title: "فشل الرفع", description: getErrorMessage(err), variant: "destructive" })
+      toast({ title: t("toasts.uploadFailed"), description: getErrorMessage(err), variant: "destructive" })
     } finally {
       setUploading(false)
       setUploadProgress(null)
@@ -91,9 +93,9 @@ export function MuqtatafatAdmin() {
       const updated = await clipsApi.update(id, { title, description: editDesc.trim() || null })
       setClips((prev) => prev.map((c) => (c.id === id ? updated : c)))
       setEditingId(null)
-      toast({ title: "تم الحفظ", description: "تم تحديث المقطع بنجاح" })
+      toast({ title: t("toasts.saved"), description: t("toasts.savedDescription") })
     } catch (err) {
-      toast({ title: "فشل الحفظ", description: getErrorMessage(err), variant: "destructive" })
+      toast({ title: t("toasts.saveFailed"), description: getErrorMessage(err), variant: "destructive" })
     } finally {
       setSavingIds((prev) => {
         const next = new Set(prev)
@@ -108,9 +110,9 @@ export function MuqtatafatAdmin() {
     try {
       await clipsApi.delete(id)
       setClips((prev) => prev.filter((c) => c.id !== id))
-      toast({ title: "تم الحذف", description: "تم حذف المقطع بنجاح" })
+      toast({ title: t("toasts.deleted"), description: t("toasts.deletedDescription") })
     } catch (err) {
-      toast({ title: "فشل الحذف", description: getErrorMessage(err), variant: "destructive" })
+      toast({ title: t("toasts.deleteFailed"), description: getErrorMessage(err), variant: "destructive" })
     } finally {
       setDeletingIds((prev) => {
         const next = new Set(prev)
@@ -121,12 +123,12 @@ export function MuqtatafatAdmin() {
   }
 
   return (
-    <section className="mt-12 bg-white rounded-2xl shadow-sm border border-[#f0eee6] overflow-hidden" dir="rtl">
+    <section className="overflow-hidden rounded-xl border border-line bg-surface">
       {/* Header */}
-      <div className="px-6 py-5 border-b border-[#f0eee6] flex items-center justify-between">
+      <div className="px-6 py-5 border-b border-line flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-[#141413]">مقطتفات</h2>
-          <p className="text-sm text-[#87867f] mt-0.5">مقاطع مرئية وصوتية عامة مجانية</p>
+          <h2 className="text-xl font-bold text-ink">{t("title")}</h2>
+          <p className="text-sm text-ink-3 mt-0.5">{t("subtitle")}</p>
         </div>
         <div>
           <input
@@ -145,12 +147,12 @@ export function MuqtatafatAdmin() {
             {uploading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                {uploadProgress ?? "جارٍ الرفع..."}
+                {uploadProgress ?? t("uploading")}
               </>
             ) : (
               <>
                 <Upload className="w-4 h-4" />
-                رفع مقاطع
+                {t("uploadButton")}
               </>
             )}
           </Button>
@@ -160,21 +162,21 @@ export function MuqtatafatAdmin() {
       {/* Table */}
       {loading ? (
         <div className="flex justify-center items-center h-40">
-          <Loader2 className="h-8 w-8 text-[#c96442] animate-spin" />
+          <Loader2 className="h-8 w-8 text-brand animate-spin" />
         </div>
       ) : clips.length === 0 ? (
-        <div className="text-center text-[#87867f] py-16">لا توجد مقتطفات بعد. ارفع أول مقطع الآن.</div>
+        <div className="text-center text-ink-3 py-16">{t("empty")}</div>
       ) : (
         <div className="hidden overflow-x-auto md:block">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-[#f5f4ed]">
-                <th className="px-4 py-3 text-right font-medium text-[#87867f]">العنوان</th>
-                <th className="px-4 py-3 text-right font-medium text-[#87867f]">الوصف</th>
-                <th className="px-4 py-3 text-right font-medium text-[#87867f]">النوع</th>
-                <th className="px-4 py-3 text-right font-medium text-[#87867f]">الحجم</th>
-                <th className="px-4 py-3 text-right font-medium text-[#87867f]">التاريخ</th>
-                <th className="px-4 py-3 text-right font-medium text-[#87867f]">إجراء</th>
+              <tr className="bg-canvas">
+                <th className="px-4 py-3 text-end font-medium text-ink-3">{t("columns.title")}</th>
+                <th className="px-4 py-3 text-end font-medium text-ink-3">{t("columns.description")}</th>
+                <th className="px-4 py-3 text-end font-medium text-ink-3">{t("columns.type")}</th>
+                <th className="px-4 py-3 text-end font-medium text-ink-3">{t("columns.size")}</th>
+                <th className="px-4 py-3 text-end font-medium text-ink-3">{t("columns.date")}</th>
+                <th className="px-4 py-3 text-end font-medium text-ink-3">{t("columns.actions")}</th>
               </tr>
             </thead>
             <tbody>
@@ -183,7 +185,7 @@ export function MuqtatafatAdmin() {
                 const isSaving = savingIds.has(clip.id)
                 const isEditing = editingId === clip.id
                 return (
-                  <tr key={clip.id} className="border-t border-[#f0eee6] hover:bg-[#faf9f5]">
+                  <tr key={clip.id} className="border-t border-line hover:bg-surface">
                     {/* Title cell */}
                     <td className="px-4 py-3">
                       {isEditing ? (
@@ -194,18 +196,18 @@ export function MuqtatafatAdmin() {
                             if (e.key === "Enter") void handleSave(clip.id)
                             if (e.key === "Escape") cancelEdit()
                           }}
-                          className="w-full border border-[#d1cfc5] rounded-md px-2 py-1 text-sm focus:outline-none focus:border-[#141413]"
+                          className="w-full border border-ring-warm rounded-md px-2 py-1 text-sm focus:outline-none focus:border-ink"
                           dir="rtl"
                           autoFocus
                         />
                       ) : (
                         <div className="flex items-center gap-2">
                           {clip.type === "VIDEO" ? (
-                            <Video className="w-4 h-4 text-[#5e5d59] shrink-0" />
+                            <Video className="w-4 h-4 text-ink-2 shrink-0" />
                           ) : (
                             <Music2 className="w-4 h-4 text-[#3b5e9e] shrink-0" />
                           )}
-                          <span className="font-medium text-[#141413] truncate max-w-xs">{clip.title}</span>
+                          <span className="font-medium text-ink truncate max-w-xs">{clip.title}</span>
                         </div>
                       )}
                     </td>
@@ -217,14 +219,14 @@ export function MuqtatafatAdmin() {
                           value={editDesc}
                           onChange={(e) => setEditDesc(e.target.value)}
                           onKeyDown={(e) => { if (e.key === "Escape") cancelEdit() }}
-                          placeholder="وصف اختياري..."
+                          placeholder={t("descriptionPlaceholder")}
                           rows={2}
-                          className="w-full border border-[#d1cfc5] rounded-md px-2 py-1 text-sm resize-none focus:outline-none focus:border-[#141413]"
+                          className="w-full border border-ring-warm rounded-md px-2 py-1 text-sm resize-none focus:outline-none focus:border-ink"
                           dir="rtl"
                         />
                       ) : (
-                        <span className="text-[#87867f] truncate block max-w-xs">
-                          {clip.description || <span className="text-[#c9c8c2]">—</span>}
+                        <span className="text-ink-3 truncate block max-w-xs">
+                          {clip.description || <span className="text-ring-warm">—</span>}
                         </span>
                       )}
                     </td>
@@ -232,14 +234,14 @@ export function MuqtatafatAdmin() {
                     <td className="px-4 py-3">
                       <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                         clip.type === "VIDEO"
-                          ? "bg-[#e8e6dc] text-[#4d4c48]"
+                          ? "bg-sand text-ink-button"
                           : "bg-blue-50 text-blue-700"
                       }`}>
-                        {clip.type === "VIDEO" ? "فيديو" : "صوت"}
+                        {clip.type === "VIDEO" ? t("types.video") : t("types.audio")}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-[#5e5d59]">{formatBytes(clip.sizeBytes)}</td>
-                    <td className="px-4 py-3 text-[#87867f]">{formatDate(clip.createdAt)}</td>
+                    <td className="px-4 py-3 text-ink-2">{formatBytes(clip.sizeBytes)}</td>
+                    <td className="px-4 py-3 text-ink-3">{formatDate(clip.createdAt)}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1.5">
                         {isEditing ? (
@@ -249,7 +251,7 @@ export function MuqtatafatAdmin() {
                               size="sm"
                               disabled={isSaving || !editTitle.trim()}
                               onClick={() => void handleSave(clip.id)}
-                              className="text-green-700 border-green-200 hover:bg-green-50 hover:border-green-300"
+                              className="text-success border-success-line hover:bg-success-soft hover:border-success-line"
                             >
                               {isSaving ? (
                                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -262,7 +264,7 @@ export function MuqtatafatAdmin() {
                               size="sm"
                               disabled={isSaving}
                               onClick={cancelEdit}
-                              className="text-[#5e5d59] border-[#d1cfc5] hover:bg-[#f5f4ed]"
+                              className="text-ink-2 border-ring-warm hover:bg-canvas"
                             >
                               <X className="w-3.5 h-3.5" />
                             </Button>
@@ -273,7 +275,7 @@ export function MuqtatafatAdmin() {
                             size="sm"
                             disabled={isDeleting}
                             onClick={() => startEdit(clip)}
-                            className="text-[#5e5d59] border-[#d1cfc5] hover:bg-[#f5f4ed]"
+                            className="text-ink-2 border-ring-warm hover:bg-canvas"
                           >
                             <Pencil className="w-3.5 h-3.5" />
                           </Button>
@@ -283,7 +285,7 @@ export function MuqtatafatAdmin() {
                           size="sm"
                           disabled={isDeleting || isEditing}
                           onClick={() => void handleDelete(clip.id)}
-                          className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
+                          className="text-danger border-danger-line hover:bg-danger-soft hover:border-danger-line"
                         >
                           {isDeleting ? (
                             <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -308,7 +310,7 @@ export function MuqtatafatAdmin() {
             const isSaving = savingIds.has(clip.id)
             const isEditing = editingId === clip.id
             return (
-              <div key={clip.id} className="rounded-lg border border-[#f0eee6] bg-[#faf9f5] p-4 text-sm">
+              <div key={clip.id} className="rounded-lg border border-line bg-surface p-4 text-sm">
                 {isEditing ? (
                   <div className="space-y-2">
                     <input
@@ -318,7 +320,7 @@ export function MuqtatafatAdmin() {
                         if (e.key === "Enter") void handleSave(clip.id)
                         if (e.key === "Escape") cancelEdit()
                       }}
-                      className="w-full border border-[#d1cfc5] rounded-md px-2 py-1 text-sm focus:outline-none focus:border-[#141413]"
+                      className="w-full border border-ring-warm rounded-md px-2 py-1 text-sm focus:outline-none focus:border-ink"
                       dir="rtl"
                       autoFocus
                     />
@@ -326,38 +328,38 @@ export function MuqtatafatAdmin() {
                       value={editDesc}
                       onChange={(e) => setEditDesc(e.target.value)}
                       onKeyDown={(e) => { if (e.key === "Escape") cancelEdit() }}
-                      placeholder="وصف اختياري..."
+                      placeholder={t("descriptionPlaceholder")}
                       rows={2}
-                      className="w-full border border-[#d1cfc5] rounded-md px-2 py-1 text-sm resize-none focus:outline-none focus:border-[#141413]"
+                      className="w-full border border-ring-warm rounded-md px-2 py-1 text-sm resize-none focus:outline-none focus:border-ink"
                       dir="rtl"
                     />
                   </div>
                 ) : (
                   <>
-                    <Field label="العنوان">
+                    <Field label={t("columns.title")}>
                       <span className="flex items-center gap-2">
                         {clip.type === "VIDEO" ? (
-                          <Video className="w-4 h-4 text-[#5e5d59] shrink-0" />
+                          <Video className="w-4 h-4 text-ink-2 shrink-0" />
                         ) : (
                           <Music2 className="w-4 h-4 text-[#3b5e9e] shrink-0" />
                         )}
-                        <span className="font-medium text-[#141413]">{clip.title}</span>
+                        <span className="font-medium text-ink">{clip.title}</span>
                       </span>
                     </Field>
-                    <Field label="الوصف">
-                      {clip.description || <span className="text-[#c9c8c2]">—</span>}
+                    <Field label={t("columns.description")}>
+                      {clip.description || <span className="text-ring-warm">—</span>}
                     </Field>
-                    <Field label="النوع">
+                    <Field label={t("columns.type")}>
                       <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                         clip.type === "VIDEO"
-                          ? "bg-[#e8e6dc] text-[#4d4c48]"
+                          ? "bg-sand text-ink-button"
                           : "bg-blue-50 text-blue-700"
                       }`}>
-                        {clip.type === "VIDEO" ? "فيديو" : "صوت"}
+                        {clip.type === "VIDEO" ? t("types.video") : t("types.audio")}
                       </span>
                     </Field>
-                    <Field label="الحجم">{formatBytes(clip.sizeBytes)}</Field>
-                    <Field label="التاريخ">{formatDate(clip.createdAt)}</Field>
+                    <Field label={t("columns.size")}>{formatBytes(clip.sizeBytes)}</Field>
+                    <Field label={t("columns.date")}>{formatDate(clip.createdAt)}</Field>
                   </>
                 )}
                 <div className="mt-3 flex flex-wrap items-center gap-1.5">
@@ -368,7 +370,7 @@ export function MuqtatafatAdmin() {
                         size="sm"
                         disabled={isSaving || !editTitle.trim()}
                         onClick={() => void handleSave(clip.id)}
-                        className="text-green-700 border-green-200 hover:bg-green-50 hover:border-green-300"
+                        className="text-success border-success-line hover:bg-success-soft hover:border-success-line"
                       >
                         {isSaving ? (
                           <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -381,7 +383,7 @@ export function MuqtatafatAdmin() {
                         size="sm"
                         disabled={isSaving}
                         onClick={cancelEdit}
-                        className="text-[#5e5d59] border-[#d1cfc5] hover:bg-[#f5f4ed]"
+                        className="text-ink-2 border-ring-warm hover:bg-canvas"
                       >
                         <X className="w-3.5 h-3.5" />
                       </Button>
@@ -392,7 +394,7 @@ export function MuqtatafatAdmin() {
                       size="sm"
                       disabled={isDeleting}
                       onClick={() => startEdit(clip)}
-                      className="text-[#5e5d59] border-[#d1cfc5] hover:bg-[#f5f4ed]"
+                      className="text-ink-2 border-ring-warm hover:bg-canvas"
                     >
                       <Pencil className="w-3.5 h-3.5" />
                     </Button>
@@ -402,7 +404,7 @@ export function MuqtatafatAdmin() {
                     size="sm"
                     disabled={isDeleting || isEditing}
                     onClick={() => void handleDelete(clip.id)}
-                    className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
+                    className="text-danger border-danger-line hover:bg-danger-soft hover:border-danger-line"
                   >
                     {isDeleting ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />

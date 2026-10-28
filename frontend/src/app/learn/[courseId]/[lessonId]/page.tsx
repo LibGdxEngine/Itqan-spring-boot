@@ -1,14 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { LessonsService, LessonResponse, OpenAPI } from '@/lib/api';
-import { Loader2, ChevronLeft, ChevronRight, CheckCircle, ClipboardCheck, AlertTriangle } from 'lucide-react';
+import { Loader2, ChevronLeft, ChevronRight, CheckCircle, ClipboardCheck, AlertTriangle, Download, Paperclip } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { VideoPlayer } from '@/components/video';
+import { MarkdownRenderer } from '@/components/articles/MarkdownRenderer';
 import { getLessonVideoPlaybackUrl } from '@/lib/lessonVideoUploadService';
+import { learningApi } from '@/lib/learning-api';
 import { useLearn } from '@/components/learning/learn-context';
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
@@ -16,24 +18,15 @@ import {
     motion,
     AnimatePresence,
     useReducedMotion,
-    type Variants,
 } from 'framer-motion';
+import { EASE, fadeUp, staggerParent } from '@/lib/motion';
 
 type LessonWithQuiz = LessonResponse & { quizId?: number };
 
 OpenAPI.BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
-const EASE = [0.22, 1, 0.36, 1] as const;
 
-const fadeUp: Variants = {
-    hidden: { opacity: 0, y: 16 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE } },
-};
 
-const staggerParent: Variants = {
-    hidden: {},
-    visible: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
-};
 
 export default function LessonPage() {
     const params = useParams();
@@ -43,7 +36,8 @@ export default function LessonPage() {
     const t = useTranslations();
     const reduced = useReducedMotion();
     const { toast } = useToast();
-    const { orderedLessons, completedLessonIds, studentId, markComplete } = useLearn();
+    const { orderedLessons, completedLessonIds, studentId, markComplete, enrolled, positions, savePosition } =
+        useLearn();
 
     const [lesson, setLesson] = useState<LessonWithQuiz | null>(null);
     const [loading, setLoading] = useState(true);
@@ -51,6 +45,30 @@ export default function LessonPage() {
     const [playbackRetryUsed, setPlaybackRetryUsed] = useState(false);
     const [playbackError, setPlaybackError] = useState(false);
     const [marking, setMarking] = useState(false);
+    const lastTimeRef = useRef(0);
+    const lastSavedRef = useRef(0);
+
+    // Remember this as the lesson to continue from.
+    useEffect(() => {
+        if (enrolled && lessonId) void learningApi.activity(lessonId).catch(() => undefined);
+    }, [enrolled, lessonId]);
+
+    // Save the resume point when leaving the lesson.
+    useEffect(() => {
+        return () => {
+            if (lastTimeRef.current > 0 && Math.abs(lastTimeRef.current - lastSavedRef.current) >= 3) {
+                savePosition(lessonId, lastTimeRef.current);
+            }
+        };
+    }, [lessonId, savePosition]);
+
+    const handleTimeUpdate = (seconds: number) => {
+        lastTimeRef.current = seconds;
+        if (Math.abs(seconds - lastSavedRef.current) >= 15) {
+            lastSavedRef.current = seconds;
+            savePosition(lessonId, seconds);
+        }
+    };
 
     const resolveVideoUrl = useCallback(async (lessonData: LessonResponse) => {
         if (lessonData.type !== 'VIDEO') {
@@ -101,9 +119,9 @@ export default function LessonPage() {
         return (
             <div className="flex min-h-[60vh] items-center justify-center p-20">
                 <div className="relative flex h-12 w-12 items-center justify-center">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#c96442] opacity-20" />
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand opacity-20" />
                     <motion.span
-                        className="relative h-8 w-8 rounded-full border-2 border-[#e8e6dc] border-t-[#c96442]"
+                        className="relative h-8 w-8 rounded-full border-2 border-line-strong border-t-brand"
                         animate={reduced ? undefined : { rotate: 360 }}
                         transition={{ duration: 1, ease: 'linear', repeat: Infinity }}
                     />
@@ -113,10 +131,12 @@ export default function LessonPage() {
     }
 
     if (!lesson) {
-        return <div className="p-10 text-[#5e5d59]">{t('lesson.notFound')}</div>;
+        return <div className="p-10 text-ink-2">{t('lesson.notFound')}</div>;
     }
 
     const isVideoLesson = lesson.type === 'VIDEO';
+    // Compared as a string: the generated client predates the RESOURCE lesson type.
+    const resourceUrl = (lesson.type as string | undefined) === 'RESOURCE' ? lesson.resourceUrl : undefined;
     const status = lesson.videoStatus;
     const showProcessing = isVideoLesson && !videoUrl && (status === 'PENDING' || status === 'UPLOADING');
     const showFailed = isVideoLesson && !videoUrl && (status === 'FAILED' || (playbackError && status !== 'READY'));
@@ -167,20 +187,26 @@ export default function LessonPage() {
             {/* Video Player Area - Using Advanced Video Player */}
             {isVideoLesson && videoUrl && (
                 <motion.div variants={fadeUp} className="mb-8">
-                    <div className="overflow-hidden rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.08)] ring-1 ring-[#e8e6dc]">
+                    <div className="overflow-hidden rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.08)] ring-1 ring-line-strong">
                         <VideoPlayer
                             videoUrl={videoUrl}
                             lessonId={lessonId}
                             autoPlay={false}
+                            startAt={positions[lessonId]}
+                            onTimeUpdate={handleTimeUpdate}
+                            onEnded={() => {
+                                lastTimeRef.current = 0;
+                                lastSavedRef.current = 0;
+                                savePosition(lessonId, 0);
+                                if (studentId != null && !completedLessonIds.has(lessonId)) {
+                                    void markComplete(lessonId)
+                                        .then(() => toast({ title: t('lesson.autoCompleted') }))
+                                        .catch(() => undefined);
+                                }
+                            }}
                             onPlaybackError={async () => {
                                 if (!lesson.id || playbackRetryUsed) return;
                                 await retryPlayback();
-                            }}
-                            onTimeUpdate={(time) => {
-                                console.log(`Watching at ${time}s`);
-                            }}
-                            onEnded={() => {
-                                console.log('Video completed');
                             }}
                         />
                     </div>
@@ -190,9 +216,9 @@ export default function LessonPage() {
             {showProcessing && (
                 <motion.div
                     variants={fadeUp}
-                    className="mb-8 flex items-center gap-3 rounded-xl border border-[#e8e6dc] bg-[#faf9f5] p-6 text-[#4d4c48]"
+                    className="mb-8 flex items-center gap-3 rounded-xl border border-line-strong bg-surface p-6 text-ink-button"
                 >
-                    <Loader2 className="h-5 w-5 animate-spin text-[#c96442]" />
+                    <Loader2 className="h-5 w-5 animate-spin text-brand" />
                     <span>{t('lesson.videoProcessing')}</span>
                 </motion.div>
             )}
@@ -200,14 +226,14 @@ export default function LessonPage() {
             {showFailed && (
                 <motion.div
                     variants={fadeUp}
-                    className="mb-8 flex flex-col gap-3 rounded-xl border border-[#f3c9be] bg-[#fdf3ef] p-6 text-[#b53333] sm:flex-row sm:items-center sm:justify-between"
+                    className="mb-8 flex flex-col gap-3 rounded-xl border border-danger-line bg-brand-soft p-6 text-danger sm:flex-row sm:items-center sm:justify-between"
                 >
                     <div className="flex items-center gap-3 ltr-flex">
                         <AlertTriangle className="h-5 w-5 shrink-0" />
                         <span>{t('lesson.videoFailed')}</span>
                     </div>
                     <button
-                        className="inline-flex h-9 shrink-0 items-center justify-center rounded-lg border border-[#f3c9be] px-4 text-xs font-medium text-[#b53333] transition hover:bg-[#f9e2da]"
+                        className="inline-flex h-9 shrink-0 items-center justify-center rounded-lg border border-danger-line px-4 text-xs font-medium text-danger transition hover:bg-brand-soft"
                         onClick={() => void retryPlayback()}
                     >
                         {t('lesson.videoTryAgain')}
@@ -218,14 +244,14 @@ export default function LessonPage() {
             {/* Header */}
             <motion.div variants={fadeUp} className="mb-6">
                 <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
-                    <h1 className="text-2xl sm:text-3xl font-bold text-[#141413] leading-tight">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-ink leading-tight">
                         {lesson.title}
                     </h1>
                     <div className="flex flex-wrap items-center gap-2 ltr-flex">
                         {lesson.quizId && (
                             <Link
                                 href={`/learn/${courseId}/${lessonId}/quiz`}
-                                className="group inline-flex h-11 items-center gap-2 rounded-lg bg-[#c96442] px-4 text-sm font-medium text-white shadow-[0_0_0_1px_#c96442] transition-all hover:bg-[#b55836] hover:shadow-[0_6px_16px_rgba(201,100,66,0.3)] hover:-translate-y-0.5 active:translate-y-0 ltr-flex"
+                                className="group inline-flex h-11 items-center gap-2 rounded-lg bg-brand px-4 text-sm font-medium text-white shadow-[0_0_0_1px_var(--color-brand)] transition-all hover:bg-brand-hover hover:shadow-[0_6px_16px_rgba(201,100,66,0.3)] hover:-translate-y-0.5 active:translate-y-0 ltr-flex"
                             >
                                 <ClipboardCheck className="h-4 w-4" />
                                 {t("quiz.lesson.startQuiz")}
@@ -248,8 +274,8 @@ export default function LessonPage() {
                                 className={cn(
                                     'inline-flex h-11 items-center gap-2 rounded-lg border px-4 text-sm font-medium transition-colors disabled:cursor-default ltr-flex',
                                     isCompleted
-                                        ? 'border-emerald-200 bg-emerald-50 text-emerald-600 disabled:opacity-100'
-                                        : 'border-[#e8e6dc] text-[#c96442] hover:bg-[#f0eee6] disabled:opacity-60',
+                                        ? 'border-emerald-200 bg-success-soft text-success disabled:opacity-100'
+                                        : 'border-line-strong text-brand hover:bg-subtle disabled:opacity-60',
                                 )}
                             >
                                 <span className="relative flex h-4 w-4 items-center justify-center">
@@ -293,7 +319,7 @@ export default function LessonPage() {
             {/* Description */}
             {lesson.description && (
                 <motion.div variants={fadeUp} className="mb-6">
-                    <p className="text-[17px] leading-[1.7] text-[#5e5d59]">{lesson.description}</p>
+                    <p className="text-[17px] leading-[1.7] text-ink-2">{lesson.description}</p>
                 </motion.div>
             )}
 
@@ -301,19 +327,38 @@ export default function LessonPage() {
             {lesson.content && (
                 <motion.div
                     variants={fadeUp}
-                    className="prose max-w-none text-[#4d4c48] mb-12 bg-[#faf9f5] rounded-2xl p-6 sm:p-8 shadow-[0_4px_24px_rgba(0,0,0,0.05)] border border-[#e8e6dc]"
+                    className="prose max-w-none text-ink-button mb-12 bg-surface rounded-2xl p-6 sm:p-8 shadow-[0_4px_24px_rgba(0,0,0,0.05)] border border-line-strong"
                 >
-                    <h2 className="text-xl font-semibold text-[#141413] mb-4">
+                    <h2 className="text-xl font-semibold text-ink mb-4">
                         {t('lesson.lessonContent')}
                     </h2>
-                    <div dangerouslySetInnerHTML={{ __html: lesson.content || '' }} />
+                    <MarkdownRenderer content={lesson.content} />
                 </motion.div>
             )}
 
-            {!lesson.content && !videoUrl && !showProcessing && !showFailed && (
+            {resourceUrl && (
+                <motion.a
+                    variants={fadeUp}
+                    href={resourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mb-12 flex items-center gap-4 rounded-2xl border border-line-strong bg-surface p-6 transition hover:border-brand hover:shadow-[0_4px_24px_rgba(0,0,0,0.05)]"
+                >
+                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-brand">
+                        <Paperclip className="h-6 w-6" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                        <span className="block font-semibold text-ink">{t('lesson.resourceTitle')}</span>
+                        <span className="block text-sm text-ink-3">{t('lesson.resourceHint')}</span>
+                    </span>
+                    <Download className="h-5 w-5 shrink-0 text-brand" />
+                </motion.a>
+            )}
+
+            {!lesson.content && !videoUrl && !showProcessing && !showFailed && !resourceUrl && !lesson.quizId && (
                 <motion.p
                     variants={fadeUp}
-                    className="italic text-[#87867f] text-center py-12"
+                    className="italic text-ink-3 text-center py-12"
                 >
                     {t('lesson.noContent')}
                 </motion.p>
@@ -322,7 +367,7 @@ export default function LessonPage() {
             {/* Navigation Footer */}
             <motion.div
                 variants={fadeUp}
-                className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-auto pt-8 border-t border-[#f0eee6]"
+                className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-auto pt-8 border-t border-line"
             >
                 <NavCard
                     direction="prev"
@@ -371,26 +416,26 @@ function NavCard({
                 'group flex items-center gap-3 rounded-xl border p-4 text-start transition-all ltr-flex',
                 isNext ? 'sm:flex-row-reverse sm:text-end' : '',
                 disabled
-                    ? 'cursor-not-allowed border-[#f0eee6] bg-[#faf9f5]/50 opacity-50'
-                    : 'border-[#e8e6dc] bg-[#faf9f5] hover:border-[#c96442]/40 hover:shadow-[0_4px_16px_rgba(0,0,0,0.05)] hover:-translate-y-0.5',
+                    ? 'cursor-not-allowed border-line bg-surface/50 opacity-50'
+                    : 'border-line-strong bg-surface hover:border-brand/40 hover:shadow-[0_4px_16px_rgba(0,0,0,0.05)] hover:-translate-y-0.5',
             )}
         >
             <span
                 className={cn(
                     'flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors',
                     disabled
-                        ? 'bg-[#f0eee6] text-[#b0aea5]'
-                        : 'bg-[#f0eee6] text-[#5e5d59] group-hover:bg-[#c96442] group-hover:text-white',
+                        ? 'bg-subtle text-on-night-2'
+                        : 'bg-subtle text-ink-2 group-hover:bg-brand group-hover:text-white',
                 )}
             >
                 <Chevron className="h-4 w-4 rtl:rotate-180" />
             </span>
             <span className="min-w-0 flex-1">
-                <span className="block text-[11px] font-semibold uppercase tracking-wider text-[#87867f]">
+                <span className="block text-[11px] font-semibold uppercase tracking-wider text-ink-3">
                     {label}
                 </span>
                 {title && (
-                    <span className="mt-0.5 block truncate text-sm font-medium text-[#141413]">
+                    <span className="mt-0.5 block truncate text-sm font-medium text-ink">
                         {title}
                     </span>
                 )}

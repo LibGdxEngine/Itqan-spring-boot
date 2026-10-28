@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class CourseResponse {
@@ -22,6 +22,9 @@ public class CourseResponse {
     private String level;
     private String category;
     private String thumbnailUrl;
+    private String previewVideoUrl;
+    private java.util.List<String> learningOutcomes;
+    private java.util.List<String> requirements;
     private java.util.List<String> tags;
     private Boolean active;
     private java.util.List<ModuleResponse> modules;

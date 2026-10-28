@@ -6,6 +6,16 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.util.StringUtils;
+import jakarta.persistence.criteria.Predicate;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,10 +32,39 @@ public class AuditLogController {
     private final AuditLogRepository auditLogRepository;
 
     @GetMapping
-    @Operation(summary = "List all audit logs (paginated)")
+    @Operation(summary = "Search audit logs (paginated, newest first)",
+            description = "q matches action, actor email or resource id; filters are optional")
     public ResponseEntity<Page<AuditLog>> getAll(
-            @PageableDefault(size = 50) Pageable pageable) {
-        return ResponseEntity.ok(auditLogRepository.findAll(pageable));
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) String resourceType,
+            @RequestParam(required = false) AuditLog.AuditStatus status,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @PageableDefault(size = 50, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        Specification<AuditLog> spec = (root, cq, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (StringUtils.hasText(q)) {
+                String like = "%" + q.trim().toLowerCase(Locale.ROOT) + "%";
+                predicates.add(cb.or(
+                        cb.like(cb.lower(root.get("action")), like),
+                        cb.like(cb.lower(cb.coalesce(root.get("actorEmail"), "")), like),
+                        cb.like(cb.lower(cb.coalesce(root.get("resourceId"), "")), like)));
+            }
+            if (StringUtils.hasText(resourceType)) {
+                predicates.add(cb.equal(root.get("resourceType"), resourceType));
+            }
+            if (status != null) {
+                predicates.add(cb.equal(root.get("status"), status));
+            }
+            if (from != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), from.atStartOfDay()));
+            }
+            if (to != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("createdAt"), to.atTime(LocalTime.MAX)));
+            }
+            return cb.and(predicates.toArray(Predicate[]::new));
+        };
+        return ResponseEntity.ok(auditLogRepository.findAll(spec, pageable));
     }
 
     @GetMapping("/actor/{userId}")

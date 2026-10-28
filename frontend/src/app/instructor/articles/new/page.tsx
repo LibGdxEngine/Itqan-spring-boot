@@ -27,21 +27,21 @@ export default function NewArticlePage() {
 
   if (authLoading || !isAuthenticated || !isAllowed) {
     return (
-      <div className="min-h-screen bg-[#f5f4ed]">
+      <div className="min-h-screen bg-canvas">
         <Navbar />
         <div className="flex min-h-[60vh] items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-[#c96442]" />
+          <Loader2 className="h-8 w-8 animate-spin text-brand" />
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f4ed]">
+    <div className="min-h-screen bg-canvas">
       <Navbar />
-      <main className="mx-auto max-w-3xl px-4 pb-20 pt-24 sm:px-6">
+      <main id="main-content" className="mx-auto max-w-3xl px-4 pb-20 pt-24 sm:px-6">
         <h1
-          className="mb-8 text-3xl text-[#141413]"
+          className="mb-8 text-3xl text-ink"
           style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
         >
           {t("articles.createArticle")}

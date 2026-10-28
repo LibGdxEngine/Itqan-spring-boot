@@ -28,12 +28,12 @@ export default async function AuthLayout({
       <AuthBrandPanel />
 
       {/* Right side - Auth forms */}
-      <div className="relative flex-1 flex flex-col bg-[#f5f4ed]">
+      <div className="relative flex-1 flex flex-col bg-canvas">
         {/* Subtle dotted texture behind the form column */}
         <div className="pointer-events-none absolute inset-0 pattern-dots opacity-60" />
 
         {/* Mobile header */}
-        <div className="relative z-10 lg:hidden p-6 border-b border-[#e8e6dc] bg-[#faf9f5]">
+        <div className="relative z-10 lg:hidden p-6 border-b border-line-strong bg-surface">
           <div className="flex items-center justify-between ltr-flex">
             <Link href="/" className="flex items-center gap-2 ltr-flex">
               <Image
@@ -44,7 +44,7 @@ export default async function AuthLayout({
                 className="h-9 w-9 object-contain"
                 priority
               />
-              <span className="text-xl font-bold text-[#141413]">
+              <span className="text-xl font-bold text-ink">
                 {t("nav.brand")}
               </span>
             </Link>

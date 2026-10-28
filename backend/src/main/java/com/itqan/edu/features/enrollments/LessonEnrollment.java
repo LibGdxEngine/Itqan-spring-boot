@@ -38,6 +38,11 @@ public class LessonEnrollment {
 
     private LocalDateTime completedAt;
 
+    /** Where the student stopped watching, for resume. */
+    private Integer positionSeconds;
+
+    private LocalDateTime lastWatchedAt;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 

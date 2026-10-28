@@ -14,7 +14,6 @@ import {
   useTransform,
   animate,
   useInView,
-  type Variants,
 } from "framer-motion"
 import { useEffect, useRef, useState } from "react"
 import { ArticleCard } from "@/components/articles/ArticleCard"
@@ -23,18 +22,10 @@ import type {
   LandingPageData,
   LandingTeacher,
 } from "@/lib/landingPage"
+import { EASE, fadeUp, staggerParent } from "@/lib/motion"
 
-const EASE = [0.22, 1, 0.36, 1] as const
 
-const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 16 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE } },
-}
 
-const staggerParent: Variants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
-}
 
 interface HomeClientProps {
   data: LandingPageData | null
@@ -58,11 +49,11 @@ export default function HomeClient({ data }: HomeClientProps) {
   const featuredArticles = data?.featuredArticles ?? []
 
   return (
-    <div className="min-h-screen bg-[#f5f4ed] text-[#141413]">
+    <div className="min-h-screen bg-canvas text-ink">
       <Navbar />
 
       {/* ===== 1. HERO ===== */}
-      <section className="relative pt-28 pb-20 overflow-hidden">
+      <section id="main-content" className="relative pt-28 pb-20 overflow-hidden">
         <div className="absolute inset-0 pattern-islamic -z-10" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -76,18 +67,18 @@ export default function HomeClient({ data }: HomeClientProps) {
             >
               <motion.span
                 variants={fadeUp}
-                className="inline-flex items-center gap-2 text-xs tracking-[0.12px] uppercase text-[#87867f]"
+                className="inline-flex items-center gap-2 text-xs tracking-[0.12px] uppercase text-ink-3"
               >
                 <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#c96442] opacity-60" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-[#c96442]" />
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand opacity-60" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-brand" />
                 </span>
                 {t("home.badge")}
               </motion.span>
 
               <motion.h1
                 variants={fadeUp}
-                className="text-display font-serif-ar text-[#141413]"
+                className="text-display font-serif-ar text-ink"
                 style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
               >
                 {t("home.heroTitle1")} {t("home.heroTitle2")}
@@ -95,7 +86,7 @@ export default function HomeClient({ data }: HomeClientProps) {
 
               <motion.p
                 variants={fadeUp}
-                className="text-[20px] leading-[1.6] text-[#5e5d59] max-w-xl"
+                className="text-[20px] leading-[1.6] text-ink-2 max-w-xl"
               >
                 {t("home.heroSubtitle")}
               </motion.p>
@@ -135,8 +126,8 @@ export default function HomeClient({ data }: HomeClientProps) {
                     "radial-gradient(circle at 50% 50%, #d97757 0%, transparent 60%)",
                 }}
               />
-              <div className="bg-[#faf9f5] border border-[#f0eee6] rounded-[32px] p-5 shadow-whisper">
-                <div className="relative aspect-video rounded-[20px] overflow-hidden bg-[#30302e]">
+              <div className="bg-surface border border-line rounded-[32px] p-5 shadow-whisper">
+                <div className="relative aspect-video rounded-[20px] overflow-hidden bg-night-2">
                   {heroVideoUrl ? (
                     heroYouTubeId ? (
                       <iframe
@@ -158,32 +149,32 @@ export default function HomeClient({ data }: HomeClientProps) {
                       <div className="absolute inset-0 pattern-islamic opacity-40" />
                       <div className="absolute inset-0 flex items-center justify-center">
                         <button
-                          aria-label="Play featured lecture"
-                          className="w-16 h-16 rounded-full bg-[#c96442] text-[#faf9f5] flex items-center justify-center shadow-[0_0_0_6px_rgba(250,249,245,0.15)] hover:bg-[#b55836] transition-colors"
+                          aria-label={t("home.playFeatured")}
+                          className="w-16 h-16 rounded-full bg-brand text-on-night flex items-center justify-center shadow-[0_0_0_6px_rgba(250,249,245,0.15)] hover:bg-brand-hover transition-colors"
                         >
-                          <Play className="w-6 h-6 ml-0.5" fill="currentColor" />
+                          <Play className="w-6 h-6 ms-0.5" fill="currentColor" />
                         </button>
                       </div>
                     </>
                   )}
                   {heroDuration ? (
-                    <div className="absolute bottom-3 left-3 bg-[#141413]/80 text-[#faf9f5] text-xs px-2.5 py-1 rounded-md flex items-center gap-1.5 ltr-flex">
+                    <div className="absolute bottom-3 start-3 bg-night/80 text-on-night text-xs px-2.5 py-1 rounded-md flex items-center gap-1.5 ltr-flex">
                       <Clock className="w-3 h-3" />
                       {heroDuration}
                     </div>
                   ) : null}
                 </div>
                 <div className="pt-5 pb-1 px-1 space-y-1.5">
-                  <span className="text-xs tracking-[0.12px] uppercase text-[#87867f]">
+                  <span className="text-xs tracking-[0.12px] uppercase text-ink-3">
                     {t("home.hero.featuredCaption")}
                   </span>
                   <h3
-                    className="text-[22px] leading-tight text-[#141413]"
+                    className="text-[22px] leading-tight text-ink"
                     style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
                   >
                     {heroTitle}
                   </h3>
-                  <p className="text-sm text-[#5e5d59]">{heroTeacher}</p>
+                  <p className="text-sm text-ink-2">{heroTeacher}</p>
                 </div>
               </div>
             </motion.div>
@@ -192,7 +183,7 @@ export default function HomeClient({ data }: HomeClientProps) {
       </section>
 
       {/* ===== 2. STATS BAR (dark chapter break) ===== */}
-      <section className="bg-[#141413] py-16">
+      <section className="bg-night py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-10 text-center">
             <StatItem value={stats?.courses ?? 0} label={t("home.stats.courses")} locale={locale} />
@@ -204,7 +195,7 @@ export default function HomeClient({ data }: HomeClientProps) {
       </section>
 
       {/* ===== 3. SPECIALIZATION PILLS ===== */}
-      <section aria-labelledby="categories-heading" className="py-20 bg-[#f5f4ed]">
+      <section aria-labelledby="categories-heading" className="py-20 bg-canvas">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             className="text-center mb-10 space-y-3"
@@ -216,12 +207,12 @@ export default function HomeClient({ data }: HomeClientProps) {
             <motion.h2
               variants={fadeUp}
               id="categories-heading"
-              className="text-subhead-lg text-[#141413]"
+              className="text-subhead-lg text-ink"
               style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
             >
               {t("home.categories.title")}
             </motion.h2>
-            <motion.p variants={fadeUp} className="text-[#5e5d59] text-[17px] leading-[1.6]">
+            <motion.p variants={fadeUp} className="text-ink-2 text-[17px] leading-[1.6]">
               {t("home.categories.subtitle")}
             </motion.p>
           </motion.div>
@@ -232,20 +223,23 @@ export default function HomeClient({ data }: HomeClientProps) {
             viewport={{ once: true, amount: 0.2 }}
             variants={staggerParent}
           >
-            <motion.button
-              variants={fadeUp}
-              className="px-5 py-2.5 rounded-full bg-[#c96442] text-[#faf9f5] text-sm font-medium shadow-[0_0_0_1px_#c96442] hover:bg-[#b55836] transition-colors"
-            >
-              {t("home.categories.all")}
-            </motion.button>
-            {specializations.map((s) => (
-              <motion.button
-                key={s.id}
-                variants={fadeUp}
-                className="px-5 py-2.5 rounded-full bg-[#e8e6dc] text-[#4d4c48] text-sm font-medium shadow-[0_0_0_1px_#d1cfc5] hover:shadow-[0_0_0_1px_#c2c0b6] hover:text-[#141413] transition-all"
+            <motion.div variants={fadeUp}>
+              <Link
+                href="/courses"
+                className="inline-block px-5 py-2.5 rounded-full bg-brand text-on-night text-sm font-medium shadow-[0_0_0_1px_var(--color-brand)] hover:bg-brand-hover transition-colors"
               >
-                {isAr ? s.nameAr : s.nameEn}
-              </motion.button>
+                {t("home.categories.all")}
+              </Link>
+            </motion.div>
+            {specializations.map((s) => (
+              <motion.div key={s.id} variants={fadeUp}>
+                <Link
+                  href={`/courses?category=${encodeURIComponent(s.slug)}`}
+                  className="inline-block px-5 py-2.5 rounded-full bg-sand text-ink-button text-sm font-medium shadow-[0_0_0_1px_var(--color-ring-warm)] hover:shadow-[0_0_0_1px_var(--color-ring-warm)] hover:text-ink transition-all"
+                >
+                  {isAr ? s.nameAr : s.nameEn}
+                </Link>
+              </motion.div>
             ))}
           </motion.div>
         </div>
@@ -253,7 +247,7 @@ export default function HomeClient({ data }: HomeClientProps) {
 
       {/* ===== 4. TEACHER CARDS ===== */}
       {featuredInstructors.length > 0 ? (
-        <section aria-labelledby="teachers-heading" className="py-20 bg-[#faf9f5] border-y border-[#f0eee6]">
+        <section aria-labelledby="teachers-heading" className="py-20 bg-surface border-y border-line">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
               className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10 ltr-flex"
@@ -265,19 +259,19 @@ export default function HomeClient({ data }: HomeClientProps) {
               <motion.div variants={fadeUp} className="space-y-3">
                 <h2
                   id="teachers-heading"
-                  className="text-subhead-lg text-[#141413]"
+                  className="text-subhead-lg text-ink"
                   style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
                 >
                   {t("home.teachers.title")}
                 </h2>
-                <p className="text-[#5e5d59] text-[17px] leading-[1.6]">
+                <p className="text-ink-2 text-[17px] leading-[1.6]">
                   {t("home.teachers.subtitle")}
                 </p>
               </motion.div>
               <motion.div variants={fadeUp}>
                 <Link
                   href="/instructors"
-                  className="inline-flex items-center gap-1.5 text-sm font-medium text-[#c96442] hover:text-[#b55836] transition-colors ltr-flex"
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-brand hover:text-brand-hover transition-colors ltr-flex"
                 >
                   {t("home.teachers.viewAll")}
                   <ChevronRight className="w-4 h-4 rtl:rotate-180" />
@@ -308,7 +302,7 @@ export default function HomeClient({ data }: HomeClientProps) {
 
       {/* ===== 5. COURSE GRID ===== */}
       {featuredCourses.length > 0 ? (
-        <section aria-labelledby="courses-heading" className="py-20 bg-[#f5f4ed]">
+        <section aria-labelledby="courses-heading" className="py-20 bg-canvas">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
               className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10 ltr-flex"
@@ -320,19 +314,19 @@ export default function HomeClient({ data }: HomeClientProps) {
               <motion.div variants={fadeUp} className="space-y-3">
                 <h2
                   id="courses-heading"
-                  className="text-subhead-lg text-[#141413]"
+                  className="text-subhead-lg text-ink"
                   style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
                 >
                   {t("home.courses.title")}
                 </h2>
-                <p className="text-[#5e5d59] text-[17px] leading-[1.6]">
+                <p className="text-ink-2 text-[17px] leading-[1.6]">
                   {t("home.courses.subtitle")}
                 </p>
               </motion.div>
               <motion.div variants={fadeUp}>
                 <Link
                   href="/courses"
-                  className="inline-flex items-center gap-1.5 text-sm font-medium text-[#c96442] hover:text-[#b55836] transition-colors ltr-flex"
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-brand hover:text-brand-hover transition-colors ltr-flex"
                 >
                   {t("home.courses.browseAll")}
                   <ChevronRight className="w-4 h-4 rtl:rotate-180" />
@@ -363,7 +357,7 @@ export default function HomeClient({ data }: HomeClientProps) {
 
       {/* ===== 5b. FEATURED ARTICLES ===== */}
       {featuredArticles.length > 0 ? (
-        <section aria-labelledby="articles-heading" className="py-20 bg-[#faf9f5] border-y border-[#f0eee6]">
+        <section aria-labelledby="articles-heading" className="py-20 bg-surface border-y border-line">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
               className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10 ltr-flex"
@@ -375,19 +369,19 @@ export default function HomeClient({ data }: HomeClientProps) {
               <motion.div variants={fadeUp} className="space-y-3">
                 <h2
                   id="articles-heading"
-                  className="text-subhead-lg text-[#141413]"
+                  className="text-subhead-lg text-ink"
                   style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
                 >
                   {t("articles.featuredTitle")}
                 </h2>
-                <p className="text-[#5e5d59] text-[17px] leading-[1.6]">
+                <p className="text-ink-2 text-[17px] leading-[1.6]">
                   {t("articles.featuredSubtitle")}
                 </p>
               </motion.div>
               <motion.div variants={fadeUp}>
                 <Link
                   href="/articles"
-                  className="inline-flex items-center gap-1.5 text-sm font-medium text-[#c96442] hover:text-[#b55836] transition-colors ltr-flex"
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-brand hover:text-brand-hover transition-colors ltr-flex"
                 >
                   {t("articles.viewAll")}
                   <ChevronRight className="w-4 h-4 rtl:rotate-180" />
@@ -413,7 +407,7 @@ export default function HomeClient({ data }: HomeClientProps) {
       ) : null}
 
       {/* ===== 6. CTA (dark chapter) ===== */}
-      <section aria-labelledby="cta-heading" className="py-24 bg-[#141413]">
+      <section aria-labelledby="cta-heading" className="py-24 bg-night">
         <motion.div
           className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8"
           initial="hidden"
@@ -424,14 +418,14 @@ export default function HomeClient({ data }: HomeClientProps) {
           <motion.h2
             variants={fadeUp}
             id="cta-heading"
-            className="text-section text-[#faf9f5]"
+            className="text-section text-on-night"
             style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
           >
             {t("home.cta.title")}
           </motion.h2>
           <motion.p
             variants={fadeUp}
-            className="text-[18px] leading-[1.6] text-[#b0aea5] max-w-2xl mx-auto"
+            className="text-[18px] leading-[1.6] text-on-night-2 max-w-2xl mx-auto"
           >
             {t("home.cta.description")}
           </motion.p>
@@ -503,7 +497,7 @@ function StatItem({
   return (
     <div ref={ref} className="space-y-2">
       <div
-        className="text-[44px] md:text-[52px] text-[#faf9f5] leading-none"
+        className="text-[44px] md:text-[52px] text-on-night leading-none"
         style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
       >
         {reduced ? (
@@ -512,7 +506,7 @@ function StatItem({
           <motion.span>{display}</motion.span>
         )}
       </div>
-      <div className="text-sm font-medium text-[#b0aea5]">{label}</div>
+      <div className="text-sm font-medium text-on-night-2">{label}</div>
     </div>
   )
 }
@@ -540,35 +534,35 @@ function TeacherCard({
   return (
     <motion.div
       variants={fadeUp}
-      className="group bg-[#faf9f5] border border-[#f0eee6] rounded-2xl p-6 hover-lift transition-smooth"
+      className="group bg-surface border border-line rounded-2xl p-6 hover-lift transition-smooth"
     >
       <div className="flex items-center gap-4 mb-4 ltr-flex">
         <div
-          className="w-12 h-12 rounded-full bg-[#e8e6dc] flex items-center justify-center text-[#4d4c48] text-[15px] ring-0 ring-[#c96442]/30 transition-all duration-300 group-hover:ring-2 group-hover:rotate-3 uppercase"
+          className="w-12 h-12 rounded-full bg-sand flex items-center justify-center text-ink-button text-[15px] ring-0 ring-brand/30 transition-all duration-300 group-hover:ring-2 group-hover:rotate-3 uppercase"
           style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
         >
           {getInitials(teacher.name)}
         </div>
         <div className="flex-1 min-w-0">
           <h3
-            className="text-[18px] text-[#141413] truncate"
+            className="text-[18px] text-ink truncate"
             style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
           >
             {teacher.name}
           </h3>
           {teacher.specialty ? (
-            <p className="text-sm text-[#87867f] truncate">{teacher.specialty}</p>
+            <p className="text-sm text-ink-3 truncate">{teacher.specialty}</p>
           ) : null}
         </div>
       </div>
-      <div className="flex items-center gap-5 pt-4 border-t border-[#f0eee6] text-sm text-[#5e5d59] ltr-flex">
+      <div className="flex items-center gap-5 pt-4 border-t border-line text-sm text-ink-2 ltr-flex">
         <div>
-          <span className="text-[#141413] font-medium">{courses}</span>{" "}
+          <span className="text-ink font-medium">{courses}</span>{" "}
           <span>{coursesLabel}</span>
         </div>
-        <div className="w-px h-4 bg-[#e8e6dc]" />
+        <div className="w-px h-4 bg-sand" />
         <div>
-          <span className="text-[#141413] font-medium">{students}</span>{" "}
+          <span className="text-ink font-medium">{students}</span>{" "}
           <span>{studentsLabel}</span>
         </div>
       </div>
@@ -603,9 +597,9 @@ function FeaturedCourseCard({
     <Link href={`/courses/${course.id}`}>
       <motion.div
         variants={fadeUp}
-        className="group bg-[#faf9f5] border border-[#f0eee6] rounded-2xl overflow-hidden hover-lift transition-smooth flex flex-col h-full"
+        className="group bg-surface border border-line rounded-2xl overflow-hidden hover-lift transition-smooth flex flex-col h-full"
       >
-        <div className="relative aspect-video bg-[#30302e] overflow-hidden">
+        <div className="relative aspect-video bg-night-2 overflow-hidden">
           {course.thumbnailUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -617,12 +611,12 @@ function FeaturedCourseCard({
             <div className="absolute inset-0 pattern-islamic opacity-40 transition-transform duration-500 ease-out group-hover:scale-105" />
           )}
           {course.category ? (
-            <div className="absolute top-3 left-3 bg-[#faf9f5]/95 text-[#4d4c48] text-xs font-medium px-2.5 py-1 rounded-md">
+            <div className="absolute top-3 start-3 bg-surface/95 text-ink-button text-xs font-medium px-2.5 py-1 rounded-md">
               {course.category}
             </div>
           ) : null}
           {duration ? (
-            <div className="absolute bottom-3 left-3 bg-[#141413]/80 text-[#faf9f5] text-xs px-2.5 py-1 rounded-md flex items-center gap-1.5 ltr-flex">
+            <div className="absolute bottom-3 start-3 bg-night/80 text-on-night text-xs px-2.5 py-1 rounded-md flex items-center gap-1.5 ltr-flex">
               <Clock className="w-3 h-3" />
               {duration}
             </div>
@@ -630,19 +624,19 @@ function FeaturedCourseCard({
         </div>
         <div className="p-5 flex-1 flex flex-col gap-3">
           <h3
-            className="text-[18px] leading-snug text-[#141413]"
+            className="text-[18px] leading-snug text-ink"
             style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
           >
             {course.title}
           </h3>
-          <p className="text-sm text-[#87867f]">{course.instructor}</p>
-          <div className="flex items-center justify-between pt-2 mt-auto border-t border-[#f0eee6] ltr-flex">
-            <div className="flex items-center gap-1 text-sm text-[#4d4c48] ltr-flex">
-              <Star className="w-4 h-4 text-[#c96442]" fill="currentColor" />
+          <p className="text-sm text-ink-3">{course.instructor}</p>
+          <div className="flex items-center justify-between pt-2 mt-auto border-t border-line ltr-flex">
+            <div className="flex items-center gap-1 text-sm text-ink-button ltr-flex">
+              <Star className="w-4 h-4 text-brand" fill="currentColor" />
               <span className="font-medium">{course.level ?? ""}</span>
             </div>
             <div className="text-sm">
-              <span className={isFree ? "font-medium text-[#c96442]" : "font-medium text-[#141413]"}>
+              <span className={isFree ? "font-medium text-brand" : "font-medium text-ink"}>
                 {priceLabel}
               </span>
             </div>

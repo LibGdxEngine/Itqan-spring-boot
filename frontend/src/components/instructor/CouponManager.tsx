@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { Loader2, PlusCircle, TicketPercent } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { CourseResponse } from "@/lib/api";
 import api from "@/lib/api-axios";
 import { paymentsBillingApi, CouponResponse } from "@/lib/payments-billing";
@@ -25,6 +26,7 @@ const defaultFormState: CouponFormState = {
 
 export function CouponManager() {
   const { toast } = useToast();
+  const t = useTranslations("studio.couponManager");
   const [loadingCourses, setLoadingCourses] = useState(true);
   const [loadingCoupons, setLoadingCoupons] = useState(false);
   const [creatingCoupon, setCreatingCoupon] = useState(false);
@@ -106,14 +108,14 @@ export function CouponManager() {
       const updated = await paymentsBillingApi.getCourseCoupons(selectedCourseId);
       setCoupons(updated);
       toast({
-        title: "Coupon created",
-        description: "The coupon has been created successfully.",
+        title: t("toasts.created"),
+        description: t("toasts.createdDescription"),
       });
     } catch (error: unknown) {
       toast({
         variant: "destructive",
-        title: "Failed to create coupon",
-        description: extractErrorDetail(error) || "Please review your input and try again.",
+        title: t("toasts.createFailed"),
+        description: extractErrorDetail(error) || t("toasts.createFailedDescription"),
       });
     } finally {
       setCreatingCoupon(false);
@@ -129,8 +131,8 @@ export function CouponManager() {
     } catch {
       toast({
         variant: "destructive",
-        title: "Failed to deactivate coupon",
-        description: "Please try again.",
+        title: t("toasts.deactivateFailed"),
+        description: t("toasts.tryAgain"),
       });
     }
   };
@@ -139,39 +141,39 @@ export function CouponManager() {
     try {
       await paymentsBillingApi.deleteCoupon(couponId);
       setCoupons((prev) => prev.filter((coupon) => coupon.id !== couponId));
-      toast({ title: "Coupon deleted" });
+      toast({ title: t("toasts.deleted") });
     } catch {
       toast({
         variant: "destructive",
-        title: "Failed to delete coupon",
-        description: "Please try again.",
+        title: t("toasts.deleteFailed"),
+        description: t("toasts.tryAgain"),
       });
     }
   };
 
   if (loadingCourses) {
     return (
-      <div className="rounded-xl border border-[#e8e6dc] bg-[#faf9f5] p-6">
-        <Loader2 className="h-5 w-5 animate-spin text-[#c96442]" />
+      <div className="rounded-xl border border-line-strong bg-surface p-6">
+        <Loader2 className="h-5 w-5 animate-spin text-brand" />
       </div>
     );
   }
 
   return (
-    <section className="rounded-xl border border-[#e8e6dc] bg-[#faf9f5] p-6">
+    <section className="rounded-xl border border-line-strong bg-surface p-6">
       <div className="mb-4 flex items-center gap-2">
-        <TicketPercent className="h-5 w-5 text-[#c96442]" />
-        <h2 className="text-xl font-semibold text-[#141413]">Course Coupons</h2>
+        <TicketPercent className="h-5 w-5 text-brand" />
+        <h2 className="text-xl font-semibold text-ink">{t("title")}</h2>
       </div>
 
       {courses.length === 0 ? (
-        <p className="text-sm text-[#87867f]">Create a course first to manage coupons.</p>
+        <p className="text-sm text-ink-3">{t("noCourses")}</p>
       ) : (
         <div className="space-y-6">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-[#4d4c48]">Course</label>
+            <label className="text-sm font-medium text-ink-button">{t("courseLabel")}</label>
             <select
-              className="flex h-10 w-full rounded-md border border-[#e8e6dc] bg-[#faf9f5] px-3 py-2 text-sm"
+              className="flex h-10 w-full rounded-md border border-line-strong bg-surface px-3 py-2 text-sm"
               value={selectedCourseId ?? ""}
               onChange={(e) => setSelectedCourseId(Number(e.target.value))}
             >
@@ -183,9 +185,9 @@ export function CouponManager() {
             </select>
           </div>
 
-          <form onSubmit={onCreateCoupon} className="grid grid-cols-1 gap-3 rounded-lg border border-[#f0eee6] p-4 sm:grid-cols-2 md:grid-cols-4">
+          <form onSubmit={onCreateCoupon} className="grid grid-cols-1 gap-3 rounded-lg border border-line p-4 sm:grid-cols-2 md:grid-cols-4">
             <Input
-              placeholder="Code (optional)"
+              placeholder={t("codePlaceholder")}
               value={formState.code}
               onChange={(e) => setFormState((prev) => ({ ...prev, code: e.target.value }))}
             />
@@ -193,7 +195,7 @@ export function CouponManager() {
               type="number"
               min={1}
               max={100}
-              placeholder="Discount %"
+              placeholder={t("discountPlaceholder")}
               value={formState.discountPercent}
               onChange={(e) => setFormState((prev) => ({ ...prev, discountPercent: e.target.value }))}
               required
@@ -201,7 +203,7 @@ export function CouponManager() {
             <Input
               type="number"
               min={1}
-              placeholder="Usage limit"
+              placeholder={t("usageLimitPlaceholder")}
               value={formState.usageLimit}
               onChange={(e) => setFormState((prev) => ({ ...prev, usageLimit: e.target.value }))}
             />
@@ -212,43 +214,48 @@ export function CouponManager() {
             />
             <div className="md:col-span-4">
               <Button type="submit" disabled={creatingCoupon}>
-                {creatingCoupon ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PlusCircle className="mr-2 h-4 w-4" />}
-                Create Coupon
+                {creatingCoupon ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <PlusCircle className="me-2 h-4 w-4" />}
+                {t("create")}
               </Button>
             </div>
           </form>
 
           <div>
-            <h3 className="mb-2 text-sm font-medium text-[#4d4c48]">Existing coupons</h3>
+            <h3 className="mb-2 text-sm font-medium text-ink-button">{t("existing")}</h3>
             {loadingCoupons ? (
-              <Loader2 className="h-4 w-4 animate-spin text-[#87867f]" />
+              <Loader2 className="h-4 w-4 animate-spin text-ink-3" />
             ) : coupons.length === 0 ? (
-              <p className="text-sm text-[#87867f]">No coupons for this course yet.</p>
+              <p className="text-sm text-ink-3">{t("empty")}</p>
             ) : (
               <div className="space-y-2">
                 {coupons.map((coupon) => (
                   <div
                     key={coupon.id}
-                    className="flex flex-col gap-2 rounded-lg border border-[#f0eee6] bg-[#f0eee6] p-3 text-sm md:flex-row md:items-center md:justify-between"
+                    className="flex flex-col gap-2 rounded-lg border border-line bg-subtle p-3 text-sm md:flex-row md:items-center md:justify-between"
                   >
                     <div>
-                      <p className="font-medium text-[#141413]">{coupon.code}</p>
-                      <p className="text-[#87867f]">
-                        {coupon.discountPercent}% off · used {coupon.usedCount}
-                        {coupon.usageLimit ? ` / ${coupon.usageLimit}` : ""}
+                      <p className="font-medium text-ink">{coupon.code}</p>
+                      <p className="text-ink-3">
+                        {coupon.usageLimit
+                          ? t("summaryWithLimit", {
+                              percent: coupon.discountPercent,
+                              used: coupon.usedCount,
+                              limit: coupon.usageLimit,
+                            })
+                          : t("summary", { percent: coupon.discountPercent, used: coupon.usedCount })}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className={`rounded-full px-2 py-1 text-xs font-medium ${coupon.active ? "bg-[#f0eee6] text-[#c96442]" : "bg-[#e8e6dc] text-[#5e5d59]"}`}>
-                        {coupon.active ? "Active" : "Inactive"}
+                      <span className={`rounded-full px-2 py-1 text-xs font-medium ${coupon.active ? "bg-subtle text-brand" : "bg-sand text-ink-2"}`}>
+                        {coupon.active ? t("status.active") : t("status.inactive")}
                       </span>
                       {coupon.active && (
                         <Button variant="outline" size="sm" onClick={() => onDeactivateCoupon(coupon.id)}>
-                          Deactivate
+                          {t("deactivate")}
                         </Button>
                       )}
-                      <Button variant="outline" size="sm" className="text-[#b53333] hover:bg-[#f4e3e3] hover:text-[#b53333] border-[#f4e3e3]" onClick={() => onDeleteCoupon(coupon.id)}>
-                        Delete
+                      <Button variant="outline" size="sm" className="text-danger hover:bg-danger-soft hover:text-danger border-danger-soft" onClick={() => onDeleteCoupon(coupon.id)}>
+                        {t("delete")}
                       </Button>
                     </div>
                   </div>

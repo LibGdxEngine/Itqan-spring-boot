@@ -53,10 +53,10 @@ export default function EditArticlePage() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-[#f5f4ed]">
+      <div className="min-h-screen bg-canvas">
         <Navbar />
         <div className="flex min-h-[60vh] items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-[#c96442]" />
+          <Loader2 className="h-8 w-8 animate-spin text-brand" />
         </div>
       </div>
     )
@@ -64,25 +64,25 @@ export default function EditArticlePage() {
 
   if (error || !article) {
     return (
-      <div className="min-h-screen bg-[#f5f4ed]">
+      <div className="min-h-screen bg-canvas">
         <Navbar />
         <div className="flex h-[80vh] flex-col items-center justify-center px-4 text-center">
-          <AlertCircle className="mb-4 h-16 w-16 text-red-500" />
-          <h1 className="mb-2 text-2xl font-bold text-[#141413]">
+          <AlertCircle className="mb-4 h-16 w-16 text-danger" />
+          <h1 className="mb-2 text-2xl font-bold text-ink">
             {t("articles.notFoundTitle")}
           </h1>
-          <p className="text-[#5e5d59]">{error || t("articles.notFoundDesc")}</p>
+          <p className="text-ink-2">{error || t("articles.notFoundDesc")}</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f4ed]">
+    <div className="min-h-screen bg-canvas">
       <Navbar />
-      <main className="mx-auto max-w-3xl px-4 pb-20 pt-24 sm:px-6">
+      <main id="main-content" className="mx-auto max-w-3xl px-4 pb-20 pt-24 sm:px-6">
         <h1
-          className="mb-8 text-3xl text-[#141413]"
+          className="mb-8 text-3xl text-ink"
           style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
         >
           {t("articles.editArticle")}

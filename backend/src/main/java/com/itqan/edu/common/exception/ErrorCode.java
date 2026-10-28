@@ -70,6 +70,14 @@ public enum ErrorCode {
     VIDEO_UPLOAD_FAILED(500, "VID_006", "Video upload failed"),
     VIDEO_NOT_READY(404, "VID_007", "Video is not ready for playback"),
     INVALID_LESSON_ORDER(400, "CRS_004", "Invalid lesson order request"),
+    COURSE_NOT_READY(400, "CRS_005", "Course needs at least one lesson before it can be published"),
+    INVALID_LESSON_CONTENT(400, "CRS_006", "Lesson content is invalid for its type"),
+    INVALID_QUIZ(400, "QUZ_007", "Quiz definition is invalid"),
+    QUIZ_HAS_ANSWERS(409, "QUZ_008", "Questions or options that students already answered cannot be removed"),
+    REVIEW_NOT_ALLOWED(403, "REV_001", "Only enrolled students can review this course"),
+    REVIEW_NOT_FOUND(404, "REV_002", "Review not found"),
+    CERTIFICATE_NOT_EARNED(400, "CRT_001", "Finish every lesson and pass every quiz to earn the certificate"),
+    CERTIFICATE_NOT_FOUND(404, "CRT_002", "Certificate not found"),
 
     // Instructor
     UNAUTHORIZED_INSTRUCTOR_ACCESS(403, "AUTH_006", "User does not have instructor privileges"),
@@ -93,6 +101,15 @@ public enum ErrorCode {
     // Refresh Token
     REFRESH_TOKEN_INVALID(401, "AUTH_008", "Invalid refresh token"),
     REFRESH_TOKEN_EXPIRED(401, "AUTH_009", "Refresh token has expired"),
+
+    // Account status
+    ACCOUNT_DISABLED(403, "AUTH_010", "Account is disabled"),
+
+    // Content access
+    COURSE_ACCESS_DENIED(403, "ENR_005", "You must be enrolled in this course to access this content"),
+
+    // Rate limiting
+    TOO_MANY_REQUESTS(429, "SYS_002", "Too many requests, please try again later"),
 
 
     // Internal Server Error

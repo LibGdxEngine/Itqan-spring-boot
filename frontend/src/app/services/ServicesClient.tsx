@@ -10,7 +10,6 @@ import {
   Languages,
   Check,
   MessageCircle,
-  Mail,
   ArrowRight,
   ChevronLeft,
   ChevronDown,
@@ -29,10 +28,10 @@ import {
 } from "framer-motion"
 import { Navbar } from "@/components/Navbar"
 import { useSiteSettings, whatsappLink } from "@/lib/use-site-currency"
+import { SITE_CONTACT, SITE_WHATSAPP_URL } from "@/lib/site-contact"
 import { SiteFooter } from "@/components/SiteFooter"
 import { Button } from "@/components/ui/button"
 import {
-  CONTACT,
   SERVICES,
   SERVICE_GROUPS,
   PROCESS_STEPS,
@@ -91,13 +90,10 @@ function toArabicDigits(n: number): string {
 /** Contact details from the admin site settings, falling back to the built-in defaults. */
 function useContact() {
   const settings = useSiteSettings()
-  const email = settings.contactEmail || CONTACT.email
+  // Contact is by WhatsApp only.
+  const number = settings.whatsappNumber || SITE_CONTACT.whatsappNumber
   return {
-    email,
-    // Without a WhatsApp number configured, requests go by email instead.
-    whatsappHref: (message: string) =>
-      whatsappLink(settings.whatsappNumber, message) ??
-      `mailto:${email}?body=${encodeURIComponent(message)}`,
+    whatsappHref: (message: string) => whatsappLink(number, message) ?? SITE_WHATSAPP_URL,
   }
 }
 
@@ -108,7 +104,7 @@ function serviceRequestMessage(title: string): string {
 const GENERAL_MESSAGE = "السلام عليكم، أرغب في الاستفسار عن خدمات الأكاديمية."
 
 export default function ServicesClient() {
-  const { email, whatsappHref } = useContact()
+  const { whatsappHref } = useContact()
   const reduced = useReducedMotion()
   const heroRef = useRef<HTMLElement>(null)
   const { scrollYProgress: heroProgress } = useScroll({
@@ -366,12 +362,6 @@ export default function ServicesClient() {
               <a href={whatsappHref(GENERAL_MESSAGE)} target="_blank" rel="noopener noreferrer">
                 <MessageCircle className="w-4 h-4" />
                 تواصل عبر واتساب
-              </a>
-            </Button>
-            <Button size="lg" variant="white" asChild className="text-base px-7">
-              <a href={`mailto:${email}?subject=${encodeURIComponent("استفسار عن خدمات الأكاديمية")}`}>
-                <Mail className="w-4 h-4" />
-                راسلنا بالبريد
               </a>
             </Button>
           </motion.div>

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
-import { localizedAlternates, jsonLdHtml } from "@/lib/seo";
+import { localizedAlternates, jsonLdHtml, ogLocale, defaultOgImage } from "@/lib/seo";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
@@ -23,12 +23,14 @@ export async function generateMetadata(): Promise<Metadata> {
       url,
       title: t("title"),
       description: t("description"),
-      locale: locale === "ar" ? "ar_SA" : "en_US",
+      locale: ogLocale(locale),
+      images: [defaultOgImage(locale)],
     },
     twitter: {
       card: "summary_large_image",
       title: t("title"),
       description: t("description"),
+      images: [defaultOgImage(locale).url],
     },
   };
 }

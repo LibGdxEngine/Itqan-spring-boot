@@ -48,6 +48,7 @@ export function Navbar() {
     { href: "/muqtatafat", label: t("nav.muqtatafat") },
     { href: "/articles", label: t("nav.articles") },
     { href: "/instructors", label: t("nav.instructors") },
+    { href: "/scholarships", label: t("nav.scholarships") },
   ]
   if (isAuthenticated && user?.role === "STUDENT") links.push({ href: "/dashboard", label: t("nav.myLearning") })
   if (user?.role === "INSTRUCTOR" || user?.role === "ADMIN") links.push({ href: "/instructor", label: t("nav.instructor") })

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 
-import { SITE_URL, fetchPublic, localizedAlternates, localizedUrl, ogLocale, jsonLdHtml } from "@/lib/seo";
+import { SITE_URL, defaultOgImage, brandName, fetchPublic, localizedAlternates, localizedUrl, ogLocale, jsonLdHtml } from "@/lib/seo";
 import { getCourseData } from "./course-data";
 
 async function siteCurrency() {
@@ -33,13 +33,14 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
             url: localizedUrl(path, locale),
             type: "website",
             locale: ogLocale(locale),
-            images: course.thumbnailUrl ? [{ url: course.thumbnailUrl, alt: title }] : [],
+            // Without a thumbnail, fall back to the brand card instead of sharing with no image.
+            images: [course.thumbnailUrl ? { url: course.thumbnailUrl, alt: title } : { ...defaultOgImage(locale), alt: title }],
         },
         twitter: {
             card: "summary_large_image",
             title,
             description,
-            images: course.thumbnailUrl ? [course.thumbnailUrl] : [],
+            images: [course.thumbnailUrl || defaultOgImage(locale).url],
         },
     };
 }
@@ -55,7 +56,7 @@ export default async function CourseLayout({
     const locale = await getLocale();
     const [{ course, stats, reviews }, currency] = await Promise.all([getCourseData(id), siteCurrency()]);
     const url = `${SITE_URL}/courses/${id}`;
-    const brand = locale === "ar" ? "إتقان" : "Itqan";
+    const brand = brandName(locale);
 
     // https://schema.org/Course — rating and reviews only when there are real ones.
     const jsonLd = course
@@ -67,13 +68,13 @@ export default async function CourseLayout({
               description: course.description || course.title,
               url,
               inLanguage: locale,
-              image: course.thumbnailUrl || undefined,
+              image: course.thumbnailUrl || defaultOgImage(locale).url,
               educationalLevel: course.level,
               about: course.category,
               teaches: course.learningOutcomes?.length ? course.learningOutcomes : undefined,
               coursePrerequisites: course.requirements?.length ? course.requirements : undefined,
               timeRequired: `PT${course.duration || 0}H`,
-              provider: { "@type": "Organization", name: brand, sameAs: SITE_URL },
+              provider: { "@type": "EducationalOrganization", "@id": `${SITE_URL}#organization`, name: brand, sameAs: SITE_URL },
               offers: {
                   "@type": "Offer",
                   category: course.price > 0 ? "Paid" : "Free",

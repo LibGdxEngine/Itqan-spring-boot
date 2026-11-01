@@ -9,6 +9,7 @@ import com.itqan.edu.features.auth.AuthRepository;
 import com.itqan.edu.features.auth.User;
 import com.itqan.edu.features.courses.Course;
 import com.itqan.edu.features.courses.CourseRepository;
+import com.itqan.edu.features.courses.LessonRepository;
 import com.itqan.edu.features.enrollments.EnrollmentRepository;
 import com.itqan.edu.features.landingpage.dto.HeroVideoUploadResponse;
 import com.itqan.edu.features.landingpage.dto.LandingArticleDto;
@@ -18,6 +19,10 @@ import com.itqan.edu.features.landingpage.dto.LandingPageResponse;
 import com.itqan.edu.features.landingpage.dto.LandingPageUpdateRequest;
 import com.itqan.edu.features.landingpage.dto.LandingStatsDto;
 import com.itqan.edu.features.landingpage.dto.LandingTeacherDto;
+import com.itqan.edu.features.landingpage.dto.LandingTestimonialDto;
+import com.itqan.edu.features.reviews.CourseReview;
+import com.itqan.edu.features.reviews.CourseReviewRepository;
+import com.itqan.edu.features.reviews.ReviewService;
 import com.itqan.edu.features.specializations.SpecializationRepository;
 import com.itqan.edu.features.specializations.SpecializationService;
 import com.itqan.edu.features.specializations.dto.SpecializationResponse;
@@ -45,9 +50,13 @@ import java.util.UUID;
 public class LandingPageService {
 
     private static final long MAX_HERO_VIDEO_BYTES = 200L * 1024 * 1024; // 200 MB
+    private static final int MIN_TESTIMONIAL_RATING = 4;
+    private static final int MAX_TESTIMONIALS = 6;
 
     private final LandingPageRepository landingPageRepository;
     private final CourseRepository courseRepository;
+    private final LessonRepository lessonRepository;
+    private final CourseReviewRepository courseReviewRepository;
     private final ArticleRepository articleRepository;
     private final AuthRepository authRepository;
     private final EnrollmentRepository enrollmentRepository;
@@ -65,9 +74,11 @@ public class LandingPageService {
         List<LandingCourseDto> courses = hydrateCourses(config.getFeaturedCourseIds());
         List<LandingTeacherDto> teachers = hydrateTeachers(config.getFeaturedInstructorIds());
         List<LandingArticleDto> articles = hydrateArticles(config.getFeaturedArticleIds());
+        List<LandingTestimonialDto> testimonials = loadTestimonials();
 
         LandingStatsDto stats = LandingStatsDto.builder()
                 .courses(courseRepository.countByActiveTrue())
+                .lessons(lessonRepository.countByActiveTrueAndModuleCourseActiveTrue())
                 .teachers(authRepository.countByRole(User.Role.INSTRUCTOR))
                 .students(authRepository.countByRole(User.Role.STUDENT))
                 .specializations(specializationRepository.countByActiveTrue())
@@ -90,6 +101,7 @@ public class LandingPageService {
                 .featuredCourses(courses)
                 .featuredInstructors(teachers)
                 .featuredArticles(articles)
+                .featuredTestimonials(testimonials)
                 .build();
     }
 
@@ -255,9 +267,38 @@ public class LandingPageService {
                     .id(id)
                     .name(fullName.isEmpty() ? u.getEmail() : fullName)
                     .specialty(specialty)
+                    .photoUrl(u.getPhotoUrl())
+                    .titleAr(u.getTitleAr())
+                    .titleEn(u.getTitleEn())
+                    .bioAr(u.getBioAr())
+                    .bioEn(u.getBioEn())
                     .coursesCount(courses.size())
                     .studentsCount(studentsCount)
                     .build());
+        }
+        return out;
+    }
+
+    /** Latest well-rated, visible reviews with a written comment on active courses (max 6). */
+    private List<LandingTestimonialDto> loadTestimonials() {
+        List<LandingTestimonialDto> out = new ArrayList<>();
+        for (CourseReview r : courseReviewRepository
+                .findTop12ByHiddenFalseAndRatingGreaterThanEqualAndCommentIsNotNullOrderByCreatedAtDesc(MIN_TESTIMONIAL_RATING)) {
+            if (r.getComment() == null || r.getComment().isBlank()) continue;
+            if (r.getCourse() == null || !Boolean.TRUE.equals(r.getCourse().getActive())) continue;
+            if (r.getStudent() == null) continue;
+            String author = ReviewService.publicName(r.getStudent());
+            if (author.isBlank()) continue;
+            out.add(LandingTestimonialDto.builder()
+                    .id(r.getId())
+                    .authorName(author)
+                    .rating(r.getRating())
+                    .comment(r.getComment().trim())
+                    .courseId(r.getCourse().getId())
+                    .courseTitle(r.getCourse().getTitle())
+                    .createdAt(r.getCreatedAt())
+                    .build());
+            if (out.size() == MAX_TESTIMONIALS) break;
         }
         return out;
     }

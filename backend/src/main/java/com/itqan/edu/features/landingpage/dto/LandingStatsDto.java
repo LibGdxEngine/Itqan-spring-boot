@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class LandingStatsDto {
     private long courses;
+    private long lessons;
     private long teachers;
     private long students;
     private long specializations;

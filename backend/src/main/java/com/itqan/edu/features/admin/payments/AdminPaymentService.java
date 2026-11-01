@@ -11,6 +11,7 @@ import com.itqan.edu.features.enrollments.EnrollmentService;
 import com.itqan.edu.features.payments.Payment;
 import com.itqan.edu.features.payments.PaymentRepository;
 import com.itqan.edu.features.payments.PaymentStatus;
+import com.itqan.edu.features.payments.paymob.PaymobGateway;
 import com.itqan.edu.features.payments.stripe.StripeGateway;
 import com.itqan.edu.features.students.Student;
 import com.itqan.edu.features.students.StudentRepository;
@@ -38,12 +39,14 @@ public class AdminPaymentService {
 
     static final String MANUAL_GATEWAY = "MANUAL";
     static final String STRIPE_GATEWAY = "STRIPE";
+    static final String PAYMOB_GATEWAY = "PAYMOB";
 
     private final PaymentRepository paymentRepository;
     private final StudentRepository studentRepository;
     private final CourseRepository courseRepository;
     private final EnrollmentService enrollmentService;
     private final StripeGateway stripeGateway;
+    private final PaymobGateway paymobGateway;
     private final AuditLogService auditLogService;
 
     @Transactional(readOnly = true)
@@ -95,8 +98,8 @@ public class AdminPaymentService {
     }
 
     /**
-     * Refunds a completed payment and revokes course access. Stripe payments are refunded through
-     * Stripe; manual payments are only marked refunded (the money is returned offline).
+     * Refunds a completed payment and revokes course access. Stripe and Paymob payments are refunded
+     * through the gateway; manual payments are only marked refunded (the money is returned offline).
      */
     @CacheEvict(value = "analytics", allEntries = true)
     @Transactional
@@ -112,6 +115,11 @@ public class AdminPaymentService {
                 throw new BusinessException(ErrorCode.PAYMENT_GATEWAY_ERROR, "Stripe payment intent is missing");
             }
             stripeGateway.refundPaymentIntent(payment.getStripePaymentIntentId());
+        } else if (PAYMOB_GATEWAY.equalsIgnoreCase(payment.getPaymentGateway())) {
+            if (!StringUtils.hasText(payment.getTransactionId())) {
+                throw new BusinessException(ErrorCode.PAYMENT_GATEWAY_ERROR, "Paymob transaction id is missing");
+            }
+            paymobGateway.refund(payment.getTransactionId(), Math.round(payment.getAmount() * 100));
         }
 
         payment.setStatus(PaymentStatus.REFUNDED);

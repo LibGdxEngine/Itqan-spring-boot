@@ -17,6 +17,11 @@ public class InstructorResponse {
     private String firstName;
     private String lastName;
     private Boolean enabled;
+    private String photoUrl;
+    private String titleAr;
+    private String titleEn;
+    private String bioAr;
+    private String bioEn;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

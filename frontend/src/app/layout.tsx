@@ -3,10 +3,9 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages, getTranslations } from 'next-intl/server';
 import { IBM_Plex_Sans_Arabic, Amiri } from 'next/font/google';
 import "./globals.css";
+import { SITE_CONTACT, SITE_WHATSAPP_URL, SOCIAL_PROFILES } from "@/lib/site-contact";
 import { ClientProviders } from "@/components/providers/ClientProviders";
-import { jsonLdHtml } from "@/lib/seo";
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+import { SITE_URL, BRAND, brandName, defaultOgImage, jsonLdHtml, LOGO_URL, ogAlternateLocale, ogLocale } from "@/lib/seo";
 
 // Applies the saved theme (or the OS preference) before first paint to avoid a light flash.
 const THEME_SCRIPT = `(function(){try{var t=localStorage.getItem('itqan-theme');var d=t==='dark'||((!t||t==='system')&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d)document.documentElement.classList.add('dark');}catch(e){}})();`;
@@ -28,8 +27,7 @@ const amiri = Amiri({
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
   const t = await getTranslations({ locale, namespace: 'seo.home' });
-  const isAr = locale === 'ar';
-  const brand = isAr ? 'إتقان' : 'Itqan';
+  const brand = brandName(locale);
   const keywords = t('keywords').split('|').map((k) => k.trim()).filter(Boolean);
 
   return {
@@ -44,18 +42,21 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       siteName: brand,
       type: 'website',
-      locale: isAr ? 'ar_SA' : 'en_US',
-      alternateLocale: isAr ? ['en_US'] : ['ar_SA'],
+      locale: ogLocale(locale),
+      alternateLocale: [ogAlternateLocale(locale)],
       url: SITE_URL,
       title: t('title'),
       description: t('description'),
+      images: [defaultOgImage(locale)],
     },
     twitter: {
       card: 'summary_large_image',
       title: t('title'),
       description: t('description'),
+      images: [defaultOgImage(locale).url],
     },
-    robots: { index: true, follow: true },
+    robots: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 },
+    formatDetection: { telephone: false },
     icons: {
       icon: [
         { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
@@ -74,20 +75,40 @@ export default async function RootLayout({
   const locale = await getLocale();
   const messages = await getMessages();
   const isRTL = locale === 'ar';
-  const brand = isRTL ? 'إتقان' : 'Itqan';
+  const brand = brandName(locale);
   const t = await getTranslations({ locale, namespace: 'seo.home' });
 
   const organizationJsonLd = {
     '@context': 'https://schema.org',
-    '@type': 'Organization',
+    '@type': 'EducationalOrganization',
     '@id': `${SITE_URL}#organization`,
     name: brand,
-    alternateName: isRTL ? 'Itqan' : 'إتقان',
+    alternateName: [isRTL ? BRAND.en : BRAND.ar, 'إتقان', 'Itqan'],
     url: SITE_URL,
-    logo: `${SITE_URL}/icon-512.png`,
-    inLanguage: locale,
+    logo: {
+      '@type': 'ImageObject',
+      '@id': `${SITE_URL}#logo`,
+      url: LOGO_URL,
+      contentUrl: LOGO_URL,
+      width: 1200,
+      height: 1200,
+      caption: brand,
+    },
+    image: { '@id': `${SITE_URL}#logo` },
     description: t('description'),
-    sameAs: [],
+    knowsAbout: isRTL
+      ? ['تفسير القرآن الكريم', 'تدبر القرآن', 'علوم القرآن', 'أصول التفسير', 'العقيدة', 'الفقه', 'الحديث الشريف']
+      : ['Quran Tafsir', 'Quranic reflection (Tadabbur)', 'Quranic sciences', 'Usool al-Tafsir', 'Aqeedah', 'Fiqh', 'Hadith'],
+    areaServed: { '@type': 'Place', name: isRTL ? 'العالم العربي' : 'Arab world' },
+    availableLanguage: ['ar', 'en'],
+    contactPoint: {
+      '@type': 'ContactPoint',
+      contactType: 'customer support',
+      telephone: SITE_CONTACT.whatsappNumber.replace(/\s/g, ''),
+      url: SITE_WHATSAPP_URL,
+      availableLanguage: ['ar', 'en'],
+    },
+    sameAs: SOCIAL_PROFILES,
   };
 
   const websiteJsonLd = {
@@ -96,7 +117,9 @@ export default async function RootLayout({
     '@id': `${SITE_URL}#website`,
     url: SITE_URL,
     name: brand,
-    inLanguage: locale,
+    alternateName: isRTL ? BRAND.en : BRAND.ar,
+    description: t('description'),
+    inLanguage: ['ar', 'en'],
     publisher: { '@id': `${SITE_URL}#organization` },
     potentialAction: {
       '@type': 'SearchAction',

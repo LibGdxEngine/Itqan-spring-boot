@@ -1,18 +1,16 @@
 "use client"
 
 import Link from "next/link"
-import { Facebook, Instagram, Mail, MapPin, MessageCircle, Music2, Phone, Send, Twitter, Youtube } from "lucide-react"
+import { Facebook, MapPin, MessageCircle, Phone } from "lucide-react"
 import { useTranslations } from "next-intl"
 
 import { useSiteSettings, whatsappLink } from "@/lib/use-site-currency"
+import { SITE_CONTACT } from "@/lib/site-contact"
 
+// Only Facebook for now. To bring a channel back, re-add its entry
+// (instagramUrl/Instagram, youtubeUrl/Youtube, xUrl/Twitter, tiktokUrl/Music2, telegramUrl/Send).
 const SOCIALS = [
-  { key: "facebookUrl", label: "Facebook", icon: Facebook },
-  { key: "instagramUrl", label: "Instagram", icon: Instagram },
-  { key: "youtubeUrl", label: "YouTube", icon: Youtube },
-  { key: "xUrl", label: "X", icon: Twitter },
-  { key: "tiktokUrl", label: "TikTok", icon: Music2 },
-  { key: "telegramUrl", label: "Telegram", icon: Send },
+  { key: "facebookUrl", label: "Facebook", icon: Facebook, fallback: SITE_CONTACT.facebookUrl },
 ] as const
 
 const isHttp = (value: string | undefined): value is string => !!value && /^https?:\/\//i.test(value)
@@ -20,9 +18,10 @@ const isHttp = (value: string | undefined): value is string => !!value && /^http
 export function SiteFooter() {
   const t = useTranslations()
   const settings = useSiteSettings()
-  const email = settings.contactEmail || t("footer.email")
-  const whatsapp = whatsappLink(settings.whatsappNumber)
-  const socials = SOCIALS.filter((s) => isHttp(settings[s.key]))
+  // Contact is by WhatsApp only; email is intentionally not shown.
+  const whatsappNumber = settings.whatsappNumber || SITE_CONTACT.whatsappNumber
+  const whatsapp = whatsappLink(whatsappNumber)
+  const socials = SOCIALS.map((s) => ({ ...s, href: settings[s.key] || s.fallback })).filter((s) => isHttp(s.href))
 
   return (
     <footer className="border-t border-night-2 bg-night text-on-night-2">
@@ -37,10 +36,10 @@ export function SiteFooter() {
             <p className="text-sm leading-relaxed">{settings.tagline || t("footer.tagline")}</p>
             {socials.length > 0 ? (
               <ul className="flex flex-wrap gap-2" aria-label={t("footer.social")}>
-                {socials.map(({ key, label, icon: Icon }) => (
+                {socials.map(({ key, label, icon: Icon, href }) => (
                   <li key={key}>
                     <a
-                      href={settings[key]}
+                      href={href}
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={label}
@@ -80,12 +79,6 @@ export function SiteFooter() {
           <div className="space-y-4">
             <h2 className="text-xs font-medium uppercase tracking-[0.5px] text-on-night">{t("footer.contact")}</h2>
             <ul className="space-y-2.5 text-sm">
-              <li>
-                <a href={`mailto:${email}`} className="ltr-flex inline-flex items-center gap-2 transition-colors hover:text-coral">
-                  <Mail className="h-4 w-4 shrink-0" />
-                  <span dir="ltr">{email}</span>
-                </a>
-              </li>
               {settings.contactPhone ? (
                 <li>
                   <a href={`tel:${settings.contactPhone.replace(/\s/g, "")}`} className="inline-flex items-center gap-2 transition-colors hover:text-coral">
@@ -98,7 +91,10 @@ export function SiteFooter() {
                 <li>
                   <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 transition-colors hover:text-coral">
                     <MessageCircle className="h-4 w-4 shrink-0" />
-                    {t("footer.whatsapp")}
+                    <span>
+                      {t("footer.whatsapp")}
+                      <span dir="ltr" className="block text-xs opacity-80">{whatsappNumber}</span>
+                    </span>
                   </a>
                 </li>
               ) : null}

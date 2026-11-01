@@ -24,4 +24,19 @@ public class InstructorUpdateRequest {
     private String password;
 
     private Boolean enabled;
+
+    @Size(max = 1000, message = "Photo URL is too long")
+    private String photoUrl;
+
+    @Size(max = 200, message = "Title must be at most 200 characters")
+    private String titleAr;
+
+    @Size(max = 200, message = "Title must be at most 200 characters")
+    private String titleEn;
+
+    @Size(max = 4000, message = "Bio must be at most 4000 characters")
+    private String bioAr;
+
+    @Size(max = 4000, message = "Bio must be at most 4000 characters")
+    private String bioEn;
 }

@@ -6,11 +6,24 @@ export interface InstructorUser {
   firstName: string
   lastName: string
   enabled: boolean
+  photoUrl: string | null
+  titleAr: string | null
+  titleEn: string | null
+  bioAr: string | null
+  bioEn: string | null
   createdAt: string
   updatedAt: string
 }
 
-export interface CreateInstructorRequest {
+export interface InstructorProfileFields {
+  photoUrl?: string | null
+  titleAr?: string | null
+  titleEn?: string | null
+  bioAr?: string | null
+  bioEn?: string | null
+}
+
+export interface CreateInstructorRequest extends InstructorProfileFields {
   email: string
   password: string
   firstName: string
@@ -18,7 +31,7 @@ export interface CreateInstructorRequest {
   enabled?: boolean
 }
 
-export interface UpdateInstructorRequest {
+export interface UpdateInstructorRequest extends InstructorProfileFields {
   email: string
   firstName: string
   lastName: string
@@ -45,6 +58,15 @@ export const instructorsApi = {
 
   async deactivate(id: number): Promise<InstructorUser> {
     const response = await api.patch<InstructorUser>(`/api/instructors/${id}/deactivate`)
+    return response.data
+  },
+
+  async uploadPhoto(file: File): Promise<{ url: string; objectKey: string }> {
+    const form = new FormData()
+    form.append("file", file)
+    const response = await api.post<{ url: string; objectKey: string }>("/api/instructors/photo", form, {
+      headers: { "Content-Type": "multipart/form-data" },
+    })
     return response.data
   },
 }

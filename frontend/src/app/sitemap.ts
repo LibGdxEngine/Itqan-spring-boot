@@ -48,6 +48,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         bilingual("/articles", "daily", 0.8, now),
         bilingual("/muqtatafat", "weekly", 0.6),
         bilingual("/about", "monthly", 0.5),
+        bilingual("/scholarships", "monthly", 0.6),
+        bilingual("/scholarships/donate", "monthly", 0.5),
         bilingual("/privacy", "yearly", 0.2),
         bilingual("/terms", "yearly", 0.2),
         // The services page is Arabic-only content.

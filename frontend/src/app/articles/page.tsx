@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { getLocale, getTranslations } from "next-intl/server"
 
 import ArticlesListClient from "./_components/ArticlesListClient"
-import { localizedAlternates, jsonLdHtml } from "@/lib/seo"
+import { brandName, defaultOgImage, localizedAlternates, jsonLdHtml, ogAlternateLocale, ogLocale } from "@/lib/seo"
 
 const API_URL =
   process.env.BACKEND_INTERNAL_URL ||
@@ -23,7 +23,6 @@ export async function generateMetadata(): Promise<Metadata> {
     .map((k) => k.trim())
     .filter(Boolean)
   const url = `${SITE_URL}/articles`
-  const isAr = locale === "ar"
 
   return {
     title: t("title"),
@@ -35,14 +34,16 @@ export async function generateMetadata(): Promise<Metadata> {
       url,
       title: t("title"),
       description: t("description"),
-      siteName: isAr ? "إتقان" : "Itqan",
-      locale: isAr ? "ar_SA" : "en_US",
-      alternateLocale: isAr ? "en_US" : "ar_SA",
+      siteName: brandName(locale),
+      locale: ogLocale(locale),
+      alternateLocale: ogAlternateLocale(locale),
+      images: [defaultOgImage(locale)],
     },
     twitter: {
       card: "summary_large_image",
       title: t("title"),
       description: t("description"),
+      images: [defaultOgImage(locale).url],
     },
     robots: { index: true, follow: true },
   }

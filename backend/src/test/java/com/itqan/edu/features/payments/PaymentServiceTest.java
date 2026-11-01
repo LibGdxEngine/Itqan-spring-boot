@@ -8,6 +8,8 @@ import com.itqan.edu.features.enrollments.Enrollment;
 import com.itqan.edu.features.enrollments.EnrollmentRepository;
 import com.itqan.edu.features.payments.stripe.StripeGateway;
 import com.itqan.edu.features.payments.stripe.StripeWebhookEvent;
+import com.itqan.edu.features.payments.paymob.PaymobGateway;
+import com.itqan.edu.features.payments.paymob.PaymobProperties;
 import com.itqan.edu.features.students.Student;
 import com.itqan.edu.features.students.StudentRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,6 +47,8 @@ class PaymentServiceTest {
     private StripeGateway stripeGateway;
     @Mock
     private AuditLogService auditLogService;
+    @Mock
+    private PaymobGateway paymobGateway;
 
     private PaymentService paymentService;
 
@@ -68,7 +72,9 @@ class PaymentServiceTest {
                 processedStripeEventRepository,
                 stripeGateway,
                 stripeProperties,
-                auditLogService);
+                auditLogService,
+                paymobGateway,
+                new PaymobProperties());
     }
 
     @Test

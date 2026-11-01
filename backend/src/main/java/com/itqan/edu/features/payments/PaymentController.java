@@ -39,6 +39,17 @@ public class PaymentController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/paymob/checkout")
+    @PreAuthorize("hasRole('STUDENT') or hasRole('ADMIN')")
+    @SecurityRequirement(name = "Bearer Authentication")
+    @Operation(summary = "Start a Paymob checkout", description = "Returns the Paymob hosted checkout URL for a course")
+    public ResponseEntity<CreateCheckoutSessionResponse> createPaymobCheckout(
+            @Valid @RequestBody CreateCheckoutSessionRequest request,
+            Authentication authentication) {
+        Long studentId = currentUserService.getCurrentStudentId(authentication);
+        return ResponseEntity.ok(paymentService.createPaymobCheckout(request, studentId));
+    }
+
     @PostMapping("/webhook/stripe")
     @Operation(summary = "Stripe webhook endpoint", description = "Handles Stripe checkout webhook events")
     public ResponseEntity<Map<String, String>> stripeWebhook(

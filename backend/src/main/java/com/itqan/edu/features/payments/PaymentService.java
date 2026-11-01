@@ -18,6 +18,12 @@ import com.itqan.edu.features.payments.stripe.StripeCheckoutSessionResult;
 import com.itqan.edu.features.audit.AuditLogService;
 import com.itqan.edu.features.payments.stripe.StripeGateway;
 import com.itqan.edu.features.payments.stripe.StripeWebhookEvent;
+import com.itqan.edu.features.payments.paymob.PaymobCheckout;
+import com.itqan.edu.features.payments.paymob.PaymobGateway;
+import com.itqan.edu.features.payments.paymob.PaymobIntentionRequest;
+import com.itqan.edu.features.payments.paymob.PaymobOutcome;
+import com.itqan.edu.features.payments.paymob.PaymobProperties;
+import com.itqan.edu.features.payments.paymob.PaymobWebhookService;
 import com.itqan.edu.features.students.Student;
 import com.itqan.edu.features.students.StudentRepository;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +53,8 @@ public class PaymentService {
     private final StripeGateway stripeGateway;
     private final StripeProperties stripeProperties;
     private final AuditLogService auditLogService;
+    private final PaymobGateway paymobGateway;
+    private final PaymobProperties paymobProperties;
 
     @Transactional
     public CreateCheckoutSessionResponse createCheckoutSession(CreateCheckoutSessionRequest request, Long studentId) {
@@ -187,6 +195,7 @@ public class PaymentService {
     @Transactional(readOnly = true)
     public CheckoutSessionStatusResponse getCheckoutSessionStatus(String sessionId, Long studentId) {
         Payment payment = paymentRepository.findByStripeCheckoutSessionId(sessionId)
+                .or(() -> paymentRepository.findByGatewayReference(sessionId))
                 .orElseThrow(() -> new BusinessException(ErrorCode.CHECKOUT_SESSION_NOT_FOUND));
         if (!payment.getStudent().getId().equals(studentId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN);
@@ -198,6 +207,172 @@ public class PaymentService {
                 .paymentId(payment.getId())
                 .courseId(payment.getCourse().getId())
                 .build();
+    }
+
+    /**
+     * Starts a Paymob checkout for a course. Same checks and coupon handling as the Stripe flow;
+     * free (or 100%-coupon) purchases enroll at once without a redirect.
+     */
+    @Transactional
+    public CreateCheckoutSessionResponse createPaymobCheckout(CreateCheckoutSessionRequest request, Long studentId) {
+        if (!paymobProperties.isConfigured()) {
+            throw new BusinessException(ErrorCode.ONLINE_PAYMENT_DISABLED);
+        }
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.STUDENT_NOT_FOUND));
+        Course course = courseRepository.findById(request.getCourseId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.COURSE_NOT_FOUND));
+
+        if (enrollmentRepository.findByStudentIdAndCourseId(studentId, course.getId())
+                .filter(e -> e.getStatus() != EnrollmentStatus.DROPPED).isPresent()) {
+            throw new BusinessException(ErrorCode.ENROLLMENT_ALREADY_EXISTS);
+        }
+        // A student who abandoned an earlier Paymob page can start again: the old attempt is cancelled.
+        paymentRepository.findByStudentIdAndCourseIdAndStatus(studentId, course.getId(), PaymentStatus.PENDING)
+                .forEach(this::cancelPendingAttempt);
+
+        CouponService.CouponValidationResult couponValidation = couponService.validateForCheckout(
+                course.getId(), request.getCouponCode(), studentId);
+        Coupon coupon = couponValidation.getCoupon();
+        var pricing = couponValidation.getPricing();
+
+        Payment payment = paymentRepository.save(Payment.builder()
+                .student(student)
+                .course(course)
+                .amount(pricing.getFinalAmount())
+                .originalAmount(pricing.getOriginalAmount())
+                .discountAmount(pricing.getDiscountAmount())
+                .currency(paymobProperties.getCurrency().toUpperCase())
+                .status(PaymentStatus.PENDING)
+                .paymentGateway("PAYMOB")
+                .paymentMethod("PAYMOB_CHECKOUT")
+                .coupon(coupon)
+                .build());
+
+        if (Boolean.TRUE.equals(pricing.getFree())) {
+            payment.setStatus(PaymentStatus.COMPLETED);
+            payment.setCompletedAt(LocalDateTime.now());
+            payment.setNotes("Completed by 100% coupon or free price");
+            paymentRepository.save(payment);
+            Enrollment enrollment = enrollIfNeeded(student, course);
+            if (coupon != null) {
+                markCouponAsRedeemed(payment, null);
+            }
+            auditLogService.recordSuccess("PAYMENT_COMPLETED", "PAYMENT", String.valueOf(payment.getId()),
+                    Map.of("amount", payment.getAmount(), "currency", payment.getCurrency(), "studentId", student.getId()));
+            return CreateCheckoutSessionResponse.builder()
+                    .mode(CheckoutMode.FREE_ENROLLED)
+                    .paymentId(payment.getId())
+                    .enrollmentId(enrollment != null ? enrollment.getId() : null)
+                    .pricing(pricing)
+                    .build();
+        }
+
+        String reference = PaymobWebhookService.PAYMENT_PREFIX + payment.getId() + "-"
+                + java.util.UUID.randomUUID().toString().substring(0, 8);
+        payment.setGatewayReference(reference);
+        paymentRepository.save(payment);
+
+        String origin = paymobProperties.publicOrigin();
+        PaymobCheckout checkout = paymobGateway.createIntention(PaymobIntentionRequest.builder()
+                .amountCents(toMinorUnit(pricing.getFinalAmount()))
+                .currency(paymobProperties.getCurrency().toUpperCase())
+                .itemName(course.getTitle())
+                .reference(reference)
+                .firstName(student.getFirstName())
+                .lastName(student.getLastName())
+                .email(student.getEmail())
+                .phone(student.getPhoneNumber())
+                .redirectionUrl(origin + "/courses/success?session_id=" + reference)
+                .notificationUrl(origin + "/api/payments/webhook/paymob")
+                .build());
+
+        if (coupon != null) {
+            couponRedemptionRepository.save(CouponRedemption.builder()
+                    .coupon(coupon)
+                    .student(student)
+                    .payment(payment)
+                    .status(CouponRedemptionStatus.RESERVED)
+                    .build());
+        }
+
+        return CreateCheckoutSessionResponse.builder()
+                .mode(CheckoutMode.REDIRECT)
+                .checkoutUrl(checkout.checkoutUrl())
+                .sessionId(reference)
+                .paymentId(payment.getId())
+                .pricing(pricing)
+                .build();
+    }
+
+    /** Applies a verified Paymob callback to the course payment it refers to. */
+    @Transactional
+    public void applyPaymobTransaction(String reference, String transactionId, PaymobOutcome outcome) {
+        Payment payment = paymentRepository.findByGatewayReference(reference).orElse(null);
+        if (payment == null) {
+            log.warn("Paymob callback for unknown payment reference {}", reference);
+            return;
+        }
+        switch (outcome) {
+            case PAID -> {
+                if (payment.getStatus() == PaymentStatus.COMPLETED) {
+                    return;
+                }
+                payment.setStatus(PaymentStatus.COMPLETED);
+                payment.setCompletedAt(LocalDateTime.now());
+                payment.setTransactionId(transactionId);
+                paymentRepository.save(payment);
+                enrollIfNeeded(payment.getStudent(), payment.getCourse());
+                if (payment.getCoupon() != null) {
+                    markCouponAsRedeemed(payment, null);
+                }
+                auditLogService.recordSuccess("PAYMENT_COMPLETED", "PAYMENT", String.valueOf(payment.getId()),
+                        Map.of("amount", payment.getAmount(), "currency", payment.getCurrency(),
+                                "studentId", payment.getStudent().getId(), "gateway", "PAYMOB"));
+            }
+            case FAILED -> {
+                if (payment.getStatus() == PaymentStatus.PENDING) {
+                    payment.setStatus(PaymentStatus.FAILED);
+                    payment.setNotes("Paymob transaction " + transactionId + " failed");
+                    paymentRepository.save(payment);
+                    releaseReservedCoupon(payment);
+                    auditLogService.recordFailure("PAYMENT_FAILED", "PAYMENT", String.valueOf(payment.getId()),
+                            "Paymob transaction failed");
+                }
+            }
+            case REFUNDED -> {
+                if (payment.getStatus() == PaymentStatus.REFUNDED) {
+                    return;
+                }
+                payment.setStatus(PaymentStatus.REFUNDED);
+                paymentRepository.save(payment);
+                enrollmentRepository.findByStudentIdAndCourseId(payment.getStudent().getId(), payment.getCourse().getId())
+                        .ifPresent(enrollment -> {
+                            enrollment.setStatus(EnrollmentStatus.DROPPED);
+                            enrollmentRepository.save(enrollment);
+                        });
+                auditLogService.recordSuccess("PAYMENT_REFUNDED", "PAYMENT", String.valueOf(payment.getId()),
+                        Map.of("source", "paymob-callback"));
+            }
+            default -> {
+            }
+        }
+    }
+
+    private void cancelPendingAttempt(Payment pending) {
+        pending.setStatus(PaymentStatus.CANCELLED);
+        pending.setNotes("Replaced by a new checkout attempt");
+        paymentRepository.save(pending);
+        releaseReservedCoupon(pending);
+    }
+
+    private void releaseReservedCoupon(Payment payment) {
+        couponRedemptionRepository.findByPaymentId(payment.getId())
+                .filter(r -> r.getStatus() == CouponRedemptionStatus.RESERVED)
+                .ifPresent(r -> {
+                    r.setStatus(CouponRedemptionStatus.RELEASED);
+                    couponRedemptionRepository.save(r);
+                });
     }
 
     private void processCompletedSession(StripeWebhookEvent event) {

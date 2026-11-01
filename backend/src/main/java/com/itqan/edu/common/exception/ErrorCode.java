@@ -56,6 +56,8 @@ public enum ErrorCode {
     PAYMENT_GATEWAY_ERROR(502, "PAY_004", "Payment gateway error"),
     CHECKOUT_SESSION_NOT_FOUND(404, "PAY_005", "Checkout session not found"),
     STRIPE_SIGNATURE_INVALID(400, "PAY_006", "Invalid Stripe webhook signature"),
+    PAYMENT_SIGNATURE_INVALID(400, "PAY_007", "Invalid payment callback signature"),
+    ONLINE_PAYMENT_DISABLED(503, "PAY_008", "Online payment is not available right now"),
 
     // Lesson Enrollment
     LESSON_NOT_ENROLLED(404, "ENR_003", "Student is not enrolled in this lesson"),
@@ -107,6 +109,15 @@ public enum ErrorCode {
 
     // Content access
     COURSE_ACCESS_DENIED(403, "ENR_005", "You must be enrolled in this course to access this content"),
+
+    // Scholarships & donations
+    SCHOLARSHIP_NOT_FOUND(404, "SCH_001", "Scholarship request not found"),
+    SCHOLARSHIP_ALREADY_PENDING(409, "SCH_002", "You already have a pending scholarship request for this course"),
+    SCHOLARSHIP_NOT_PENDING(409, "SCH_003", "This scholarship request has already been decided"),
+    SCHOLARSHIP_COURSE_FREE(400, "SCH_004", "This course is free; no scholarship is needed"),
+    SCHOLARSHIP_FUND_INSUFFICIENT(409, "SCH_005", "The scholarship fund does not have enough money for this course"),
+    DONATION_NOT_FOUND(404, "DON_001", "Donation not found"),
+    DONATION_AMOUNT_INVALID(400, "DON_002", "Donation amount is outside the allowed range"),
 
     // Rate limiting
     TOO_MANY_REQUESTS(429, "SYS_002", "Too many requests, please try again later"),

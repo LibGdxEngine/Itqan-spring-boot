@@ -12,6 +12,7 @@ export interface LandingHero {
 
 export interface LandingStats {
   courses: number
+  lessons: number
   teachers: number
   students: number
   specializations: number
@@ -42,6 +43,11 @@ export interface LandingTeacher {
   id: number
   name: string
   specialty: string | null
+  photoUrl: string | null
+  titleAr: string | null
+  titleEn: string | null
+  bioAr: string | null
+  bioEn: string | null
   coursesCount: number
   studentsCount: number
 }
@@ -58,6 +64,16 @@ export interface LandingArticle {
   publishedAt: string | null
 }
 
+export interface LandingTestimonial {
+  id: number
+  authorName: string
+  rating: number
+  comment: string
+  courseId: number
+  courseTitle: string
+  createdAt: string | null
+}
+
 export interface LandingPageData {
   hero: LandingHero
   stats: LandingStats
@@ -65,6 +81,7 @@ export interface LandingPageData {
   featuredCourses: LandingCourse[]
   featuredInstructors: LandingTeacher[]
   featuredArticles: LandingArticle[]
+  featuredTestimonials: LandingTestimonial[]
 }
 
 export interface LandingPageUpdateRequest {

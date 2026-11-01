@@ -1,10 +1,9 @@
 import type { Metadata } from "next"
 import ServicesClient from "./ServicesClient"
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+import { SITE_URL, defaultOgImage, ogLocale } from "@/lib/seo"
 
 export const metadata: Metadata = {
-  title: "خدمات الأكاديمية — إتقان",
+  title: "خدمات الأكاديمية",
   description:
     "خدمات إتقان العلمية والتحريرية والتعليمية: تحقيق المخطوطات، مراجعة الكتب والرسائل، التدقيق اللغوي، تعليم القرآن الكريم، وتعليم العربية لغير الناطقين بها.",
   keywords: [
@@ -14,22 +13,24 @@ export const metadata: Metadata = {
     "تدقيق لغوي",
     "تعليم القرآن الكريم",
     "تعليم غير الناطقين بالعربية",
-    "إتقان",
+    "إتقان للتفسير",
   ],
   alternates: { canonical: `${SITE_URL}/services` },
   openGraph: {
     type: "website",
     url: `${SITE_URL}/services`,
-    title: "خدمات الأكاديمية — إتقان",
+    title: "خدمات الأكاديمية",
     description:
       "خدمات إتقان العلمية والتحريرية والتعليمية: تحقيق المخطوطات، مراجعة الكتب والرسائل، التدقيق اللغوي، تعليم القرآن الكريم، وتعليم العربية لغير الناطقين بها.",
-    locale: "ar_SA",
+    locale: ogLocale("ar"),
+    images: [defaultOgImage("ar")],
   },
   twitter: {
     card: "summary_large_image",
-    title: "خدمات الأكاديمية — إتقان",
+    title: "خدمات الأكاديمية",
     description:
       "خدمات إتقان العلمية والتحريرية والتعليمية: تحقيق المخطوطات، مراجعة الكتب والرسائل، التدقيق اللغوي، تعليم القرآن الكريم، وتعليم العربية لغير الناطقين بها.",
+    images: [defaultOgImage("ar").url],
   },
 }
 

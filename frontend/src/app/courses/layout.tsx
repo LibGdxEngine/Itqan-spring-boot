@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
-import { SITE_URL, fetchPublic, localizedAlternates, jsonLdHtml } from "@/lib/seo";
+import { SITE_URL, fetchPublic, localizedAlternates, jsonLdHtml, ogLocale, defaultOgImage } from "@/lib/seo";
 
 
 type CourseItem = {
@@ -25,12 +25,14 @@ export async function generateMetadata(): Promise<Metadata> {
       url,
       title: t("title"),
       description: t("description"),
-      locale: locale === "ar" ? "ar_SA" : "en_US",
+      locale: ogLocale(locale),
+      images: [defaultOgImage(locale)],
     },
     twitter: {
       card: "summary_large_image",
       title: t("title"),
       description: t("description"),
+      images: [defaultOgImage(locale).url],
     },
   };
 }

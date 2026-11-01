@@ -9,11 +9,6 @@
 
 // TODO: replace with the academy's real contact details before shipping.
 // `whatsapp` must be digits only in international format (no +, spaces or dashes).
-export const CONTACT = {
-  // Real numbers come from Admin → Settings; this is only the email fallback.
-  email: "info@itqan.academy",
-} as const
-
 export type ServiceGroupKey = "scholarly" | "teaching"
 
 export interface ServiceGroupMeta {

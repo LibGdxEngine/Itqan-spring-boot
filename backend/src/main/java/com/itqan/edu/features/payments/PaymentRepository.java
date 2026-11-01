@@ -23,6 +23,10 @@ public interface PaymentRepository extends JpaRepository<Payment, Long>, JpaSpec
 
     Optional<Payment> findFirstByStripePaymentIntentId(String stripePaymentIntentId);
 
+    Optional<Payment> findByGatewayReference(String gatewayReference);
+
+    List<Payment> findByStudentIdAndCourseIdAndStatus(Long studentId, Long courseId, PaymentStatus status);
+
     @Query("SELECT p.course.id, p.course.title, p.currency, SUM(p.amount), COUNT(p) FROM Payment p " +
            "WHERE p.status = :status AND p.createdAt BETWEEN :from AND :to " +
            "GROUP BY p.course.id, p.course.title, p.currency ORDER BY SUM(p.amount) DESC")

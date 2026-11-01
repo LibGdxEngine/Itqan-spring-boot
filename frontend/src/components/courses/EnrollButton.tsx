@@ -13,6 +13,7 @@ import { Loader2, CheckCircle } from 'lucide-react';
 import { paymentsBillingApi } from '@/lib/payments-billing';
 import { Input } from '@/components/ui/input';
 import { PaymentMethodDialog } from '@/components/courses/PaymentMethodDialog';
+import Link from 'next/link';
 
 interface EnrollButtonProps {
     courseId: number;
@@ -254,11 +255,20 @@ export function EnrollButton({ courseId, coursePrice, courseTitle }: EnrollButto
                 </Button>
             ) : (
                 <PaymentMethodDialog
+                    courseId={courseId}
                     courseTitle={courseTitle}
                     amount={pricing.finalAmount}
                     couponCode={appliedCouponCode}
                 />
             )}
+
+            {!pricing.free ? (
+                <p className="text-center text-sm text-ink-2">
+                    <Link href={`/scholarships/apply?courseId=${courseId}`} className="text-brand underline-offset-4 hover:underline">
+                        {t('scholarships.cantPay')}
+                    </Link>
+                </p>
+            ) : null}
         </div>
     );
 }

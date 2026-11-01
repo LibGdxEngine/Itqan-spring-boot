@@ -63,6 +63,10 @@ public class Payment {
 
     private String stripePaymentIntentId;
 
+    /** Our reference sent to Paymob (special_reference / merchant_order_id), e.g. PAY-12-a1b2c3. */
+    @Column(unique = true, length = 64)
+    private String gatewayReference;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "coupon_id")
     private Coupon coupon;

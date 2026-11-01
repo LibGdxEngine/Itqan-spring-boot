@@ -14,6 +14,7 @@ import com.itqan.edu.features.reviews.ReviewDtos.ReviewSummary;
 import com.itqan.edu.features.students.Student;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -68,6 +69,7 @@ public class ReviewService {
 
     /** Creates or replaces the student's review. Only students with a non-dropped enrollment may review. */
     @Transactional
+    @CacheEvict(value = "landing-page", allEntries = true)
     public ReviewResponse upsert(Long courseId, Student student, ReviewRequest request) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.COURSE_NOT_FOUND));
@@ -86,6 +88,7 @@ public class ReviewService {
     }
 
     @Transactional
+    @CacheEvict(value = "landing-page", allEntries = true)
     public void deleteMine(Long courseId, Student student) {
         CourseReview review = reviewRepository.findByCourseIdAndStudentId(courseId, student.getId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.REVIEW_NOT_FOUND));
@@ -122,6 +125,7 @@ public class ReviewService {
     }
 
     @Transactional
+    @CacheEvict(value = "landing-page", allEntries = true)
     public void setHidden(Long reviewId, boolean hidden) {
         CourseReview review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.REVIEW_NOT_FOUND));
@@ -136,7 +140,7 @@ public class ReviewService {
                 review.getRating(), review.getComment(), review.getCreatedAt(), review.getUpdatedAt());
     }
 
-    private static String publicName(Student student) {
+    public static String publicName(Student student) {
         String first = student.getFirstName() == null ? "" : student.getFirstName().trim();
         String last = student.getLastName() == null ? "" : student.getLastName().trim();
         if (first.isEmpty() && last.isEmpty()) {

@@ -19,4 +19,5 @@ public class LandingPageResponse {
     private List<LandingCourseDto> featuredCourses;
     private List<LandingTeacherDto> featuredInstructors;
     private List<LandingArticleDto> featuredArticles;
+    private List<LandingTestimonialDto> featuredTestimonials;
 }

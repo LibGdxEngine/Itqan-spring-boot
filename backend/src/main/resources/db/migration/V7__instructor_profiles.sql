@@ -1,0 +1,6 @@
+-- Public teacher profile shown on the landing page and instructor pages.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS photo_url VARCHAR(1000);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS title_ar VARCHAR(200);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS title_en VARCHAR(200);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS bio_ar VARCHAR(4000);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS bio_en VARCHAR(4000);

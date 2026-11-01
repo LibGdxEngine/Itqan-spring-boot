@@ -54,7 +54,12 @@ public class RateLimitFilter extends OncePerRequestFilter {
                 new Rule("otp-request", List.of("/api/auth/forgot-password"),
                         otpRequestsPer15Min, Duration.ofMinutes(15)),
                 new Rule("otp-verify", List.of("/api/auth/verify-otp", "/api/auth/reset-password"),
-                        otpVerifyPer15Min, Duration.ofMinutes(15)));
+                        otpVerifyPer15Min, Duration.ofMinutes(15)),
+                // Public guest endpoint: each call creates a Stripe session and a pending row.
+                new Rule("donation-checkout", List.of("/api/donations/checkout"),
+                        10, Duration.ofMinutes(15)),
+                new Rule("scholarship-apply", List.of("/api/scholarships/applications"),
+                        10, Duration.ofHours(1)));
     }
 
     @Override

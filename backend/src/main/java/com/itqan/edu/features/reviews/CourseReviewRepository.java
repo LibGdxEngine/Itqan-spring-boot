@@ -17,6 +17,8 @@ public interface CourseReviewRepository extends JpaRepository<CourseReview, Long
 
     Optional<CourseReview> findByCourseIdAndStudentId(Long courseId, Long studentId);
 
+    List<CourseReview> findTop12ByHiddenFalseAndRatingGreaterThanEqualAndCommentIsNotNullOrderByCreatedAtDesc(int minRating);
+
     /** Per course: average rating and count of visible reviews. */
     @Query("SELECT r.course.id, AVG(r.rating), COUNT(r) FROM CourseReview r " +
            "WHERE r.hidden = false AND r.course.id IN :courseIds GROUP BY r.course.id")

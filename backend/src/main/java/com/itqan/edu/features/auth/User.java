@@ -66,6 +66,22 @@ public class User implements UserDetails {
 
     private LocalDateTime lastLoginAt;
 
+    // Public teacher profile (instructors only)
+    @Column(length = 1000)
+    private String photoUrl;
+
+    @Column(length = 200)
+    private String titleAr;
+
+    @Column(length = 200)
+    private String titleEn;
+
+    @Column(length = 4000)
+    private String bioAr;
+
+    @Column(length = 4000)
+    private String bioEn;
+
     @Column(nullable = false)
     @Builder.Default
     private Integer failedLoginAttempts = 0;

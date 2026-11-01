@@ -82,6 +82,12 @@ export const paymentsBillingApi = {
     return response.data;
   },
 
+  /** Paymob hosted checkout for a course (card / wallet). */
+  async createPaymobCheckout(request: CreateCheckoutSessionRequest): Promise<CreateCheckoutSessionResponse> {
+    const response = await api.post<CreateCheckoutSessionResponse>("/api/payments/paymob/checkout", request);
+    return response.data;
+  },
+
   async getMyPayments(): Promise<PaymentResponse[]> {
     const response = await api.get<PaymentResponse[]>("/api/payments/me");
     return response.data;

@@ -25,6 +25,8 @@ import {
   Ticket,
   Users,
   X,
+  HandHeart,
+  HeartHandshake,
 } from "lucide-react"
 
 import { useAuth } from "@/components/auth-context"
@@ -67,6 +69,8 @@ const NAV_GROUPS: { labelKey: string; items: NavItem[] }[] = [
       { href: "/admin/payments", labelKey: "payments", icon: CreditCard },
       { href: "/admin/coupons", labelKey: "coupons", icon: Ticket },
       { href: "/admin/enrollment-codes", labelKey: "enrollmentCodes", icon: KeyRound },
+      { href: "/admin/scholarships", labelKey: "scholarships", icon: HandHeart },
+      { href: "/admin/donations", labelKey: "donations", icon: HeartHandshake },
     ],
   },
   {

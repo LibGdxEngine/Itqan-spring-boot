@@ -4,15 +4,13 @@ import Link from "next/link"
 import Image from "next/image"
 import { useTranslations } from "next-intl"
 import { motion, useReducedMotion } from "framer-motion"
+import { Award, BookOpen, PlayCircle } from "lucide-react"
 import { fadeUp, staggerParent } from "@/lib/motion"
 
-
-
-
-const stats = [
-  { value: "10K+", labelKey: "home.stats.activeStudents" },
-  { value: "500+", labelKey: "home.stats.courses" },
-  { value: "98%", labelKey: "home.stats.successRate" },
+const features = [
+  { key: "courses", icon: BookOpen },
+  { key: "flexible", icon: PlayCircle },
+  { key: "certificates", icon: Award },
 ] as const
 
 export function AuthBrandPanel() {
@@ -99,20 +97,24 @@ export function AuthBrandPanel() {
             {t("auth.branding.description")}
           </motion.p>
 
-          {/* Stats */}
-          <motion.div
-            variants={itemVariants}
-            className="flex gap-8 pt-4 ltr-flex"
-          >
-            {stats.map((stat) => (
-              <div key={stat.value}>
-                <div className="text-3xl font-bold">{stat.value}</div>
-                <div className="text-sm text-on-night-2">
-                  {t(stat.labelKey)}
+          {/* What the platform offers */}
+          <motion.ul variants={itemVariants} className="space-y-5 pt-4 max-w-md">
+            {features.map(({ key, icon: Icon }) => (
+              <li key={key} className="flex items-start gap-4">
+                <span className="shrink-0 rounded-xl bg-white/10 p-2.5">
+                  <Icon className="h-5 w-5" aria-hidden />
+                </span>
+                <div>
+                  <div className="font-semibold">
+                    {t(`auth.branding.features.${key}.title`)}
+                  </div>
+                  <div className="text-sm text-on-night-2 leading-relaxed">
+                    {t(`auth.branding.features.${key}.description`)}
+                  </div>
                 </div>
-              </div>
+              </li>
             ))}
-          </motion.div>
+          </motion.ul>
         </div>
 
         {/* Footer */}

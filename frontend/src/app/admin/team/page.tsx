@@ -1,19 +1,21 @@
 "use client"
 
-import { FormEvent, useCallback, useEffect, useMemo, useState } from "react"
+import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useTranslations } from "next-intl"
-import { Loader2 } from "lucide-react"
+import { ImagePlus, Loader2, X } from "lucide-react"
 
 import { useAuth } from "@/components/auth-context"
 import { PageHeader } from "@/components/admin/ui"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 import { ResponsiveTable } from "@/components/ui/responsive-table"
 import { useToast } from "@/components/ui/use-toast"
 import { getErrorMessage } from "@/lib/api-axios"
 import { AdminUser, adminsApi } from "@/lib/admins"
 import { InstructorUser, instructorsApi } from "@/lib/instructors"
+import { validateThumbnailFile } from "@/lib/courseThumbnail"
 
 interface ListErrors {
   admins?: string
@@ -44,6 +46,25 @@ interface InstructorFormState {
   email: string
   password: string
   enabled: boolean
+  photoUrl: string
+  titleAr: string
+  titleEn: string
+  bioAr: string
+  bioEn: string
+}
+
+type InstructorProfileKey = "photoUrl" | "titleAr" | "titleEn" | "bioAr" | "bioEn"
+
+const emptyToNull = (value: string) => (value.trim() ? value.trim() : null)
+
+function instructorProfilePayload(form: InstructorFormState) {
+  return {
+    photoUrl: emptyToNull(form.photoUrl),
+    titleAr: emptyToNull(form.titleAr),
+    titleEn: emptyToNull(form.titleEn),
+    bioAr: emptyToNull(form.bioAr),
+    bioEn: emptyToNull(form.bioEn),
+  }
 }
 
 function formatDate(value?: string) {
@@ -83,6 +104,11 @@ const defaultInstructorForm: InstructorFormState = {
   email: "",
   password: "",
   enabled: true,
+  photoUrl: "",
+  titleAr: "",
+  titleEn: "",
+  bioAr: "",
+  bioEn: "",
 }
 
 export default function AdminTeamPage() {
@@ -227,6 +253,7 @@ export default function AdminTeamPage() {
         email: instructorCreateForm.email.trim(),
         password: instructorCreateForm.password,
         enabled: instructorCreateForm.enabled,
+        ...instructorProfilePayload(instructorCreateForm),
       })
 
       setInstructors((prev) => sortInstructors([...prev, created]))
@@ -251,6 +278,11 @@ export default function AdminTeamPage() {
       email: instructor.email,
       password: "",
       enabled: instructor.enabled,
+      photoUrl: instructor.photoUrl ?? "",
+      titleAr: instructor.titleAr ?? "",
+      titleEn: instructor.titleEn ?? "",
+      bioAr: instructor.bioAr ?? "",
+      bioEn: instructor.bioEn ?? "",
     })
   }
 
@@ -271,6 +303,7 @@ export default function AdminTeamPage() {
         email: instructorEditingForm.email.trim(),
         password: instructorEditingForm.password || undefined,
         enabled: instructorEditingForm.enabled,
+        ...instructorProfilePayload(instructorEditingForm),
       })
 
       setInstructors((prev) => sortInstructors(prev.map((item) => (item.id === updated.id ? updated : item))))
@@ -632,6 +665,11 @@ export default function AdminTeamPage() {
                 />
                 {t("admin.instructors.enabled")}
               </label>
+              <InstructorProfileFields
+                idPrefix="create-instructor"
+                form={instructorCreateForm}
+                onChange={(key, value) => setInstructorCreateForm((prev) => ({ ...prev, [key]: value }))}
+              />
               <div className="md:col-span-2 xl:col-span-3">
                 <Button type="submit" disabled={creatingInstructor}>
                   {creatingInstructor ? (
@@ -709,6 +747,13 @@ export default function AdminTeamPage() {
                 />
                 {t("admin.instructors.enabled")}
               </label>
+              <InstructorProfileFields
+                idPrefix="edit-instructor"
+                form={instructorEditingForm}
+                onChange={(key, value) =>
+                  setInstructorEditingForm((prev) => (prev ? { ...prev, [key]: value } : prev))
+                }
+              />
               <div className="flex items-center gap-2 md:col-span-2 xl:col-span-3">
                 <Button type="submit" disabled={savingInstructor}>
                   {savingInstructor ? (
@@ -740,8 +785,16 @@ export default function AdminTeamPage() {
               {
                 header: t("admin.instructors.name"),
                 cell: (instructor) => (
-                  <span className="font-medium text-ink">
-                    {[instructor.firstName, instructor.lastName].filter(Boolean).join(" ").trim() || "-"}
+                  <span className="inline-flex items-center gap-3">
+                    {instructor.photoUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={instructor.photoUrl} alt="" className="h-9 w-9 rounded-full object-cover ring-1 ring-line" />
+                    ) : (
+                      <span className="h-9 w-9 rounded-full bg-sand" aria-hidden />
+                    )}
+                    <span className="font-medium text-ink">
+                      {[instructor.firstName, instructor.lastName].filter(Boolean).join(" ").trim() || "-"}
+                    </span>
                   </span>
                 ),
               },
@@ -800,5 +853,136 @@ export default function AdminTeamPage() {
         )}
       </section>
     </>
+  )
+}
+
+/** Public teacher profile fields (photo, credentials, bio) shared by the create and edit forms. */
+function InstructorProfileFields({
+  idPrefix,
+  form,
+  onChange,
+}: {
+  idPrefix: string
+  form: InstructorFormState
+  onChange: (key: InstructorProfileKey, value: string) => void
+}) {
+  const t = useTranslations()
+  const { toast } = useToast()
+  const fileInput = useRef<HTMLInputElement>(null)
+  const [uploading, setUploading] = useState(false)
+
+  const pickPhoto = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    event.target.value = ""
+    if (!file) return
+    const check = validateThumbnailFile(file)
+    if (!check.ok) {
+      toast({
+        variant: "destructive",
+        title: check.reason === "size" ? t("admin.instructors.photoTooLarge") : t("admin.instructors.photoType"),
+      })
+      return
+    }
+    setUploading(true)
+    try {
+      const uploaded = await instructorsApi.uploadPhoto(file)
+      onChange("photoUrl", uploaded.url)
+    } catch (err) {
+      toast({ variant: "destructive", title: t("admin.instructors.photoFailed"), description: getErrorMessage(err) })
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  return (
+    <fieldset className="grid gap-3 rounded-lg border border-line p-3 sm:col-span-2 xl:col-span-3 sm:grid-cols-[160px_1fr]">
+      <legend className="px-1 text-xs font-semibold uppercase tracking-wide text-ink-3">
+        {t("admin.instructors.profileTitle")}
+      </legend>
+
+      <div className="space-y-1.5">
+        <span className="text-sm font-medium text-ink">{t("admin.instructors.photo")}</span>
+        {form.photoUrl ? (
+          <div className="relative w-[160px] overflow-hidden rounded-lg border border-line-strong bg-subtle">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={form.photoUrl} alt="" className="aspect-square w-full object-cover" />
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              className="absolute end-1 top-1"
+              onClick={() => onChange("photoUrl", "")}
+            >
+              <X /> {t("admin.instructors.removePhoto")}
+            </Button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => fileInput.current?.click()}
+            disabled={uploading}
+            className="flex aspect-square w-[160px] flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-line-strong bg-paper px-2 text-center text-sm text-ink-3 transition-colors hover:border-brand hover:text-brand"
+          >
+            {uploading ? <Loader2 className="h-6 w-6 animate-spin" /> : <ImagePlus className="h-6 w-6" />}
+            <span>{t("admin.instructors.choosePhoto")}</span>
+            <span className="text-xs">{t("admin.instructors.photoHint")}</span>
+          </button>
+        )}
+        <input
+          ref={fileInput}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          className="hidden"
+          onChange={(event) => void pickPhoto(event)}
+        />
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="space-y-1.5">
+          <Label htmlFor={`${idPrefix}-title-ar`}>{t("admin.instructors.titleAr")}</Label>
+          <Input
+            id={`${idPrefix}-title-ar`}
+            dir="rtl"
+            value={form.titleAr}
+            maxLength={200}
+            placeholder={t("admin.instructors.titleHint")}
+            onChange={(event) => onChange("titleAr", event.target.value)}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor={`${idPrefix}-title-en`}>{t("admin.instructors.titleEn")}</Label>
+          <Input
+            id={`${idPrefix}-title-en`}
+            dir="ltr"
+            value={form.titleEn}
+            maxLength={200}
+            onChange={(event) => onChange("titleEn", event.target.value)}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor={`${idPrefix}-bio-ar`}>{t("admin.instructors.bioAr")}</Label>
+          <Textarea
+            id={`${idPrefix}-bio-ar`}
+            dir="rtl"
+            rows={5}
+            value={form.bioAr}
+            maxLength={4000}
+            placeholder={t("admin.instructors.bioHint")}
+            onChange={(event) => onChange("bioAr", event.target.value)}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor={`${idPrefix}-bio-en`}>{t("admin.instructors.bioEn")}</Label>
+          <Textarea
+            id={`${idPrefix}-bio-en`}
+            dir="ltr"
+            rows={5}
+            value={form.bioEn}
+            maxLength={4000}
+            onChange={(event) => onChange("bioEn", event.target.value)}
+          />
+        </div>
+      </div>
+    </fieldset>
   )
 }

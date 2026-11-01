@@ -17,6 +17,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import com.itqan.edu.features.courses.dto.ThumbnailUploadResponse;
 
 @RestController
 @RequestMapping("/api/instructors")
@@ -65,5 +67,12 @@ public class InstructorController {
             Authentication authentication) {
         InstructorResponse response = instructorService.deactivateInstructor(id, currentUserService.getCurrentUser(authentication));
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/photo")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Upload an instructor profile photo, returns its public URL")
+    public ResponseEntity<ThumbnailUploadResponse> uploadPhoto(@RequestParam("file") MultipartFile file) {
+        return ResponseEntity.ok(instructorService.uploadPhoto(file));
     }
 }

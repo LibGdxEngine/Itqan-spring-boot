@@ -2,6 +2,8 @@ package com.itqan.edu.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itqan.edu.features.auth.RefreshTokenRepository;
+import com.itqan.edu.features.scholarships.DonationRepository;
+import com.itqan.edu.features.scholarships.ScholarshipApplicationRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -33,8 +35,17 @@ public abstract class BaseIntegrationTest {
      * and have no cascade). This is a pre-existing teardown-ordering issue,
      * independent of any single feature.
      */
+    @Autowired
+    protected ScholarshipApplicationRepository scholarshipApplicationRepository;
+
+    @Autowired
+    protected DonationRepository donationRepository;
+
     @AfterEach
     void clearRefreshTokensAfterEach() {
         refreshTokenRepository.deleteAll();
+        // Scholarship requests reference students and courses, which subclasses delete per test.
+        scholarshipApplicationRepository.deleteAll();
+        donationRepository.deleteAll();
     }
 }

@@ -15,6 +15,8 @@ public interface LessonRepository extends JpaRepository<Lesson, Long> {
 
     long countByModuleCourseIdAndActiveTrue(Long courseId);
 
+    long countByActiveTrueAndModuleCourseActiveTrue();
+
     @Query("SELECT l.module.course.id, COUNT(l) FROM Lesson l " +
            "WHERE l.module.course.id IN :courseIds AND l.active = true GROUP BY l.module.course.id")
     List<Object[]> countActiveLessonsPerCourse(@Param("courseIds") java.util.Collection<Long> courseIds);

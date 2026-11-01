@@ -1,7 +1,18 @@
 "use client"
 
 import Link from "next/link"
-import { ArrowRight, Play, Star, Clock, ChevronRight } from "lucide-react"
+import {
+  ArrowRight,
+  Star,
+  Clock,
+  ChevronRight,
+  UserRound,
+  Route,
+  ClipboardCheck,
+  Award,
+  Quote,
+  type LucideIcon,
+} from "lucide-react"
 import { Navbar } from "@/components/Navbar"
 import { SiteFooter } from "@/components/SiteFooter"
 import { useTranslations, useLocale } from "next-intl"
@@ -21,6 +32,7 @@ import type {
   LandingCourse,
   LandingPageData,
   LandingTeacher,
+  LandingTestimonial,
 } from "@/lib/landingPage"
 import { EASE, fadeUp, staggerParent } from "@/lib/motion"
 
@@ -31,6 +43,13 @@ interface HomeClientProps {
   data: LandingPageData | null
 }
 
+const FEATURES: { key: "oneTeacher" | "gradual" | "followUp" | "certificate"; Icon: LucideIcon }[] = [
+  { key: "oneTeacher", Icon: UserRound },
+  { key: "gradual", Icon: Route },
+  { key: "followUp", Icon: ClipboardCheck },
+  { key: "certificate", Icon: Award },
+]
+
 export default function HomeClient({ data }: HomeClientProps) {
   const t = useTranslations()
   const locale = useLocale()
@@ -38,15 +57,24 @@ export default function HomeClient({ data }: HomeClientProps) {
 
   const heroVideoUrl = data?.hero.videoUrl ?? null
   const heroYouTubeId = getYouTubeVideoId(heroVideoUrl)
-  const heroTitle = (isAr ? data?.hero.titleAr : data?.hero.titleEn) ?? t("home.hero.featuredTitle")
+  const heroTitle = (isAr ? data?.hero.titleAr : data?.hero.titleEn) ?? null
   const heroTeacher = (isAr ? data?.hero.teacherNameAr : data?.hero.teacherNameEn) ?? t("home.hero.featuredTeacher")
-  const heroDuration = (isAr ? data?.hero.durationLabelAr : data?.hero.durationLabelEn) ?? t("home.hero.featuredDuration")
+  const heroDuration = (isAr ? data?.hero.durationLabelAr : data?.hero.durationLabelEn) ?? null
+  // Without a configured video the hero collapses to a single centered column (no placeholder card).
+  const heroHasVideo = Boolean(heroVideoUrl)
 
   const stats = data?.stats
-  const specializations = data?.specializations ?? []
   const featuredCourses = data?.featuredCourses ?? []
   const featuredInstructors = data?.featuredInstructors ?? []
   const featuredArticles = data?.featuredArticles ?? []
+  const testimonials = data?.featuredTestimonials ?? []
+
+  const statItems = [
+    { key: "courses", value: stats?.courses ?? 0, label: t("home.stats.courses") },
+    { key: "lessons", value: stats?.lessons ?? 0, label: t("home.stats.lessons") },
+    { key: "students", value: stats?.students ?? 0, label: t("home.stats.activeStudents") },
+  ].filter((item) => item.value > 0)
+  const statCols: Record<number, string> = { 1: "sm:grid-cols-1", 2: "sm:grid-cols-2", 3: "sm:grid-cols-3" }
 
   return (
     <div className="min-h-screen bg-canvas text-ink">
@@ -57,10 +85,16 @@ export default function HomeClient({ data }: HomeClientProps) {
         <div className="absolute inset-0 pattern-islamic -z-10" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-[1.1fr_1fr] gap-12 lg:gap-16 items-center">
+          <div
+            className={
+              heroHasVideo
+                ? "grid lg:grid-cols-[1.1fr_1fr] gap-12 lg:gap-16 items-center"
+                : "max-w-3xl mx-auto text-center"
+            }
+          >
             {/* Text column */}
             <motion.div
-              className="space-y-8"
+              className={heroHasVideo ? "space-y-8" : "space-y-8 flex flex-col items-center"}
               initial="hidden"
               animate="visible"
               variants={staggerParent}
@@ -86,14 +120,14 @@ export default function HomeClient({ data }: HomeClientProps) {
 
               <motion.p
                 variants={fadeUp}
-                className="text-[20px] leading-[1.6] text-ink-2 max-w-xl"
+                className={`text-[20px] leading-[1.6] text-ink-2 max-w-xl${heroHasVideo ? "" : " mx-auto"}`}
               >
                 {t("home.heroSubtitle")}
               </motion.p>
 
               <motion.div
                 variants={fadeUp}
-                className="flex flex-col sm:flex-row items-start gap-3 ltr-flex"
+                className={`flex flex-col sm:flex-row gap-3 ltr-flex ${heroHasVideo ? "items-start" : "items-center justify-center"}`}
               >
                 <Link href="/register">
                   <Button size="lg" className="text-base px-7">
@@ -110,28 +144,29 @@ export default function HomeClient({ data }: HomeClientProps) {
               </motion.div>
             </motion.div>
 
-            {/* Featured video card */}
-            <motion.div
-              className="relative"
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.7, delay: 0.25, ease: EASE }}
-            >
-              {/* Ambient warm glow */}
-              <div
-                aria-hidden
-                className="pointer-events-none absolute -inset-10 -z-10 opacity-25 blur-3xl"
-                style={{
-                  background:
-                    "radial-gradient(circle at 50% 50%, #d97757 0%, transparent 60%)",
-                }}
-              />
-              <div className="bg-surface border border-line rounded-[32px] p-5 shadow-whisper">
-                <div className="relative aspect-video rounded-[20px] overflow-hidden bg-night-2">
-                  {heroVideoUrl ? (
-                    heroYouTubeId ? (
+            {/* Featured video card (only when an admin configured a video) */}
+            {heroVideoUrl ? (
+              <motion.div
+                className="relative"
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.7, delay: 0.25, ease: EASE }}
+              >
+                {/* Ambient warm glow */}
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute -inset-10 -z-10 opacity-25 blur-3xl"
+                  style={{
+                    background:
+                      "radial-gradient(circle at 50% 50%, #d97757 0%, transparent 60%)",
+                  }}
+                />
+                <div className="bg-surface border border-line rounded-[32px] p-5 shadow-whisper">
+                  <div className="relative aspect-video rounded-[20px] overflow-hidden bg-night-2">
+                    {heroYouTubeId ? (
                       <iframe
                         src={`https://www.youtube.com/embed/${heroYouTubeId}`}
+                        title={heroTitle ?? t("home.hero.featuredCaption")}
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
                         className="absolute inset-0 w-full h-full"
@@ -143,62 +178,55 @@ export default function HomeClient({ data }: HomeClientProps) {
                         preload="metadata"
                         className="absolute inset-0 w-full h-full object-cover"
                       />
-                    )
-                  ) : (
-                    <>
-                      <div className="absolute inset-0 pattern-islamic opacity-40" />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <button
-                          aria-label={t("home.playFeatured")}
-                          className="w-16 h-16 rounded-full bg-brand text-on-night flex items-center justify-center shadow-[0_0_0_6px_rgba(250,249,245,0.15)] hover:bg-brand-hover transition-colors"
-                        >
-                          <Play className="w-6 h-6 ms-0.5" fill="currentColor" />
-                        </button>
+                    )}
+                    {heroDuration ? (
+                      <div className="absolute bottom-3 start-3 bg-night/80 text-on-night text-xs px-2.5 py-1 rounded-md flex items-center gap-1.5 ltr-flex">
+                        <Clock className="w-3 h-3" />
+                        {heroDuration}
                       </div>
-                    </>
-                  )}
-                  {heroDuration ? (
-                    <div className="absolute bottom-3 start-3 bg-night/80 text-on-night text-xs px-2.5 py-1 rounded-md flex items-center gap-1.5 ltr-flex">
-                      <Clock className="w-3 h-3" />
-                      {heroDuration}
+                    ) : null}
+                  </div>
+                  {heroTitle || heroTeacher ? (
+                    <div className="pt-5 pb-1 px-1 space-y-1.5">
+                      <span className="text-xs tracking-[0.12px] uppercase text-ink-3">
+                        {t("home.hero.featuredCaption")}
+                      </span>
+                      {heroTitle ? (
+                        <h3
+                          className="text-[22px] leading-tight text-ink"
+                          style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
+                        >
+                          {heroTitle}
+                        </h3>
+                      ) : null}
+                      {heroTeacher ? <p className="text-sm text-ink-2">{heroTeacher}</p> : null}
                     </div>
                   ) : null}
                 </div>
-                <div className="pt-5 pb-1 px-1 space-y-1.5">
-                  <span className="text-xs tracking-[0.12px] uppercase text-ink-3">
-                    {t("home.hero.featuredCaption")}
-                  </span>
-                  <h3
-                    className="text-[22px] leading-tight text-ink"
-                    style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
-                  >
-                    {heroTitle}
-                  </h3>
-                  <p className="text-sm text-ink-2">{heroTeacher}</p>
-                </div>
-              </div>
-            </motion.div>
+              </motion.div>
+            ) : null}
           </div>
         </div>
       </section>
 
       {/* ===== 2. STATS BAR (dark chapter break) ===== */}
-      <section className="bg-night py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-10 text-center">
-            <StatItem value={stats?.courses ?? 0} label={t("home.stats.courses")} locale={locale} />
-            <StatItem value={stats?.teachers ?? 0} label={t("home.stats.teachers")} locale={locale} />
-            <StatItem value={stats?.students ?? 0} label={t("home.stats.activeStudents")} locale={locale} />
-            <StatItem value={stats?.specializations ?? 0} label={t("home.stats.specializations")} locale={locale} />
+      {statItems.length > 0 ? (
+        <section className="bg-night py-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className={`grid grid-cols-1 ${statCols[statItems.length] ?? "sm:grid-cols-3"} gap-10 text-center`}>
+              {statItems.map((item) => (
+                <StatItem key={item.key} value={item.value} label={item.label} locale={locale} />
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
 
-      {/* ===== 3. SPECIALIZATION PILLS ===== */}
-      <section aria-labelledby="categories-heading" className="py-20 bg-canvas">
+      {/* ===== 3. WHY LEARN HERE (single-teacher method) ===== */}
+      <section aria-labelledby="features-heading" className="py-20 bg-canvas">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
-            className="text-center mb-10 space-y-3"
+            className="text-center mb-12 space-y-3"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.4 }}
@@ -206,46 +234,36 @@ export default function HomeClient({ data }: HomeClientProps) {
           >
             <motion.h2
               variants={fadeUp}
-              id="categories-heading"
+              id="features-heading"
               className="text-subhead-lg text-ink"
               style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
             >
-              {t("home.categories.title")}
+              {t("home.features.title")}
             </motion.h2>
-            <motion.p variants={fadeUp} className="text-ink-2 text-[17px] leading-[1.6]">
-              {t("home.categories.subtitle")}
+            <motion.p variants={fadeUp} className="text-ink-2 text-[17px] leading-[1.6] max-w-2xl mx-auto">
+              {t("home.features.description")}
             </motion.p>
           </motion.div>
           <motion.div
-            className="flex flex-wrap items-center justify-center gap-3"
+            className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.2 }}
             variants={staggerParent}
           >
-            <motion.div variants={fadeUp}>
-              <Link
-                href="/courses"
-                className="inline-block px-5 py-2.5 rounded-full bg-brand text-on-night text-sm font-medium shadow-[0_0_0_1px_var(--color-brand)] hover:bg-brand-hover transition-colors"
-              >
-                {t("home.categories.all")}
-              </Link>
-            </motion.div>
-            {specializations.map((s) => (
-              <motion.div key={s.id} variants={fadeUp}>
-                <Link
-                  href={`/courses?category=${encodeURIComponent(s.slug)}`}
-                  className="inline-block px-5 py-2.5 rounded-full bg-sand text-ink-button text-sm font-medium shadow-[0_0_0_1px_var(--color-ring-warm)] hover:shadow-[0_0_0_1px_var(--color-ring-warm)] hover:text-ink transition-all"
-                >
-                  {isAr ? s.nameAr : s.nameEn}
-                </Link>
-              </motion.div>
+            {FEATURES.map(({ key, Icon }) => (
+              <FeatureCard
+                key={key}
+                Icon={Icon}
+                title={t(`home.features.${key}.title`)}
+                description={t(`home.features.${key}.description`)}
+              />
             ))}
           </motion.div>
         </div>
       </section>
 
-      {/* ===== 4. TEACHER CARDS ===== */}
+      {/* ===== 4. TEACHERS (photo, credentials, bio) ===== */}
       {featuredInstructors.length > 0 ? (
         <section aria-labelledby="teachers-heading" className="py-20 bg-surface border-y border-line">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -268,19 +286,27 @@ export default function HomeClient({ data }: HomeClientProps) {
                   {t("home.teachers.subtitle")}
                 </p>
               </motion.div>
-              <motion.div variants={fadeUp}>
-                <Link
-                  href="/instructors"
-                  className="inline-flex items-center gap-1.5 text-sm font-medium text-brand hover:text-brand-hover transition-colors ltr-flex"
-                >
-                  {t("home.teachers.viewAll")}
-                  <ChevronRight className="w-4 h-4 rtl:rotate-180" />
-                </Link>
-              </motion.div>
+              {featuredInstructors.length > 3 ? (
+                <motion.div variants={fadeUp}>
+                  <Link
+                    href="/instructors"
+                    className="inline-flex items-center gap-1.5 text-sm font-medium text-brand hover:text-brand-hover transition-colors ltr-flex"
+                  >
+                    {t("home.teachers.viewAll")}
+                    <ChevronRight className="w-4 h-4 rtl:rotate-180" />
+                  </Link>
+                </motion.div>
+              ) : null}
             </motion.div>
 
             <motion.div
-              className="grid md:grid-cols-3 gap-6"
+              className={
+                featuredInstructors.length === 1
+                  ? "max-w-4xl mx-auto"
+                  : featuredInstructors.length === 2
+                    ? "grid md:grid-cols-2 gap-6"
+                    : "grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+              }
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, amount: 0.2 }}
@@ -291,6 +317,7 @@ export default function HomeClient({ data }: HomeClientProps) {
                   key={teacher.id}
                   teacher={teacher}
                   locale={locale}
+                  wide={featuredInstructors.length === 1}
                   coursesLabel={t("home.teachers.coursesLabel")}
                   studentsLabel={t("home.teachers.studentsLabel")}
                 />
@@ -348,6 +375,49 @@ export default function HomeClient({ data }: HomeClientProps) {
                   locale={locale}
                   freeLabel={t("home.courses.free")}
                   hoursLabel={t("common.duration")}
+                />
+              ))}
+            </motion.div>
+          </div>
+        </section>
+      ) : null}
+
+      {/* ===== 5a. TESTIMONIALS (real course reviews) ===== */}
+      {testimonials.length > 0 ? (
+        <section aria-labelledby="testimonials-heading" className="py-20 bg-surface border-y border-line">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <motion.div
+              className="text-center mb-12 space-y-3"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.4 }}
+              variants={staggerParent}
+            >
+              <motion.h2
+                variants={fadeUp}
+                id="testimonials-heading"
+                className="text-subhead-lg text-ink"
+                style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
+              >
+                {t("home.testimonials.title")}
+              </motion.h2>
+              <motion.p variants={fadeUp} className="text-ink-2 text-[17px] leading-[1.6]">
+                {t("home.testimonials.subtitle")}
+              </motion.p>
+            </motion.div>
+            <motion.div
+              className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.2 }}
+              variants={staggerParent}
+            >
+              {testimonials.map((item) => (
+                <TestimonialCard
+                  key={item.id}
+                  item={item}
+                  courseLabel={t("home.testimonials.courseLabel")}
+                  ratingLabel={t("reviews.stars", { count: item.rating })}
                 />
               ))}
             </motion.div>
@@ -518,55 +588,153 @@ function getInitials(name: string): string {
   return parts[0][0] + parts[parts.length - 1][0]
 }
 
+function FeatureCard({
+  Icon,
+  title,
+  description,
+}: {
+  Icon: LucideIcon
+  title: string
+  description: string
+}) {
+  return (
+    <motion.div
+      variants={fadeUp}
+      className="group bg-surface border border-line rounded-2xl p-6 hover-lift transition-smooth h-full"
+    >
+      <div className="w-12 h-12 rounded-full bg-sand flex items-center justify-center text-ink-button mb-5 ring-0 ring-brand/30 transition-all duration-300 group-hover:ring-2 group-hover:rotate-3">
+        <Icon className="w-5 h-5" aria-hidden />
+      </div>
+      <h3
+        className="text-[18px] text-ink mb-2"
+        style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
+      >
+        {title}
+      </h3>
+      <p className="text-sm leading-[1.7] text-ink-2">{description}</p>
+    </motion.div>
+  )
+}
+
 function TeacherCard({
   teacher,
   locale,
+  wide,
   coursesLabel,
   studentsLabel,
 }: {
   teacher: LandingTeacher
   locale: string
+  wide: boolean
   coursesLabel: string
   studentsLabel: string
 }) {
+  const isAr = locale === "ar"
+  const title = (isAr ? teacher.titleAr : teacher.titleEn) || teacher.titleAr || teacher.titleEn || teacher.specialty
+  const bio = (isAr ? teacher.bioAr : teacher.bioEn) || teacher.bioAr || teacher.bioEn
   const courses = formatStatNumber(teacher.coursesCount, locale)
   const students = formatStatNumber(teacher.studentsCount, locale)
+  const photoSize = wide ? "w-40 h-40 sm:w-48 sm:h-48" : "w-24 h-24"
+
   return (
     <motion.div
       variants={fadeUp}
-      className="group bg-surface border border-line rounded-2xl p-6 hover-lift transition-smooth"
+      className={`group bg-canvas border border-line rounded-2xl hover-lift transition-smooth h-full ${
+        wide ? "p-8 sm:p-10 flex flex-col sm:flex-row gap-8 items-start ltr-flex" : "p-6 flex flex-col"
+      }`}
     >
-      <div className="flex items-center gap-4 mb-4 ltr-flex">
-        <div
-          className="w-12 h-12 rounded-full bg-sand flex items-center justify-center text-ink-button text-[15px] ring-0 ring-brand/30 transition-all duration-300 group-hover:ring-2 group-hover:rotate-3 uppercase"
+      <div className={`shrink-0 ${wide ? "" : "mb-5"}`}>
+        {teacher.photoUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={teacher.photoUrl}
+            alt={teacher.name}
+            loading="lazy"
+            className={`${photoSize} rounded-2xl object-cover ring-1 ring-line transition-transform duration-300 group-hover:scale-[1.02]`}
+          />
+        ) : (
+          <div
+            className={`${photoSize} rounded-2xl bg-sand flex items-center justify-center text-ink-button ${
+              wide ? "text-4xl" : "text-2xl"
+            } uppercase`}
+            style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
+            aria-hidden
+          >
+            {getInitials(teacher.name)}
+          </div>
+        )}
+      </div>
+      <div className="flex-1 min-w-0 flex flex-col">
+        <h3
+          className={`${wide ? "text-[28px]" : "text-[20px]"} leading-tight text-ink`}
           style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
         >
-          {getInitials(teacher.name)}
-        </div>
-        <div className="flex-1 min-w-0">
-          <h3
-            className="text-[18px] text-ink truncate"
-            style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
-          >
-            {teacher.name}
-          </h3>
-          {teacher.specialty ? (
-            <p className="text-sm text-ink-3 truncate">{teacher.specialty}</p>
-          ) : null}
-        </div>
-      </div>
-      <div className="flex items-center gap-5 pt-4 border-t border-line text-sm text-ink-2 ltr-flex">
-        <div>
-          <span className="text-ink font-medium">{courses}</span>{" "}
-          <span>{coursesLabel}</span>
-        </div>
-        <div className="w-px h-4 bg-sand" />
-        <div>
-          <span className="text-ink font-medium">{students}</span>{" "}
-          <span>{studentsLabel}</span>
-        </div>
+          {teacher.name}
+        </h3>
+        {title ? <p className="mt-1.5 text-sm font-medium text-brand">{title}</p> : null}
+        {bio ? (
+          <p className={`mt-4 text-[15px] leading-[1.75] text-ink-2 whitespace-pre-line ${wide ? "" : "line-clamp-5"}`}>
+            {bio}
+          </p>
+        ) : null}
+        {teacher.coursesCount > 0 || teacher.studentsCount > 0 ? (
+          <div className="mt-auto pt-5 flex items-center gap-5 text-sm text-ink-2 ltr-flex">
+            {teacher.coursesCount > 0 ? (
+              <div>
+                <span className="text-ink font-medium">{courses}</span> <span>{coursesLabel}</span>
+              </div>
+            ) : null}
+            {teacher.coursesCount > 0 && teacher.studentsCount > 0 ? <div className="w-px h-4 bg-sand" /> : null}
+            {teacher.studentsCount > 0 ? (
+              <div>
+                <span className="text-ink font-medium">{students}</span> <span>{studentsLabel}</span>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
       </div>
     </motion.div>
+  )
+}
+
+function TestimonialCard({
+  item,
+  courseLabel,
+  ratingLabel,
+}: {
+  item: LandingTestimonial
+  courseLabel: string
+  ratingLabel: string
+}) {
+  return (
+    <motion.figure
+      variants={fadeUp}
+      className="bg-canvas border border-line rounded-2xl p-6 flex flex-col h-full hover-lift transition-smooth"
+    >
+      <div className="flex items-center justify-between mb-4 ltr-flex">
+        <div className="flex items-center gap-0.5" role="img" aria-label={ratingLabel}>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Star
+              key={i}
+              className={`w-4 h-4 ${i < item.rating ? "text-brand" : "text-line"}`}
+              fill="currentColor"
+              aria-hidden
+            />
+          ))}
+        </div>
+        <Quote className="w-5 h-5 text-ink-3 opacity-60" aria-hidden />
+      </div>
+      <blockquote className="text-[15px] leading-[1.75] text-ink-2 flex-1 line-clamp-6">{item.comment}</blockquote>
+      <figcaption className="mt-5 pt-4 border-t border-line text-sm">
+        <div className="text-ink font-medium">{item.authorName}</div>
+        <Link
+          href={`/courses/${item.courseId}`}
+          className="text-ink-3 hover:text-brand transition-colors line-clamp-1"
+        >
+          {courseLabel} {item.courseTitle}
+        </Link>
+      </figcaption>
+    </motion.figure>
   )
 }
 

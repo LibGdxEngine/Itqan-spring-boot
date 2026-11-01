@@ -52,16 +52,17 @@
     "mainLabel": "Main",
     "accountMenu": "Account menu",
     "openMenu": "Open menu",
-    "closeMenu": "Close menu"
+    "closeMenu": "Close menu",
+    "scholarships": "Scholarships"
   },
   "instructors": {
-    "title": "Our Instructors",
-    "subtitle": "Learn from experienced educators and industry professionals dedicated to helping you succeed.",
-    "meetOurTeam": "Meet Our Team",
+    "title": "Our Teachers",
+    "subtitle": "Meet the platform's teachers, their qualifications and their courses.",
+    "meetOurTeam": "Meet the teachers",
     "viewAllCourses": "View All Courses",
     "courses": "courses",
-    "noInstructors": "No instructors found",
-    "noInstructorsDesc": "Check back soon as we continue to grow our instructor community."
+    "noInstructors": "No teachers yet",
+    "noInstructorsDesc": "Teachers will appear here once the first course is published."
   },
   "profile": {
     "title": "My Profile",
@@ -291,7 +292,21 @@
       "enabled": "Enabled",
       "createdAt": "Created",
       "status": "Status",
-      "actions": "Actions"
+      "actions": "Actions",
+      "profileTitle": "Public profile (shown on the home and teachers pages)",
+      "photo": "Profile photo",
+      "choosePhoto": "Choose a photo",
+      "removePhoto": "Remove",
+      "photoHint": "JPG, PNG or WebP, up to 5MB",
+      "photoTooLarge": "Photo exceeds 5MB",
+      "photoType": "Unsupported file type",
+      "photoFailed": "Photo upload failed",
+      "titleAr": "Title / credentials (Arabic)",
+      "titleEn": "Title / credentials (English)",
+      "titleHint": "Example: Ijazah in the ten qira'at, MA in Tafseer and Qur'anic sciences",
+      "bioAr": "Bio (Arabic)",
+      "bioEn": "Bio (English)",
+      "bioHint": "Teachers studied under, ijazat, teaching experience"
     },
     "nav": {
       "ariaLabel": "Admin navigation",
@@ -325,7 +340,9 @@
       "breadcrumb": "Breadcrumb",
       "superAdmin": "Super admin",
       "admin": "Admin",
-      "reviews": "Reviews"
+      "reviews": "Reviews",
+      "scholarships": "Scholarship requests",
+      "donations": "Donation fund"
     },
     "table": {
       "exportCsv": "Export CSV",
@@ -730,76 +747,153 @@
         "video": "Video",
         "audio": "Audio"
       }
+    },
+    "scholarships": {
+      "title": "Scholarship requests",
+      "description": "Review student requests and approve them from the scholarship fund or at the academy's expense.",
+      "manageDonations": "Donation fund →",
+      "fundBalance": "Fund balance",
+      "fundHint": "In {received} · used {used}",
+      "pendingCount": "Awaiting review",
+      "approvedCount": "Approved scholarships",
+      "empty": "No requests.",
+      "search": "Search by name or email",
+      "allStatuses": "All statuses",
+      "cols": {
+        "student": "Student",
+        "course": "Course",
+        "reason": "Reason",
+        "date": "Date",
+        "status": "Status"
+      },
+      "source": {
+        "FUND": "From the scholarship fund",
+        "ACADEMY": "Covered by the academy"
+      },
+      "view": "View",
+      "approve": "Approve",
+      "reject": "Reject",
+      "detailsTitle": "Request details",
+      "approveTitle": "Approve scholarship",
+      "rejectTitle": "Reject scholarship",
+      "circumstances": "Circumstances",
+      "email": "Email",
+      "phone": "Phone",
+      "note": "Admin note",
+      "fundingSource": "Who pays the course fee?",
+      "fundAvailable": "The course price is taken from the fund (current balance {balance}).",
+      "fundShort": "The fund balance ({balance}) is not enough for this course.",
+      "academyHint": "The course opens for free without using the fund.",
+      "noteOptional": "Message to the student (optional)",
+      "rejectNote": "Reason (sent to the student)",
+      "noteHint": "Shown to the student on their requests page and in the email.",
+      "confirmApprove": "Approve and enroll",
+      "confirmReject": "Reject request",
+      "approved": "Request approved and student enrolled",
+      "rejected": "Request rejected"
+    },
+    "donations": {
+      "title": "Donation fund",
+      "description": "Donations to the scholarship fund. Record donations received by Vodafone Cash, InstaPay or cash here.",
+      "record": "Record donation",
+      "received": "Total donated",
+      "used": "Spent on scholarships",
+      "balance": "Available balance",
+      "count": "{count} donations",
+      "approvedHint": "{count} approved scholarships",
+      "toRequests": "Scholarship requests →",
+      "empty": "No donations yet.",
+      "search": "Search by name, email or reference",
+      "allStatuses": "All statuses",
+      "allGateways": "All methods",
+      "anonymous": "Donor",
+      "cols": {
+        "donor": "Donor",
+        "amount": "Amount",
+        "method": "Method",
+        "message": "Message",
+        "date": "Date",
+        "status": "Status"
+      },
+      "status": {
+        "PENDING": "Awaiting payment",
+        "COMPLETED": "Completed",
+        "FAILED": "Failed",
+        "REFUNDED": "Refunded"
+      },
+      "gateway": {
+        "PAYMOB": "Online (Paymob)",
+        "MANUAL": "Recorded manually"
+      },
+      "methods": {
+        "VODAFONE_CASH": "Vodafone Cash",
+        "INSTAPAY": "InstaPay",
+        "BANK_TRANSFER": "Bank transfer",
+        "CASH": "Cash",
+        "OTHER": "Other",
+        "ONLINE": "Online"
+      },
+      "recordTitle": "Record a manual donation",
+      "recordHint": "For a donation received outside the site. The amount is added to the fund balance immediately.",
+      "amountLabel": "Amount ({currency})",
+      "reference": "Transfer / receipt reference (optional)",
+      "donorName": "Donor name (optional)",
+      "donorEmail": "Donor email (optional)",
+      "donorEmailHint": "If given, a receipt is emailed.",
+      "messageLabel": "Note (optional)",
+      "recorded": "Donation recorded"
     }
   },
   "home": {
-    "heroTitle1": "Master Your",
-    "heroTitle2": "Learning Journey",
-    "heroDescription": "Join thousands of students achieving their educational goals with our comprehensive platform. Expert-led courses, personalized learning paths, and a supportive community.",
-    "socialProof": {
-      "count": "10,000+ students",
-      "label": "already enrolled"
-    },
+    "heroTitle1": "Your journey into",
+    "heroTitle2": "the Book of Allah",
     "features": {
-      "title": "Why choose Itqan?",
-      "description": "Everything you need to succeed in your educational journey",
-      "expertInstructors": {
-        "title": "Expert Instructors",
-        "description": "Learn from industry professionals and experienced educators who are passionate about teaching."
+      "title": "Why learn here?",
+      "description": "One teacher, one method, and a complete journey into understanding the Qur'an",
+      "oneTeacher": {
+        "title": "One voice, one method",
+        "description": "Learn from a single teacher from the first lesson to the last, with no conflicting approaches."
       },
-      "certifiedCourses": {
-        "title": "Certified Courses",
-        "description": "Earn recognized certificates that showcase your skills and knowledge to employers."
+      "gradual": {
+        "title": "A structured path",
+        "description": "Carefully ordered lessons take you step by step from the basics to deep reflection."
       },
-      "learnAtYourPace": {
-        "title": "Learn at Your Pace",
-        "description": "Access courses anytime, anywhere. Study at your own speed with lifetime access."
+      "followUp": {
+        "title": "Quizzes and follow-up",
+        "description": "Short quizzes after lessons reinforce what you learned and show what needs review."
+      },
+      "certificate": {
+        "title": "Certificate of completion",
+        "description": "Finish a course and receive a certificate of completion in your name."
       }
     },
     "cta": {
-      "title": "Ready to start your learning journey?",
-      "description": "Join our community of learners and unlock your full potential. Get started with a free account today.",
+      "title": "Ready to begin?",
+      "description": "Start with one tafseer course and move lesson by lesson until you earn your certificate.",
       "exploreCourses": "Explore courses"
     },
-    "badge": "Islamic Learning Platform",
-    "heroSubtitle": "Trusted by thousands of students achieving their educational and Islamic knowledge goals with our comprehensive platform.",
+    "badge": "Itqan for Tafseer",
+    "heroSubtitle": "Structured video lessons in the tafseer of the Qur'an, with quizzes, progress tracking and a certificate of completion.",
     "hero": {
-      "featuredCaption": "Featured lecture",
-      "featuredTitle": "Introduction to Quranic Sciences",
-      "featuredTeacher": "Sheikh Abdul Rahman Al-Sudais",
-      "featuredDuration": "45 min"
+      "featuredCaption": "Featured lesson",
+      "featuredTeacher": "Sheikh Osama Al-Marakbi"
     },
     "stats": {
-      "activeStudents": "Active Students",
+      "activeStudents": "Students",
       "courses": "Courses",
-      "teachers": "Teachers",
-      "specializations": "Specializations",
-      "successRate": "Success Rate",
-      "studentsCount": "8,500+",
-      "coursesCount": "250+",
-      "teachersCount": "120+",
-      "specializationsCount": "9",
-      "successRateValue": "95%"
-    },
-    "categories": {
-      "title": "Specializations",
-      "subtitle": "Choose the field of study that matches your interest",
-      "all": "All",
-      "tafsir": "Tafsir",
-      "hadith": "Hadith",
-      "fiqh": "Fiqh",
-      "aqeedah": "Aqeedah",
-      "seerah": "Seerah",
-      "arabic": "Arabic Language",
-      "tajweed": "Tajweed",
-      "usool": "Usool al-Fiqh"
+      "lessons": "Lessons"
     },
     "teachers": {
-      "title": "Featured Teachers",
-      "subtitle": "Learn from a select circle of trusted scholars",
+      "title": "Your teachers",
+      "subtitle": "Meet who teaches you: qualifications, ijazat and method",
       "coursesLabel": "courses",
       "studentsLabel": "students",
       "viewAll": "View all"
+    },
+    "testimonials": {
+      "title": "What students say",
+      "subtitle": "Written by students in their course reviews",
+      "courseLabel": "On the course:"
     },
     "courses": {
       "title": "Selected Courses",
@@ -808,8 +902,7 @@
       "new": "New",
       "free": "Free",
       "browseAll": "Browse all courses"
-    },
-    "playFeatured": "Play the featured lecture"
+    }
   },
   "auth": {
     "login": {
@@ -883,7 +976,21 @@
     },
     "branding": {
       "tagline": "Master Your Learning Journey",
-      "description": "Join thousands of students achieving their educational goals with our comprehensive learning platform."
+      "description": "A dedicated platform for learning Quranic tafseer and understanding its meanings through a clear, structured approach.",
+      "features": {
+        "courses": {
+          "title": "Structured tafseer courses",
+          "description": "Carefully ordered lessons in Quranic tafseer, from the basics to deep reflection."
+        },
+        "flexible": {
+          "title": "Learn on your schedule",
+          "description": "Watch lessons anytime and pick up where you left off with progress tracking."
+        },
+        "certificates": {
+          "title": "Completion certificates",
+          "description": "Earn a verifiable certificate when you complete each course."
+        }
+      }
     },
     "validation": {
       "emailInvalid": "Please enter a valid email address",
@@ -902,7 +1009,7 @@
     }
   },
   "footer": {
-    "tagline": "Empowering learners with authentic Islamic knowledge and modern education.",
+    "tagline": "Itqan for Tafseer: structured lessons in the tafseer, understanding and sciences of the Qur'an.",
     "quickLinks": "Quick Links",
     "platform": "Platform",
     "contact": "Contact",
@@ -913,7 +1020,6 @@
     "linkRegister": "Get Started",
     "linkDashboard": "Dashboard",
     "linkMyCourses": "My Learning",
-    "email": "support@itqan.edu",
     "rights": "All rights reserved.",
     "social": "Follow us",
     "whatsapp": "Message us on WhatsApp",
@@ -927,32 +1033,32 @@
   },
   "seo": {
     "home": {
-      "title": "Itqan — Authentic Islamic Studies & Quran Learning Platform",
-      "description": "Itqan is an authentic Islamic education platform offering courses in Tafsir, Hadith, Fiqh, Aqeedah, Seerah, Tajweed, Usool al-Fiqh, and Arabic language — taught by leading scholars and sheikhs.",
-      "keywords": "Islamic education|Quran sciences|Tafsir|Hadith|Fiqh|Aqeedah|Seerah|Tajweed|Usool al-Fiqh|learn Quran online|Islamic courses|Itqan"
+      "title": "Itqan Tafseer — Learn Quran Tafsir Online",
+      "description": "Learn Quran Tafsir and reflect on its meanings with Itqan Tafseer: structured video lessons, quizzes and a completion certificate, plus Quranic sciences, Aqeedah and Fiqh.",
+      "keywords": "Quran Tafsir|Tafseer|learn Tafsir online|Quran Tafsir course|Quran interpretation|Tadabbur|Quranic sciences|Usool al-Tafsir|learn Quran online|Islamic courses|Itqan Tafseer|Itqan"
     },
     "courses": {
-      "title": "Islamic Courses — Itqan",
-      "description": "Browse Itqan's catalog of Islamic courses in Tafsir, Hadith, Fiqh, Aqeedah, Seerah, Tajweed, and Arabic language, taught by leading scholars.",
-      "keywords": "Islamic courses|online Quran courses|Tafsir courses|Hadith courses|Fiqh courses|Aqeedah courses|Tajweed courses|online Islamic learning"
+      "title": "Quran Tafsir & Islamic Studies Courses",
+      "description": "Browse Itqan courses in Quran Tafsir, Tadabbur, Quranic sciences, Aqeedah and Fiqh: structured video lessons with quizzes and a completion certificate.",
+      "keywords": "Tafsir courses|online Tafsir course|Quran interpretation course|Quranic sciences|Islamic courses|online Islamic learning"
     },
     "instructors": {
-      "title": "Sheikhs & Instructors — Itqan",
+      "title": "Sheikhs & Instructors",
       "description": "Meet the sheikhs and instructors of the Itqan platform, specialized in Islamic sciences, Arabic language, and the Holy Quran.",
       "keywords": "sheikhs|Islamic scholars|Quran teachers|Hadith teachers|Fiqh teachers|Itqan instructors"
     },
     "courseFallback": {
-      "notFound": "Course Not Found | Itqan",
+      "notFound": "Course Not Found",
       "description": "Learn with Itqan — an authentic Islamic education platform."
     },
     "auth": {
-      "loginTitle": "Sign in | Itqan",
-      "registerTitle": "Create account | Itqan",
-      "forgotTitle": "Forgot password | Itqan",
-      "resetTitle": "Reset password | Itqan"
+      "loginTitle": "Sign in",
+      "registerTitle": "Create account",
+      "forgotTitle": "Forgot password",
+      "resetTitle": "Reset password"
     },
     "articles": {
-      "title": "Articles & Research",
+      "title": "Articles on Tafsir & Quranic Studies",
       "description": "Articles and research in Quranic studies and Islamic sciences by distinguished scholars — read the latest articles on Itqan platform.",
       "keywords": "islamic articles|quranic studies|islamic sciences|tajweed|fiqh|research|Itqan"
     },
@@ -968,7 +1074,8 @@
     "payment": {
       "success": "Payment successful",
       "cancel": "Payment cancelled"
-    }
+    },
+    "brand": "Itqan Tafseer"
   },
   "quiz": {
     "lesson": {
@@ -1024,7 +1131,7 @@
     "order": "Order",
     "content": "Content / Description",
     "exploreTitle": "Explore Our Courses",
-    "exploreSubtitle": "Discover top-rated courses to upskill yourself.",
+    "exploreSubtitle": "Structured courses in the tafseer and sciences of the Qur'an, ordered from the basics to reflection.",
     "noCourses": "No active courses found.",
     "loadFailed": "Failed to load courses. Please try again later.",
     "instructorLabel": "Instructor:",
@@ -1076,7 +1183,9 @@
       "viaWhatsapp": "via WhatsApp",
       "numberMissing": "Contact number is unavailable",
       "whatsappMessage": "I want to buy the course \"{course}\" for ${amount} via {method}.",
-      "whatsappCoupon": " (coupon: {coupon})"
+      "whatsappCoupon": " (coupon: {coupon})",
+      "paymobHint": "Bank card or mobile wallet through Paymob's secure checkout",
+      "onlineFailed": "Could not start the online payment"
     }
   },
   "instructor": {
@@ -1843,5 +1952,133 @@
     "title": "You're offline",
     "description": "Check your internet connection, then try again. Pages will load normally once you're back online.",
     "retry": "Try again"
+  },
+  "scholarships": {
+    "cantPay": "Can't afford this course? Apply for a scholarship",
+    "meta": {
+      "landingTitle": "Scholarships",
+      "landingDescription": "Apply to study a course for free, or give to the scholarship fund to cover course fees for students who cannot afford them.",
+      "applyTitle": "Apply for a scholarship",
+      "applyDescription": "Apply to study an Itqan course for free if you cannot pay its fee.",
+      "donateTitle": "Support a student",
+      "donateDescription": "Give to the scholarship fund to cover course fees for students who cannot afford them."
+    },
+    "status": {
+      "PENDING": "Under review",
+      "APPROVED": "Approved",
+      "REJECTED": "Not approved",
+      "WITHDRAWN": "Withdrawn"
+    },
+    "landing": {
+      "eyebrow": "Scholarship program",
+      "title": "Knowledge belongs to every student",
+      "intro": "Course fees should never stand between a student and the Book of Allah. If you cannot pay for a course, apply for a scholarship. If you want to help, give to the scholarship fund so someone else can study.",
+      "applyTitle": "Apply for a scholarship",
+      "applyBody": "Choose the course you want to study and tell us about your situation. The academy reviews every request, and once approved the course is added to your account for free.",
+      "applyCta": "Apply now",
+      "donateTitle": "Support a student",
+      "donateBody": "Your donation goes into the scholarship fund, which the academy uses to cover course fees for approved students. No account is needed and donor names are never published.",
+      "donateCta": "Donate now",
+      "stepsTitle": "How it works",
+      "steps": {
+        "apply": {
+          "title": "Apply",
+          "body": "Sign in, choose the course and explain why you need a scholarship."
+        },
+        "review": {
+          "title": "Review",
+          "body": "The academy reviews requests carefully. You get the answer by email and on your applications page."
+        },
+        "study": {
+          "title": "Start learning",
+          "body": "Once approved, the full course opens for free: the same lessons, quizzes and certificate."
+        }
+      },
+      "faqTitle": "Frequently asked questions",
+      "faq": {
+        "who": {
+          "q": "Who can apply?",
+          "a": "Any registered student who cannot pay the course fee. We only ask that you describe your situation honestly."
+        },
+        "cost": {
+          "q": "Is a scholarship course different from a paid one?",
+          "a": "No. You get the full course: every lesson, quiz and the completion certificate."
+        },
+        "donorPrivacy": {
+          "q": "Will my name be shown if I donate?",
+          "a": "No. Donor names are never shown on the site. Your email is used only to send your receipt."
+        },
+        "howUsed": {
+          "q": "How is my donation used?",
+          "a": "Donations go into one fund. When a scholarship is approved, the course fee is covered from that fund. If the fund is short, the academy may cover the fee itself."
+        },
+        "decision": {
+          "q": "When will I hear back?",
+          "a": "Requests are reviewed regularly. You will get an email with the decision, and you can follow the status on the application page."
+        }
+      }
+    },
+    "apply": {
+      "back": "← Scholarship program",
+      "title": "Apply for a scholarship",
+      "intro": "Tell us about yourself and why you need a scholarship. Only the academy's staff can see your request.",
+      "loginRequired": "Sign in or create an account to apply.",
+      "login": "Sign in",
+      "register": "Create account",
+      "studentsOnly": "Scholarship requests are open to student accounts only.",
+      "course": "Course",
+      "chooseCourse": "Choose a course",
+      "reason": "Why do you want to study this course, and why do you need a scholarship?",
+      "reasonHint": "At least {min} characters.",
+      "circumstances": "Your circumstances (optional)",
+      "circumstancesHint": "For example: student, no income right now, supporting a family. Share only what you are comfortable with.",
+      "phone": "Phone or WhatsApp (optional)",
+      "phoneHint": "We may contact you if we need more details.",
+      "privacy": "This information is used only to review your request and is never shared.",
+      "submit": "Send request",
+      "submitted": "Request sent",
+      "submittedHint": "You will get the decision by email after review.",
+      "failed": "Could not send the request",
+      "mine": "My requests",
+      "noneYet": "You have not sent any requests yet.",
+      "sentOn": "Sent on {date}",
+      "note": "Note from the academy: {note}",
+      "startLearning": "Start learning",
+      "withdraw": "Withdraw"
+    },
+    "donate": {
+      "back": "← Scholarship program",
+      "title": "Support a student",
+      "intro": "Your donation goes into the scholarship fund and covers course fees for students who cannot afford them. No account is needed.",
+      "amount": "Donation amount",
+      "customAmount": "Or enter another amount",
+      "minAmount": "Minimum {min}",
+      "email": "Email",
+      "emailHint": "Only used to send your receipt.",
+      "name": "Name (optional)",
+      "nameHint": "Your name is never shown on the site.",
+      "message": "Message to the academy (optional)",
+      "payOnline": "Donate {amount} by card or wallet",
+      "paymobNote": "Payment is handled by Paymob's secure checkout; we never see your card details.",
+      "orManual": "Or transfer manually:",
+      "manualTitle": "Transfer your donation via:",
+      "vodafoneCash": "Vodafone Cash",
+      "instapay": "InstaPay",
+      "manualHint": "We'll open a WhatsApp chat with the academy so you can send the transfer receipt; we then add your donation to the fund.",
+      "whatsappMessage": "Hello, I would like to donate {amount} to the scholarship fund via {method}.",
+      "unavailable": "Donations are not available right now. Please contact the academy.",
+      "failed": "Could not start the payment",
+      "privacy": "Thank you. Donor names and amounts are never shown on the site."
+    },
+    "thankYou": {
+      "checking": "Checking your donation…",
+      "pendingBody": "We have not received the payment confirmation yet. If you were charged, your donation will be recorded within minutes and a receipt will be emailed to you.",
+      "title": "Thank you",
+      "body": "We received your donation of {amount} to the scholarship fund. It will cover course fees for students who cannot afford them, and a receipt has been emailed to you.",
+      "failedTitle": "The payment did not go through",
+      "failedBody": "You were not charged, or the payment was cancelled. You can try again.",
+      "tryAgain": "Try again",
+      "home": "Home"
+    }
   }
 }

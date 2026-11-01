@@ -3,7 +3,7 @@ import { getLocale, getTranslations } from "next-intl/server"
 
 import type { Article } from "@/lib/articles"
 import ArticleDetailClient from "../_components/ArticleDetailClient"
-import { jsonLdHtml } from "@/lib/seo"
+import { brandName, defaultOgImage, jsonLdHtml, LOGO_URL, ogLocale } from "@/lib/seo"
 
 const API_URL =
   process.env.BACKEND_INTERNAL_URL ||
@@ -60,7 +60,6 @@ export async function generateMetadata({
   const { slug: rawSlug } = await params
   const slug = decodeURIComponent(rawSlug)
   const locale = await getLocale()
-  const isAr = locale === "ar"
   const article = await fetchArticle(slug)
 
   if (!article) {
@@ -81,7 +80,7 @@ export async function generateMetadata({
   const keywords = article.category ? [article.category] : undefined
   const images = article.coverImageUrl
     ? [{ url: absoluteImageUrl(article.coverImageUrl), alt: title }]
-    : undefined
+    : [{ ...defaultOgImage(locale), alt: title }]
 
   return {
     title,
@@ -93,21 +92,19 @@ export async function generateMetadata({
       url: canonical,
       title,
       description,
-      siteName: isAr ? "إتقان" : "Itqan",
-      locale: isAr ? "ar_SA" : "en_US",
+      siteName: brandName(locale),
+      locale: ogLocale(locale),
       publishedTime: article.publishedAt ?? undefined,
       modifiedTime: article.updatedAt ?? undefined,
       authors: article.authorName ? [article.authorName] : undefined,
       section: article.category ?? undefined,
-      ...(images ? { images } : {}),
+      images,
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      ...(article.coverImageUrl
-        ? { images: [absoluteImageUrl(article.coverImageUrl)] }
-        : {}),
+      images: [images[0].url],
     },
   }
 }
@@ -127,7 +124,7 @@ export default async function ArticleDetailPage({
     return <ArticleDetailClient />
   }
 
-  const brand = locale === "ar" ? "إتقان" : "Itqan"
+  const brand = brandName(locale)
   const canonical = `${SITE_URL}/articles/${encodeURIComponent(slug)}`
   const description = buildDescription(article)
   const coverImage = article.coverImageUrl
@@ -151,7 +148,7 @@ export default async function ArticleDetailPage({
       name: brand,
       logo: {
         "@type": "ImageObject",
-        url: `${SITE_URL}/icon-512.png`,
+        url: LOGO_URL,
       },
     },
     mainEntityOfPage: {

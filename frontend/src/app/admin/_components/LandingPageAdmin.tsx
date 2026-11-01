@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { Loader2, Trash2, ChevronUp, ChevronDown, Upload } from "lucide-react"
 import { useTranslations } from "next-intl"
+import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -21,6 +22,7 @@ import {
 import { instructorsApi, type InstructorUser } from "@/lib/instructors"
 import { CoursesService, type CourseResponse } from "@/lib/api"
 import { articlesApi, type ArticleSummary } from "@/lib/articles"
+import { TEACHERS_SECTION_DEFAULTS } from "@/lib/landingDefaults"
 
 const emptySpecForm: SpecializationRequest = {
   nameAr: "",
@@ -51,6 +53,10 @@ export function LandingPageAdmin() {
   const [heroTeacherEn, setHeroTeacherEn] = useState("")
   const [heroDurationAr, setHeroDurationAr] = useState("")
   const [heroDurationEn, setHeroDurationEn] = useState("")
+  const [teachersTitleAr, setTeachersTitleAr] = useState("")
+  const [teachersTitleEn, setTeachersTitleEn] = useState("")
+  const [teachersSubtitleAr, setTeachersSubtitleAr] = useState("")
+  const [teachersSubtitleEn, setTeachersSubtitleEn] = useState("")
   const [featuredCourseIds, setFeaturedCourseIds] = useState<number[]>([])
   const [featuredInstructorIds, setFeaturedInstructorIds] = useState<number[]>([])
   const [featuredArticleIds, setFeaturedArticleIds] = useState<number[]>([])
@@ -81,6 +87,10 @@ export function LandingPageAdmin() {
       setHeroTeacherEn(landing.hero.teacherNameEn ?? "")
       setHeroDurationAr(landing.hero.durationLabelAr ?? "")
       setHeroDurationEn(landing.hero.durationLabelEn ?? "")
+      setTeachersTitleAr(landing.teachersSection?.titleAr ?? "")
+      setTeachersTitleEn(landing.teachersSection?.titleEn ?? "")
+      setTeachersSubtitleAr(landing.teachersSection?.subtitleAr ?? "")
+      setTeachersSubtitleEn(landing.teachersSection?.subtitleEn ?? "")
       setFeaturedCourseIds(landing.featuredCourses.map((c) => c.id))
       setFeaturedInstructorIds(landing.featuredInstructors.map((t) => t.id))
       setFeaturedArticleIds((landing.featuredArticles ?? []).map((a) => a.id))
@@ -127,6 +137,10 @@ export function LandingPageAdmin() {
         heroTeacherNameEn: heroTeacherEn.trim() || null,
         heroDurationLabelAr: heroDurationAr.trim() || null,
         heroDurationLabelEn: heroDurationEn.trim() || null,
+        teachersTitleAr: teachersTitleAr.trim() || null,
+        teachersTitleEn: teachersTitleEn.trim() || null,
+        teachersSubtitleAr: teachersSubtitleAr.trim() || null,
+        teachersSubtitleEn: teachersSubtitleEn.trim() || null,
         featuredCourseIds,
         featuredInstructorIds,
         featuredArticleIds,
@@ -266,23 +280,76 @@ export function LandingPageAdmin() {
           ) : null}
         </div>
 
+        {/* Sheikhs & scholars section (replaces the stats bar) */}
+        <div className="space-y-4 rounded-lg border border-line bg-canvas p-4">
+          <div>
+            <h3 className="font-medium text-ink">{t("teachers.heading")}</h3>
+            <p className="mt-1 text-sm text-ink-2">{t("teachers.description")}</p>
+          </div>
+          <div className="grid gap-3 md:grid-cols-2">
+            <div>
+              <Label>{t("teachers.titleAr")}</Label>
+              <Input
+                value={teachersTitleAr}
+                onChange={(e) => setTeachersTitleAr(e.target.value)}
+                placeholder={TEACHERS_SECTION_DEFAULTS.ar.title}
+                dir="rtl"
+              />
+            </div>
+            <div>
+              <Label>{t("teachers.titleEn")}</Label>
+              <Input
+                value={teachersTitleEn}
+                onChange={(e) => setTeachersTitleEn(e.target.value)}
+                placeholder={TEACHERS_SECTION_DEFAULTS.en.title}
+                dir="ltr"
+              />
+            </div>
+            <div>
+              <Label>{t("teachers.subtitleAr")}</Label>
+              <Input
+                value={teachersSubtitleAr}
+                onChange={(e) => setTeachersSubtitleAr(e.target.value)}
+                placeholder={TEACHERS_SECTION_DEFAULTS.ar.subtitle}
+                dir="rtl"
+              />
+            </div>
+            <div>
+              <Label>{t("teachers.subtitleEn")}</Label>
+              <Input
+                value={teachersSubtitleEn}
+                onChange={(e) => setTeachersSubtitleEn(e.target.value)}
+                placeholder={TEACHERS_SECTION_DEFAULTS.en.subtitle}
+                dir="ltr"
+              />
+            </div>
+          </div>
+          <p className="text-xs text-ink-2">{t("teachers.defaultHint", { title: TEACHERS_SECTION_DEFAULTS.ar.title })}</p>
+
+          <OrderedPicker
+            title={t("teachers.pickerTitle")}
+            options={allInstructors.map((i) => ({
+              id: i.id,
+              label: `${i.firstName} ${i.lastName}`.trim() || i.email,
+            }))}
+            selected={featuredInstructorIds}
+            onChange={setFeaturedInstructorIds}
+          />
+          <p className="text-xs text-ink-2">
+            {t("teachers.profileHint")}{" "}
+            <Link href="/admin/team" className="font-medium text-brand underline-offset-2 hover:underline">
+              {t("teachers.profileLink")}
+            </Link>
+            . {t("teachers.hiddenHint")}
+          </p>
+        </div>
+
         {/* Featured courses */}
         <OrderedPicker
           title={t("featuredCourses")}
           options={courseOptions.map((c) => ({ id: c.id as number, label: `${c.title} — ${c.instructor ?? ""}` }))}
           selected={featuredCourseIds}
           onChange={setFeaturedCourseIds}
-        />
-
-        {/* Featured instructors */}
-        <OrderedPicker
-          title={t("featuredInstructors")}
-          options={allInstructors.map((i) => ({
-            id: i.id,
-            label: `${i.firstName} ${i.lastName}`.trim() || i.email,
-          }))}
-          selected={featuredInstructorIds}
-          onChange={setFeaturedInstructorIds}
         />
 
         {/* Featured articles */}

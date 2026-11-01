@@ -19,6 +19,10 @@ public class LandingPageUpdateRequest {
     private String heroTeacherNameEn;
     private String heroDurationLabelAr;
     private String heroDurationLabelEn;
+    private String teachersTitleAr;
+    private String teachersTitleEn;
+    private String teachersSubtitleAr;
+    private String teachersSubtitleEn;
     private List<Long> featuredCourseIds;
     private List<Long> featuredInstructorIds;
     private List<Long> featuredArticleIds;

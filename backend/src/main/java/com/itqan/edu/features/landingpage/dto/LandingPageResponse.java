@@ -15,6 +15,7 @@ import java.util.List;
 public class LandingPageResponse {
     private LandingHeroDto hero;
     private LandingStatsDto stats;
+    private LandingTeachersSectionDto teachersSection;
     private List<SpecializationResponse> specializations;
     private List<LandingCourseDto> featuredCourses;
     private List<LandingTeacherDto> featuredInstructors;

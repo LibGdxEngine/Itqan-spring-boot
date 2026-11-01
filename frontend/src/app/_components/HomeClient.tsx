@@ -18,15 +18,7 @@ import { SiteFooter } from "@/components/SiteFooter"
 import { useTranslations, useLocale } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { getYouTubeVideoId } from "@/lib/videoSource"
-import {
-  motion,
-  useReducedMotion,
-  useMotionValue,
-  useTransform,
-  animate,
-  useInView,
-} from "framer-motion"
-import { useEffect, useRef, useState } from "react"
+import { motion } from "framer-motion"
 import { ArticleCard } from "@/components/articles/ArticleCard"
 import type {
   LandingCourse,
@@ -35,6 +27,7 @@ import type {
   LandingTestimonial,
 } from "@/lib/landingPage"
 import { EASE, fadeUp, staggerParent } from "@/lib/motion"
+import { TEACHERS_SECTION_DEFAULTS } from "@/lib/landingDefaults"
 
 
 
@@ -63,18 +56,23 @@ export default function HomeClient({ data }: HomeClientProps) {
   // Without a configured video the hero collapses to a single centered column (no placeholder card).
   const heroHasVideo = Boolean(heroVideoUrl)
 
-  const stats = data?.stats
   const featuredCourses = data?.featuredCourses ?? []
   const featuredInstructors = data?.featuredInstructors ?? []
   const featuredArticles = data?.featuredArticles ?? []
   const testimonials = data?.featuredTestimonials ?? []
 
-  const statItems = [
-    { key: "courses", value: stats?.courses ?? 0, label: t("home.stats.courses") },
-    { key: "lessons", value: stats?.lessons ?? 0, label: t("home.stats.lessons") },
-    { key: "students", value: stats?.students ?? 0, label: t("home.stats.activeStudents") },
-  ].filter((item) => item.value > 0)
-  const statCols: Record<number, string> = { 1: "sm:grid-cols-1", 2: "sm:grid-cols-2", 3: "sm:grid-cols-3" }
+  const teachersSection = data?.teachersSection ?? null
+  const teachersDefaults = TEACHERS_SECTION_DEFAULTS[isAr ? "ar" : "en"]
+  const teachersTitle =
+    (isAr ? teachersSection?.titleAr : teachersSection?.titleEn) ||
+    teachersSection?.titleAr ||
+    teachersSection?.titleEn ||
+    teachersDefaults.title
+  const teachersSubtitle =
+    (isAr ? teachersSection?.subtitleAr : teachersSection?.subtitleEn) ||
+    teachersSection?.subtitleAr ||
+    teachersSection?.subtitleEn ||
+    teachersDefaults.subtitle
 
   return (
     <div className="min-h-screen bg-canvas text-ink">
@@ -209,15 +207,82 @@ export default function HomeClient({ data }: HomeClientProps) {
         </div>
       </section>
 
-      {/* ===== 2. STATS BAR (dark chapter break) ===== */}
-      {statItems.length > 0 ? (
-        <section className="bg-night py-16">
+      {/* ===== 2. SHEIKHS & SCHOLARS (dark chapter break; admin-curated) ===== */}
+      {featuredInstructors.length > 0 ? (
+        <section aria-labelledby="teachers-heading" className="relative bg-night py-20 overflow-hidden">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand/50 to-transparent"
+          />
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className={`grid grid-cols-1 ${statCols[statItems.length] ?? "sm:grid-cols-3"} gap-10 text-center`}>
-              {statItems.map((item) => (
-                <StatItem key={item.key} value={item.value} label={item.label} locale={locale} />
+            <motion.div
+              className="text-center mb-12 space-y-3"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.4 }}
+              variants={staggerParent}
+            >
+              <motion.p variants={fadeUp} className="text-xs font-medium tracking-[0.2em] uppercase text-brand">
+                {t("home.teachers.eyebrow")}
+              </motion.p>
+              <motion.h2
+                variants={fadeUp}
+                id="teachers-heading"
+                className="text-section text-on-night"
+                style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
+              >
+                {teachersTitle}
+              </motion.h2>
+              <motion.p
+                variants={fadeUp}
+                className="text-[17px] leading-[1.7] text-on-night-2 max-w-2xl mx-auto"
+              >
+                {teachersSubtitle}
+              </motion.p>
+            </motion.div>
+
+            <motion.div
+              className={
+                featuredInstructors.length === 1
+                  ? "max-w-4xl mx-auto"
+                  : featuredInstructors.length === 2
+                    ? "grid md:grid-cols-2 gap-6 max-w-5xl mx-auto"
+                    : "grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+              }
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.2 }}
+              variants={staggerParent}
+            >
+              {featuredInstructors.map((teacher) => (
+                <TeacherCard
+                  key={teacher.id}
+                  teacher={teacher}
+                  locale={locale}
+                  wide={featuredInstructors.length === 1}
+                />
               ))}
-            </div>
+            </motion.div>
+
+            {featuredInstructors.length > 3 ? (
+              <motion.div
+                className="mt-10 text-center"
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.4 }}
+                variants={staggerParent}
+              >
+                <motion.div variants={fadeUp}>
+                  <Link
+                    href="/instructors"
+                    className="inline-flex items-center gap-1.5 text-sm font-medium text-on-night-soft hover:text-on-night transition-colors ltr-flex"
+                  >
+                    {t("home.teachers.viewAll")}
+                    <ChevronRight className="w-4 h-4 rtl:rotate-180" />
+                  </Link>
+                </motion.div>
+              </motion.div>
+            ) : null}
           </div>
         </section>
       ) : null}
@@ -263,71 +328,7 @@ export default function HomeClient({ data }: HomeClientProps) {
         </div>
       </section>
 
-      {/* ===== 4. TEACHERS (photo, credentials, bio) ===== */}
-      {featuredInstructors.length > 0 ? (
-        <section aria-labelledby="teachers-heading" className="py-20 bg-surface border-y border-line">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <motion.div
-              className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10 ltr-flex"
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.4 }}
-              variants={staggerParent}
-            >
-              <motion.div variants={fadeUp} className="space-y-3">
-                <h2
-                  id="teachers-heading"
-                  className="text-subhead-lg text-ink"
-                  style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
-                >
-                  {t("home.teachers.title")}
-                </h2>
-                <p className="text-ink-2 text-[17px] leading-[1.6]">
-                  {t("home.teachers.subtitle")}
-                </p>
-              </motion.div>
-              {featuredInstructors.length > 3 ? (
-                <motion.div variants={fadeUp}>
-                  <Link
-                    href="/instructors"
-                    className="inline-flex items-center gap-1.5 text-sm font-medium text-brand hover:text-brand-hover transition-colors ltr-flex"
-                  >
-                    {t("home.teachers.viewAll")}
-                    <ChevronRight className="w-4 h-4 rtl:rotate-180" />
-                  </Link>
-                </motion.div>
-              ) : null}
-            </motion.div>
-
-            <motion.div
-              className={
-                featuredInstructors.length === 1
-                  ? "max-w-4xl mx-auto"
-                  : featuredInstructors.length === 2
-                    ? "grid md:grid-cols-2 gap-6"
-                    : "grid md:grid-cols-2 lg:grid-cols-3 gap-6"
-              }
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.2 }}
-              variants={staggerParent}
-            >
-              {featuredInstructors.map((teacher) => (
-                <TeacherCard
-                  key={teacher.id}
-                  teacher={teacher}
-                  locale={locale}
-                  wide={featuredInstructors.length === 1}
-                  coursesLabel={t("home.teachers.coursesLabel")}
-                  studentsLabel={t("home.teachers.studentsLabel")}
-                />
-              ))}
-            </motion.div>
-          </div>
-        </section>
-      ) : null}
-
-      {/* ===== 5. COURSE GRID ===== */}
+      {/* ===== 4. COURSE GRID ===== */}
       {featuredCourses.length > 0 ? (
         <section aria-labelledby="courses-heading" className="py-20 bg-canvas">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -536,51 +537,6 @@ function toArabicDigits(n: number): string {
     .join("")
 }
 
-function formatStatNumber(n: number, locale: string): string {
-  const rounded = Math.round(n)
-  if (locale === "ar") return toArabicDigits(rounded)
-  return rounded.toLocaleString("en-US")
-}
-
-function StatItem({
-  value,
-  label,
-  locale,
-}: {
-  value: number
-  label: string
-  locale: string
-}) {
-  const reduced = useReducedMotion()
-  const ref = useRef<HTMLDivElement>(null)
-  const inView = useInView(ref, { once: true, amount: 0.4 })
-  const motionValue = useMotionValue(0)
-  const display = useTransform(motionValue, (v) => formatStatNumber(v, locale))
-  const [staticValue] = useState(formatStatNumber(value, locale))
-
-  useEffect(() => {
-    if (reduced || !inView) return
-    const controls = animate(motionValue, value, { duration: 1.4, ease: EASE })
-    return controls.stop
-  }, [inView, reduced, value, motionValue])
-
-  return (
-    <div ref={ref} className="space-y-2">
-      <div
-        className="text-[44px] md:text-[52px] text-on-night leading-none"
-        style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
-      >
-        {reduced ? (
-          staticValue
-        ) : (
-          <motion.span>{display}</motion.span>
-        )}
-      </div>
-      <div className="text-sm font-medium text-on-night-2">{label}</div>
-    </div>
-  )
-}
-
 function getInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean)
   if (parts.length === 0) return "?"
@@ -620,26 +576,20 @@ function TeacherCard({
   teacher,
   locale,
   wide,
-  coursesLabel,
-  studentsLabel,
 }: {
   teacher: LandingTeacher
   locale: string
   wide: boolean
-  coursesLabel: string
-  studentsLabel: string
 }) {
   const isAr = locale === "ar"
   const title = (isAr ? teacher.titleAr : teacher.titleEn) || teacher.titleAr || teacher.titleEn || teacher.specialty
   const bio = (isAr ? teacher.bioAr : teacher.bioEn) || teacher.bioAr || teacher.bioEn
-  const courses = formatStatNumber(teacher.coursesCount, locale)
-  const students = formatStatNumber(teacher.studentsCount, locale)
   const photoSize = wide ? "w-40 h-40 sm:w-48 sm:h-48" : "w-24 h-24"
 
   return (
     <motion.div
       variants={fadeUp}
-      className={`group bg-canvas border border-line rounded-2xl hover-lift transition-smooth h-full ${
+      className={`group bg-surface border border-line rounded-2xl hover-lift transition-smooth h-full shadow-[0_24px_60px_-30px_rgba(0,0,0,0.6)] ${
         wide ? "p-8 sm:p-10 flex flex-col sm:flex-row gap-8 items-start ltr-flex" : "p-6 flex flex-col"
       }`}
     >
@@ -673,24 +623,9 @@ function TeacherCard({
         </h3>
         {title ? <p className="mt-1.5 text-sm font-medium text-brand">{title}</p> : null}
         {bio ? (
-          <p className={`mt-4 text-[15px] leading-[1.75] text-ink-2 whitespace-pre-line ${wide ? "" : "line-clamp-5"}`}>
+          <p className={`mt-4 text-[15px] leading-[1.75] text-ink-2 whitespace-pre-line ${wide ? "" : "line-clamp-6"}`}>
             {bio}
           </p>
-        ) : null}
-        {teacher.coursesCount > 0 || teacher.studentsCount > 0 ? (
-          <div className="mt-auto pt-5 flex items-center gap-5 text-sm text-ink-2 ltr-flex">
-            {teacher.coursesCount > 0 ? (
-              <div>
-                <span className="text-ink font-medium">{courses}</span> <span>{coursesLabel}</span>
-              </div>
-            ) : null}
-            {teacher.coursesCount > 0 && teacher.studentsCount > 0 ? <div className="w-px h-4 bg-sand" /> : null}
-            {teacher.studentsCount > 0 ? (
-              <div>
-                <span className="text-ink font-medium">{students}</span> <span>{studentsLabel}</span>
-              </div>
-            ) : null}
-          </div>
         ) : null}
       </div>
     </motion.div>

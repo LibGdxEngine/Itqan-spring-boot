@@ -33,6 +33,13 @@ public class LandingPageConfig {
     private String heroDurationLabelAr;
     private String heroDurationLabelEn;
 
+    private String teachersTitleAr;
+    private String teachersTitleEn;
+    @Column(length = 500)
+    private String teachersSubtitleAr;
+    @Column(length = 500)
+    private String teachersSubtitleEn;
+
     @ElementCollection
     @CollectionTable(name = "landing_page_featured_courses",
             joinColumns = @JoinColumn(name = "landing_page_id"))

@@ -19,6 +19,7 @@ import com.itqan.edu.features.landingpage.dto.LandingPageResponse;
 import com.itqan.edu.features.landingpage.dto.LandingPageUpdateRequest;
 import com.itqan.edu.features.landingpage.dto.LandingStatsDto;
 import com.itqan.edu.features.landingpage.dto.LandingTeacherDto;
+import com.itqan.edu.features.landingpage.dto.LandingTeachersSectionDto;
 import com.itqan.edu.features.landingpage.dto.LandingTestimonialDto;
 import com.itqan.edu.features.reviews.CourseReview;
 import com.itqan.edu.features.reviews.CourseReviewRepository;
@@ -94,9 +95,17 @@ public class LandingPageService {
                 .durationLabelEn(config.getHeroDurationLabelEn())
                 .build();
 
+        LandingTeachersSectionDto teachersSection = LandingTeachersSectionDto.builder()
+                .titleAr(config.getTeachersTitleAr())
+                .titleEn(config.getTeachersTitleEn())
+                .subtitleAr(config.getTeachersSubtitleAr())
+                .subtitleEn(config.getTeachersSubtitleEn())
+                .build();
+
         return LandingPageResponse.builder()
                 .hero(hero)
                 .stats(stats)
+                .teachersSection(teachersSection)
                 .specializations(specializations)
                 .featuredCourses(courses)
                 .featuredInstructors(teachers)
@@ -117,6 +126,10 @@ public class LandingPageService {
         if (request.getHeroTeacherNameEn() != null) config.setHeroTeacherNameEn(emptyToNull(request.getHeroTeacherNameEn()));
         if (request.getHeroDurationLabelAr() != null) config.setHeroDurationLabelAr(emptyToNull(request.getHeroDurationLabelAr()));
         if (request.getHeroDurationLabelEn() != null) config.setHeroDurationLabelEn(emptyToNull(request.getHeroDurationLabelEn()));
+        if (request.getTeachersTitleAr() != null) config.setTeachersTitleAr(emptyToNull(request.getTeachersTitleAr()));
+        if (request.getTeachersTitleEn() != null) config.setTeachersTitleEn(emptyToNull(request.getTeachersTitleEn()));
+        if (request.getTeachersSubtitleAr() != null) config.setTeachersSubtitleAr(emptyToNull(request.getTeachersSubtitleAr()));
+        if (request.getTeachersSubtitleEn() != null) config.setTeachersSubtitleEn(emptyToNull(request.getTeachersSubtitleEn()));
 
         if (request.getFeaturedCourseIds() != null) {
             if (config.getFeaturedCourseIds() == null) {

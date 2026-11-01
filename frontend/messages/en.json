@@ -541,7 +541,7 @@
     },
     "landingPage": {
       "title": "Landing page",
-      "description": "Hero video, featured courses, teachers, articles and specializations."
+      "description": "Hero video, sheikhs & scholars section, featured courses, articles and specializations."
     },
     "clipsPage": {
       "title": "Clips",
@@ -689,7 +689,6 @@
         "durationEn": "Duration label (EN)"
       },
       "featuredCourses": "Featured courses",
-      "featuredInstructors": "Featured instructors",
       "featuredArticles": "Featured articles",
       "specs": {
         "heading": "Specializations (chips)",
@@ -713,6 +712,19 @@
         "placeholder": "Pick an option…",
         "selected": "Selected ({count})",
         "noneSelected": "None selected"
+      },
+      "teachers": {
+        "heading": "Sheikhs & scholars section",
+        "description": "This section replaces the numbers bar on the landing page. Choose who appears, in which order, and optionally edit its heading.",
+        "titleAr": "Section title (AR)",
+        "titleEn": "Section title (EN)",
+        "subtitleAr": "Section description (AR)",
+        "subtitleEn": "Section description (EN)",
+        "defaultHint": "Leave empty to use the default text: “{title}”",
+        "pickerTitle": "Sheikhs shown in the section",
+        "profileHint": "Each sheikh's photo, title and bio are edited on the",
+        "profileLink": "Teaching team",
+        "hiddenHint": "If nobody is selected the section is hidden on the landing page."
       }
     },
     "clipsEditor": {
@@ -878,16 +890,8 @@
       "featuredCaption": "Featured lesson",
       "featuredTeacher": "Sheikh Osama Al-Marakbi"
     },
-    "stats": {
-      "activeStudents": "Students",
-      "courses": "Courses",
-      "lessons": "Lessons"
-    },
     "teachers": {
-      "title": "Your teachers",
-      "subtitle": "Meet who teaches you: qualifications, ijazat and method",
-      "coursesLabel": "courses",
-      "studentsLabel": "students",
+      "eyebrow": "Learn from",
       "viewAll": "View all"
     },
     "testimonials": {

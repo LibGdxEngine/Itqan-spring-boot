@@ -18,6 +18,13 @@ export interface LandingStats {
   specializations: number
 }
 
+export interface LandingTeachersSection {
+  titleAr: string | null
+  titleEn: string | null
+  subtitleAr: string | null
+  subtitleEn: string | null
+}
+
 export interface LandingSpecialization {
   id: number
   nameAr: string
@@ -77,6 +84,7 @@ export interface LandingTestimonial {
 export interface LandingPageData {
   hero: LandingHero
   stats: LandingStats
+  teachersSection: LandingTeachersSection | null
   specializations: LandingSpecialization[]
   featuredCourses: LandingCourse[]
   featuredInstructors: LandingTeacher[]
@@ -92,6 +100,10 @@ export interface LandingPageUpdateRequest {
   heroTeacherNameEn?: string | null
   heroDurationLabelAr?: string | null
   heroDurationLabelEn?: string | null
+  teachersTitleAr?: string | null
+  teachersTitleEn?: string | null
+  teachersSubtitleAr?: string | null
+  teachersSubtitleEn?: string | null
   featuredCourseIds?: number[]
   featuredInstructorIds?: number[]
   featuredArticleIds?: number[]

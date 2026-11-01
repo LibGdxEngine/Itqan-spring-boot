@@ -153,7 +153,10 @@ services:
           echo 'Waiting for MinIO...'; sleep 2;
         done
         mc mb --ignore-existing "local/$$BUCKET"
-        printf '%s' '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":["*"]},"Action":["s3:GetObject"],"Resource":["arn:aws:s3:::'"$$BUCKET"'/courses/thumbnails/*","arn:aws:s3:::'"$$BUCKET"'/clips/*","arn:aws:s3:::'"$$BUCKET"'/articles/covers/*"]}]}' > /tmp/policy.json
+        # Anonymous read for every folder the backend returns a plain public URL for (unguessable
+        # keys: thumbnails, lesson resources, clips, article covers, instructor photos, hero video).
+        # Course videos stay private and are served through presigned URLs.
+        printf '%s' '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":["*"]},"Action":["s3:GetObject"],"Resource":["arn:aws:s3:::'"$$BUCKET"'/courses/thumbnails/*","arn:aws:s3:::'"$$BUCKET"'/courses/resources/*","arn:aws:s3:::'"$$BUCKET"'/clips/*","arn:aws:s3:::'"$$BUCKET"'/articles/covers/*","arn:aws:s3:::'"$$BUCKET"'/instructors/photos/*","arn:aws:s3:::'"$$BUCKET"'/landing/hero/*"]}]}' > /tmp/policy.json
         mc anonymous set-json /tmp/policy.json "local/$$BUCKET"
     networks:
       - itqan-network

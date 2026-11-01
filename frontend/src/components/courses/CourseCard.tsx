@@ -60,7 +60,7 @@ export function CourseCard({ course }: CourseCardProps) {
         </h3>
         <p className="mb-3 text-sm text-ink-3">{course.instructor}</p>
 
-        <div className="mb-3 flex items-center gap-2 text-sm">
+        <div className="ltr-flex mb-3 flex items-center gap-2 text-sm">
           {course.reviewCount > 0 ? (
             <>
               <span className="font-semibold text-warning" dir="ltr">{course.rating.toFixed(1)}</span>
@@ -72,7 +72,7 @@ export function CourseCard({ course }: CourseCardProps) {
           )}
         </div>
 
-        <div className="mt-auto flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-3">
+        <div className="ltr-flex mt-auto flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-3">
           <span className="inline-flex items-center gap-1">
             <PlayCircle className="h-3.5 w-3.5" /> {t('catalog.lessons', { count: course.lessonCount })}
           </span>

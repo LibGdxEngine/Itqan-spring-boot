@@ -212,7 +212,7 @@ export function EnrollButton({ courseId, coursePrice, courseTitle }: EnrollButto
 
     return (
         <div className="space-y-3">
-            <div className="flex gap-2">
+            <div className="ltr-flex flex gap-2">
                 <Input
                     placeholder={t('courses.enroll.couponPlaceholder')}
                     value={couponCode}
@@ -230,15 +230,15 @@ export function EnrollButton({ courseId, coursePrice, courseTitle }: EnrollButto
             </div>
 
             <div className="rounded-lg border border-line-strong p-3 text-sm text-ink-button">
-                <div className="flex items-center justify-between">
+                <div className="ltr-flex flex items-center justify-between">
                     <span>{t('courses.enroll.original')}</span>
                     <span dir="ltr">{money(pricing.originalAmount)}</span>
                 </div>
-                <div className="flex items-center justify-between">
+                <div className="ltr-flex flex items-center justify-between">
                     <span>{t('courses.enroll.discount')}</span>
                     <span dir="ltr">−{money(pricing.discountAmount)}</span>
                 </div>
-                <div className="mt-2 flex items-center justify-between font-semibold text-ink">
+                <div className="ltr-flex mt-2 flex items-center justify-between font-semibold text-ink">
                     <span>{t('courses.enroll.total')}</span>
                     <span dir="ltr">{money(pricing.finalAmount)}</span>
                 </div>

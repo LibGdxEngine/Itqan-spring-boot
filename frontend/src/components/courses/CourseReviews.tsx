@@ -174,7 +174,7 @@ export function CourseReviews({ courseId, canReview }: { courseId: number; canRe
               const n = summary.distribution[String(stars)] ?? 0
               const pct = count > 0 ? Math.round((n / count) * 100) : 0
               return (
-                <li key={stars} className="flex items-center gap-3 text-sm">
+                <li key={stars} className="ltr-flex flex items-center gap-3 text-sm">
                   <span className="w-14 shrink-0 text-ink-2">{t("stars", { count: stars })}</span>
                   <div className="h-2 flex-1 overflow-hidden rounded-full bg-grid">
                     <div className="h-full rounded-full bg-star" style={{ width: `${pct}%` }} />
@@ -194,8 +194,8 @@ export function CourseReviews({ courseId, canReview }: { courseId: number; canRe
 
       {canReview && mine !== undefined ? (
         mine && !editing ? (
-          <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-line-strong bg-paper p-4 text-sm">
-            <span className="flex items-center gap-2 text-ink-2">
+          <div className="ltr-flex flex flex-wrap items-center justify-between gap-2 rounded-xl border border-line-strong bg-paper p-4 text-sm">
+            <span className="ltr-flex flex items-center gap-2 text-ink-2">
               {t("youRated")} <StarRating value={mine.rating} label={t("stars", { count: mine.rating })} />
             </span>
             <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
@@ -225,7 +225,7 @@ export function CourseReviews({ courseId, canReview }: { courseId: number; canRe
         <ul className="divide-y divide-line">
           {reviews.map((review) => (
             <li key={review.id} className="py-4">
-              <div className="mb-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+              <div className="ltr-flex mb-1 flex flex-wrap items-center gap-x-3 gap-y-1">
                 <span className="flex h-8 w-8 items-center justify-center rounded-full bg-sand text-sm font-semibold text-ink-2">
                   {(review.authorName || "?").charAt(0)}
                 </span>

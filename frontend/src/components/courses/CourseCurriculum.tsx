@@ -45,9 +45,9 @@ function ModuleItem({ module, index, courseId }: { module: ModuleResponse; index
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 aria-expanded={isOpen}
-                className="w-full flex items-center justify-between gap-3 p-4 hover:bg-subtle/60 transition-smooth text-start focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/40"
+                className="ltr-flex w-full flex items-center justify-between gap-3 p-4 hover:bg-subtle/60 transition-smooth text-start focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/40"
             >
-                <div className="flex items-center gap-3">
+                <div className="ltr-flex flex min-w-0 items-center gap-3">
                     <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand/10 text-sm font-semibold text-brand tabular-nums">
                         {index + 1}
                     </span>
@@ -99,8 +99,8 @@ function ModuleItem({ module, index, courseId }: { module: ModuleResponse; index
 function LessonItem({ lesson, courseId }: { lesson: LessonResponse; courseId?: number }) {
     const t = useTranslations();
     return (
-        <div className="group flex items-center justify-between gap-3 ps-12 pe-3 py-3 border-b border-line last:border-0 border-s-2 border-s-transparent hover:border-s-brand hover:bg-subtle transition-smooth cursor-default">
-            <div className="flex items-center gap-3">
+        <div className="group ltr-flex flex items-center justify-between gap-3 ps-9 pe-3 py-3 sm:ps-12 border-b border-line last:border-0 border-s-2 border-s-transparent hover:border-s-brand hover:bg-subtle transition-smooth cursor-default">
+            <div className="ltr-flex flex min-w-0 items-center gap-3">
                 {lesson.type === 'VIDEO' ? (
                     <PlayCircle className="h-4 w-4 shrink-0 text-brand" />
                 ) : (
@@ -108,8 +108,8 @@ function LessonItem({ lesson, courseId }: { lesson: LessonResponse; courseId?: n
                 )}
                 <span className="text-sm text-ink-2 font-medium group-hover:text-ink transition-smooth">{lesson.title}</span>
             </div>
-            <div className="flex items-center gap-3">
-                <span className="text-xs text-ink-3 tabular-nums">{lesson.duration} {t('courses.minutes')}</span>
+            <div className="ltr-flex flex shrink-0 items-center gap-3">
+                <span className="whitespace-nowrap text-xs text-ink-3 tabular-nums">{lesson.duration} {t('courses.minutes')}</span>
                 {lesson.isFree && courseId ? (
                     <Link
                         href={`/learn/${courseId}/${lesson.id}`}

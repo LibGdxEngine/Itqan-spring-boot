@@ -182,7 +182,7 @@ export function CourseDetailClient({
                 ) : (
                     <EnrollButton courseId={course.id} coursePrice={price} courseTitle={course.title} />
                 )}
-                <div className="flex gap-2">
+                <div className="ltr-flex flex gap-2">
                     {!enrolled ? <WishlistButton courseId={course.id} variant="full" /> : null}
                     <button
                         type="button"
@@ -199,7 +199,7 @@ export function CourseDetailClient({
                         t('courses.fullLifetimeAccess'),
                         t('courses.certificate'),
                     ].map((feature) => (
-                        <li key={feature} className="flex items-center gap-3">
+                        <li key={feature} className="ltr-flex flex items-center gap-3">
                             <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand/12 text-brand">
                                 <Check className="h-3 w-3" />
                             </span>
@@ -251,9 +251,9 @@ export function CourseDetailClient({
                             {course.description}
                         </motion.p>
                     ) : null}
-                    <motion.div variants={fadeUp} className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
+                    <motion.div variants={fadeUp} className="ltr-flex flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
                         {stats && stats.reviewCount > 0 ? (
-                            <a href="#reviews-heading" className="flex items-center gap-2 hover:underline">
+                            <a href="#reviews-heading" className="ltr-flex flex items-center gap-2 hover:underline">
                                 <span className="font-bold text-star" dir="ltr">{stats.rating.toFixed(1)}</span>
                                 <StarRating value={stats.rating} label={t('catalog.ratingLabel', { rating: stats.rating.toFixed(1) })} />
                                 <span className="text-on-night-2">{t('reviews.count', { count: stats.reviewCount })}</span>
@@ -290,7 +290,7 @@ export function CourseDetailClient({
                             <h2 className="mb-4 text-2xl font-bold text-ink">{t('courseDetail.whatYouLearn')}</h2>
                             <ul className="grid gap-3 sm:grid-cols-2">
                                 {outcomes.map((item) => (
-                                    <li key={item} className="flex gap-3 text-sm leading-relaxed text-ink-button">
+                                    <li key={item} className="ltr-flex flex gap-3 text-sm leading-relaxed text-ink-button">
                                         <Check className="mt-0.5 h-4 w-4 shrink-0 text-success" />
                                         {item}
                                     </li>
@@ -321,7 +321,7 @@ export function CourseDetailClient({
 
                     <section className="rounded-xl border border-line-strong bg-surface p-6">
                         <h2 className="mb-4 text-xl font-bold text-ink">{t('courseDetail.instructor')}</h2>
-                        <div className="flex items-center gap-4">
+                        <div className="ltr-flex flex items-center gap-4">
                             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-brand text-xl font-bold text-white">
                                 {instructorName.charAt(0)}
                             </div>

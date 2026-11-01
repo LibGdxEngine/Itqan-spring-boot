@@ -165,9 +165,10 @@ function Catalog({ initial }: { initial: CatalogInitialData }) {
   return (
     <main id="main-content" className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
       <section className="relative mb-8">
+        {/* Bleeds only as far as the page gutter so it never widens the document on phones. */}
         <div
           aria-hidden
-          className="pointer-events-none absolute -inset-x-8 -top-16 h-56 pattern-islamic opacity-50 [mask-image:radial-gradient(60%_60%_at_50%_0%,#000,transparent)]"
+          className="pointer-events-none absolute -inset-x-4 -top-16 h-56 pattern-islamic opacity-50 [mask-image:radial-gradient(60%_60%_at_50%_0%,#000,transparent)] sm:-inset-x-6 lg:-inset-x-8"
         />
         <div className="relative space-y-3">
           <h1 className="text-4xl text-ink sm:text-5xl" style={{ fontFamily: 'var(--font-serif-ar)', fontWeight: 500 }}>
@@ -193,15 +194,19 @@ function Catalog({ initial }: { initial: CatalogInitialData }) {
           <Button
             type="button"
             variant="outline"
-            className="h-11 lg:hidden"
+            className="h-11 shrink-0 px-3 sm:px-4 lg:hidden"
             aria-expanded={showFilters}
+            aria-controls="catalog-filters"
+            aria-label={t('catalog.filters.toggle')}
             onClick={() => setShowFilters((v) => !v)}
           >
-            <SlidersHorizontal /> {t('catalog.filters.toggle')}
+            <SlidersHorizontal />
+            {/* Icon-only on phones so the search box keeps its width. */}
+            <span className="hidden sm:inline">{t('catalog.filters.toggle')}</span>
             {activeFilters > 0 ? <span className="rounded-full bg-brand px-1.5 text-xs text-white">{activeFilters}</span> : null}
           </Button>
         </div>
-        <div className={cn(showFilters ? 'block' : 'hidden', 'lg:block')}>{filters}</div>
+        <div id="catalog-filters" className={cn(showFilters ? 'block' : 'hidden', 'lg:block')}>{filters}</div>
       </div>
 
       <div ref={resultsRef} className="mb-4 flex min-h-9 scroll-mt-24 flex-wrap items-center justify-between gap-2">
@@ -283,7 +288,7 @@ function Catalog({ initial }: { initial: CatalogInitialData }) {
 
 export function CatalogPage({ initial }: { initial: CatalogInitialData }) {
   return (
-    <div className="min-h-screen bg-canvas">
+    <div className="min-h-screen overflow-x-clip bg-canvas">
       <Navbar />
       <React.Suspense fallback={null}>
         <Catalog initial={initial} />

@@ -469,8 +469,8 @@ h1, h2, h3 {
 
 .hero-glow {
   background:
-    radial-gradient(520px circle at 85% 10%, rgba(217, 119, 87, 0.22), transparent 60%),
-    radial-gradient(480px circle at 8% 85%, rgba(201, 100, 66, 0.16), transparent 60%);
+    radial-gradient(640px circle at 50% 38%, rgba(217, 119, 87, 0.22), transparent 65%),
+    radial-gradient(420px circle at 50% 100%, rgba(201, 100, 66, 0.14), transparent 65%);
 }
 
 .hero-ornament {

@@ -2,10 +2,10 @@
 
 import React, { useRef, useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { Play, Pause, Volume2, VolumeX, Maximize, PictureInPicture2, Bookmark } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Maximize, PictureInPicture2, Bookmark, Headphones } from 'lucide-react';
 import { VideoPlayerProps, VideoBookmark } from '@/types/video';
 import { VideoBookmarkService, PictureInPictureService } from '@/lib/videoService';
-import { parseVideoSource } from '@/lib/videoSource';
+import { isAudioSource, parseVideoSource } from '@/lib/videoSource';
 import { BookmarkPanel } from './BookmarkPanel';
 import { InteractiveTranscript } from './InteractiveTranscript';
 import { useYouTubePlayer } from './useYouTubePlayer';
@@ -19,6 +19,8 @@ export function VideoPlayer({
   onTimeUpdate,
   onEnded,
   onPlaybackError,
+  mimeType,
+  title,
 }: VideoPlayerProps) {
   const t = useTranslations('lesson.player');
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -47,6 +49,8 @@ export function VideoPlayer({
   const source = parseVideoSource(videoUrl);
   const isYouTube = source.kind === 'youtube';
   const youTubeVideoId = source.kind === 'youtube' ? source.videoId : null;
+  // Audio lessons use the same <video> element (it plays audio natively) with a poster instead of a picture.
+  const isAudio = !isYouTube && isAudioSource(videoUrl, mimeType);
 
   const yt = useYouTubePlayer({
     videoId: youTubeVideoId,
@@ -187,6 +191,7 @@ export function VideoPlayer({
   };
 
   const toggleFullscreen = () => {
+    if (isAudio) return;
     if (document.fullscreenElement) {
       document.exitFullscreen();
       return;
@@ -323,7 +328,7 @@ export function VideoPlayer({
 
   return (
     <div className="w-full bg-gray-900 rounded-xl overflow-hidden shadow-2xl">
-      <div className="relative aspect-video bg-black">
+      <div className={`relative bg-black ${isAudio ? 'h-44 sm:h-52' : 'aspect-video'}`}>
         {isYouTube ? (
           <div ref={ytContainerRef} className="w-full h-full" />
         ) : (
@@ -338,7 +343,37 @@ export function VideoPlayer({
             onEnded={onEnded}
             onError={onPlaybackError}
             autoPlay={autoPlay}
+            playsInline
+            preload="metadata"
           />
+        )}
+
+        {isAudio && (
+          <button
+            type="button"
+            onClick={togglePlay}
+            aria-label={isPlaying ? t('pause') : t('play')}
+            className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-brand to-gray-900 px-6 text-center text-white"
+          >
+            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/15 ring-1 ring-white/25">
+              <Headphones size={30} />
+            </span>
+            {title ? <span className="line-clamp-2 max-w-xl text-base font-semibold">{title}</span> : null}
+            <span aria-hidden className="flex h-6 items-end gap-1">
+              {[0, 1, 2, 3, 4].map((i) => (
+                <span
+                  key={i}
+                  className={`w-1 rounded-full bg-white/80 ${isPlaying ? 'animate-pulse' : ''}`}
+                  style={{
+                    height: isPlaying ? `${[40, 90, 60, 100, 50][i]}%` : '20%',
+                    animationDelay: `${i * 150}ms`,
+                    transition: 'height 300ms ease',
+                  }}
+                />
+              ))}
+            </span>
+            <span className="text-xs text-white/70">{t('audioLesson')}</span>
+          </button>
         )}
 
         {/* Bookmark markers on progress bar */}
@@ -443,7 +478,7 @@ export function VideoPlayer({
               </button>
             )}
 
-            {!isYouTube && (
+            {!isYouTube && !isAudio && (
               <button
                 onClick={togglePictureInPicture}
                 className="p-2 hover:bg-gray-700 rounded-full transition"
@@ -453,13 +488,15 @@ export function VideoPlayer({
               </button>
             )}
 
-            <button
-              onClick={toggleFullscreen}
-              className="p-2 hover:bg-gray-700 rounded-full transition"
-              title={t('fullscreen')}
-            >
-              <Maximize size={20} />
-            </button>
+            {!isAudio && (
+              <button
+                onClick={toggleFullscreen}
+                className="p-2 hover:bg-gray-700 rounded-full transition"
+                title={t('fullscreen')}
+              >
+                <Maximize size={20} />
+              </button>
+            )}
           </div>
         </div>
       </div>

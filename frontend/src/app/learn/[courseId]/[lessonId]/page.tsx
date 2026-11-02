@@ -193,6 +193,8 @@ export default function LessonPage() {
                             lessonId={lessonId}
                             autoPlay={false}
                             startAt={positions[lessonId]}
+                            mimeType={lesson.videoMimeType}
+                            title={lesson.title}
                             onTimeUpdate={handleTimeUpdate}
                             onEnded={() => {
                                 lastTimeRef.current = 0;

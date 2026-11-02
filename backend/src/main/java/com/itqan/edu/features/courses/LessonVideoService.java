@@ -253,10 +253,26 @@ public class LessonVideoService {
                     "requestedSizeBytes", request.getFileSizeBytes()));
         }
 
-        String mimeType = request.getMimeType().toLowerCase(Locale.ROOT);
-        if (!mimeType.startsWith("video/")) {
-            throw new BusinessException(ErrorCode.VIDEO_INVALID_MIME_TYPE);
+        String mimeType = request.getMimeType().toLowerCase(Locale.ROOT).trim();
+        if (mimeType.startsWith("video/") || mimeType.startsWith("audio/")) {
+            return;
         }
+        // Some browsers send no specific type for audio such as .m4a or .opus; trust a known
+        // media extension here, because the file header is still checked once the upload completes.
+        if (mimeType.equals("application/octet-stream") && hasMediaExtension(request.getFilename())) {
+            return;
+        }
+        throw new BusinessException(ErrorCode.VIDEO_INVALID_MIME_TYPE);
+    }
+
+    private static final java.util.Set<String> MEDIA_EXTENSIONS = java.util.Set.of(
+            "mp4", "m4v", "mov", "webm", "mkv", "avi", "mpg", "mpeg", "flv",
+            "mp3", "m4a", "aac", "wav", "ogg", "oga", "opus", "flac", "amr", "weba");
+
+    private static boolean hasMediaExtension(String filename) {
+        if (filename == null) return false;
+        int dot = filename.lastIndexOf('.');
+        return dot >= 0 && MEDIA_EXTENSIONS.contains(filename.substring(dot + 1).toLowerCase(Locale.ROOT));
     }
 
     /**
@@ -278,10 +294,10 @@ public class LessonVideoService {
      *                           does not match any supported video format
      */
     public void validateVideoContent(byte[] headerBytes, String declaredMimeType) {
-        validateVideoMagicNumber(headerBytes, declaredMimeType);
+        validateMediaMagicNumber(headerBytes, declaredMimeType);
     }
 
-    private void validateVideoMagicNumber(byte[] header, String declaredMimeType) {
+    private void validateMediaMagicNumber(byte[] header, String declaredMimeType) {
         // Check first 12 bytes against known video signatures
         if (header == null || header.length < 12) {
             throw new BusinessException(ErrorCode.VIDEO_INVALID_MIME_TYPE,
@@ -319,9 +335,41 @@ public class LessonVideoService {
             valid = true;
         }
 
+        // Audio lessons. M4A (ftyp) and WebM audio are already covered above.
+        // MP3 with an ID3 tag
+        if (!valid && header[0] == 'I' && header[1] == 'D' && header[2] == '3') {
+            valid = true;
+        }
+
+        // MP3 / AAC (ADTS) — MPEG audio frame sync: 11 set bits
+        if (!valid && header[0] == (byte) 0xFF && (header[1] & 0xE0) == 0xE0) {
+            valid = true;
+        }
+
+        // WAV — 'RIFF' ... 'WAVE'
+        if (!valid && header[0] == 'R' && header[1] == 'I' && header[2] == 'F' && header[3] == 'F'
+                && header[8] == 'W' && header[9] == 'A' && header[10] == 'V' && header[11] == 'E') {
+            valid = true;
+        }
+
+        // OGG (Vorbis / Opus) — 'OggS'
+        if (!valid && header[0] == 'O' && header[1] == 'g' && header[2] == 'g' && header[3] == 'S') {
+            valid = true;
+        }
+
+        // FLAC — 'fLaC'
+        if (!valid && header[0] == 'f' && header[1] == 'L' && header[2] == 'a' && header[3] == 'C') {
+            valid = true;
+        }
+
+        // AMR — '#!AMR'
+        if (!valid && header[0] == '#' && header[1] == '!' && header[2] == 'A' && header[3] == 'M' && header[4] == 'R') {
+            valid = true;
+        }
+
         if (!valid) {
             throw new BusinessException(ErrorCode.VIDEO_INVALID_MIME_TYPE,
-                    "File content does not match any supported video format. Declared: " + declaredMimeType);
+                    "File content does not match any supported video or audio format. Declared: " + declaredMimeType);
         }
     }
 
@@ -344,9 +392,9 @@ public class LessonVideoService {
             throw new BusinessException(ErrorCode.VIDEO_UPLOAD_FAILED, "Uploaded video could not be verified");
         }
         try {
-            validateVideoMagicNumber(header, lesson.getVideoMimeType());
+            validateMediaMagicNumber(header, lesson.getVideoMimeType());
         } catch (BusinessException ex) {
-            log.warn("Rejected upload that is not a video lesson={} key={}", lesson.getId(), objectKey);
+            log.warn("Rejected upload that is not a video or audio file lesson={} key={}", lesson.getId(), objectKey);
             try {
                 s3Client.deleteObject(DeleteObjectRequest.builder()
                         .bucket(storageProperties.getBucket())
@@ -383,7 +431,7 @@ public class LessonVideoService {
                 .replaceAll("[^a-z0-9]+", "-")
                 .replaceAll("^-|-$", "");
         if (!StringUtils.hasText(sanitizedBase)) {
-            sanitizedBase = "video";
+            sanitizedBase = "media";
         }
 
         return "lessons/" + lessonId + "/" + UUID.randomUUID() + "-" + sanitizedBase + extension;

@@ -12,6 +12,7 @@ import {
   initiateLessonVideoMultipartUpload,
 } from "@/lib/lessonVideoUploadService"
 import { LessonResponse } from "@/lib/api"
+import { MEDIA_FILE_ACCEPT, guessMediaMimeType } from "@/lib/videoSource"
 
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024 * 1024 // 5 GB
 const RETRY_COUNT = 3
@@ -140,10 +141,11 @@ export function VideoUploader({ lessonId, onUploaded }: VideoUploaderProps) {
     setProgress(0)
     setPhase("preparing")
 
+    const mimeType = guessMediaMimeType(file)
     try {
       const init = await initiateLessonVideoMultipartUpload(lessonId, {
         filename: file.name,
-        mimeType: file.type || "video/mp4",
+        mimeType,
         fileSizeBytes: file.size,
       })
       contextRef.current = { uploadId: init.uploadId, objectKey: init.objectKey }
@@ -165,7 +167,7 @@ export function VideoUploader({ lessonId, onUploaded }: VideoUploaderProps) {
         const etag = await uploadPartWithRetry(
           part.url,
           chunk,
-          file.type || "application/octet-stream",
+          mimeType,
           controller.signal,
           (attempt) =>
             setPartInfo({ current: part.partNumber, total: sortedParts.length, attempt }),
@@ -229,7 +231,7 @@ export function VideoUploader({ lessonId, onUploaded }: VideoUploaderProps) {
         <input
           ref={inputRef}
           type="file"
-          accept="video/*"
+          accept={MEDIA_FILE_ACCEPT}
           onChange={onSelect}
           disabled={isBusy}
           className="block text-sm text-ink-button file:me-3 file:rounded-md file:border file:border-line-strong file:bg-surface file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-ink hover:file:bg-subtle"

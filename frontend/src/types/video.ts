@@ -39,6 +39,10 @@ export interface VideoPlayerProps {
   onTimeUpdate?: (currentTime: number) => void;
   onEnded?: () => void;
   onPlaybackError?: () => void;
+  /** The uploaded file's MIME type; `audio/*` shows the audio layout. Falls back to the URL's extension. */
+  mimeType?: string | null;
+  /** Shown on the audio poster (e.g. the lesson title). */
+  title?: string;
 }
 
 export interface BookmarkPanelProps {

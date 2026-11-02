@@ -15,6 +15,7 @@ import { useToast } from "@/components/ui/use-toast"
 import { getErrorMessage } from "@/lib/api-axios"
 import { uploadLessonVideoFile } from "@/lib/lessonVideoUploadService"
 import { LessonInput, LessonType, StudioLesson, studioApi } from "@/lib/studio-api"
+import { MEDIA_FILE_ACCEPT } from "@/lib/videoSource"
 import { cn } from "@/lib/utils"
 
 const MAX_VIDEO_BYTES = 5 * 1024 * 1024 * 1024
@@ -214,7 +215,7 @@ export function LessonDialog({ open, onOpenChange, moduleId, lesson, nextOrderIn
                 <p className="text-sm text-ink-2">{t("videoAlreadyUploaded")}</p>
               ) : null}
               <FormField label={t("videoFile")} htmlFor="lesson-video" hint={t("videoFileHint")}>
-                <Input id="lesson-video" type="file" accept="video/*" onChange={pickVideo} />
+                <Input id="lesson-video" type="file" accept={MEDIA_FILE_ACCEPT} onChange={pickVideo} />
               </FormField>
               <FormField label={t("videoLink")} htmlFor="lesson-video-url" hint={t("videoLinkHint")}>
                 <Input

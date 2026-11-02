@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
-import { AlertCircle, BarChart, BookOpen, Check, Clock, PlayCircle, Share2, Users } from 'lucide-react';
+import { AlertCircle, BarChart, BookOpen, Check, Clock, Headphones, PlayCircle, Share2, Users } from 'lucide-react';
 
 import { useAuth } from '@/components/auth-context';
 import { Navbar } from '@/components/Navbar';
@@ -24,6 +24,7 @@ import { CatalogCourse, catalogApi, learningApi } from '@/lib/learning-api';
 import type { StudioCourse } from '@/lib/studio-api';
 import { formatPrice, useSiteCurrency } from '@/lib/use-site-currency';
 import { fadeUp, staggerParent } from '@/lib/motion';
+import { isAudioSource } from '@/lib/videoSource';
 
 OpenAPI.BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
@@ -60,6 +61,7 @@ export function CourseDetailClient({
     const [loading, setLoading] = React.useState(!initialCourse);
     const [error, setError] = React.useState(false);
     const [previewOpen, setPreviewOpen] = React.useState(false);
+    const previewIsAudio = isAudioSource(course?.previewVideoUrl);
 
     // Only fetch in the browser when the server couldn't (e.g. a draft the signed-in owner previews).
     React.useEffect(() => {
@@ -177,8 +179,10 @@ export function CourseDetailClient({
                         onClick={() => setPreviewOpen(true)}
                         className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/35 text-white transition hover:bg-black/45"
                     >
-                        <PlayCircle className="h-14 w-14" />
-                        <span className="text-sm font-semibold">{t('courseDetail.watchPreview')}</span>
+                        {previewIsAudio ? <Headphones className="h-14 w-14" /> : <PlayCircle className="h-14 w-14" />}
+                        <span className="text-sm font-semibold">
+                            {t(previewIsAudio ? 'courseDetail.listenPreview' : 'courseDetail.watchPreview')}
+                        </span>
                     </button>
                 ) : null}
             </div>
@@ -366,7 +370,7 @@ export function CourseDetailClient({
                         <DialogTitle>{t('courseDetail.previewTitle', { title: course.title })}</DialogTitle>
                     </DialogHeader>
                     {previewOpen && course.previewVideoUrl ? (
-                        <VideoPlayer videoUrl={course.previewVideoUrl} lessonId={0} autoPlay />
+                        <VideoPlayer videoUrl={course.previewVideoUrl} lessonId={0} title={course.title} autoPlay />
                     ) : null}
                 </DialogContent>
             </Dialog>

@@ -1,5 +1,6 @@
 import api from "@/lib/api-axios";
 import { LessonResponse } from "@/lib/api";
+import { guessMediaMimeType } from "@/lib/videoSource";
 
 interface LessonVideoMultipartInitiateRequest {
   filename: string;
@@ -72,9 +73,10 @@ export async function uploadLessonVideoFile(
   file: File,
   onProgress?: (progressPercent: number) => void
 ): Promise<LessonResponse> {
+  const mimeType = guessMediaMimeType(file);
   const initiateResponse = await initiateLessonVideoMultipartUpload(lessonId, {
     filename: file.name,
-    mimeType: file.type || "video/mp4",
+    mimeType,
     fileSizeBytes: file.size,
   });
 
@@ -96,7 +98,7 @@ export async function uploadLessonVideoFile(
         method: "PUT",
         body: chunk,
         headers: {
-          "Content-Type": file.type || "application/octet-stream",
+          "Content-Type": mimeType,
         },
       });
 

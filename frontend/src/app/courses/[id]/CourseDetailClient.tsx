@@ -19,6 +19,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useToast } from '@/components/ui/use-toast';
 import { VideoPlayer } from '@/components/video';
 import { CoursesService, OpenAPI } from '@/lib/api';
+import { LandingSpecialization, specializationsApi } from '@/lib/landingPage';
 import { CatalogCourse, catalogApi, learningApi } from '@/lib/learning-api';
 import type { StudioCourse } from '@/lib/studio-api';
 import { formatPrice, useSiteCurrency } from '@/lib/use-site-currency';
@@ -35,10 +36,13 @@ export function CourseDetailClient({
     initialCourse,
     initialStats,
     initialRelated,
+    initialCategory = null,
 }: {
     initialCourse: CourseDetail | null;
     initialStats: CatalogCourse | null;
     initialRelated: CatalogCourse[];
+    /** The course's specialization, when the server could resolve its slug; drives the breadcrumb label. */
+    initialCategory?: LandingSpecialization | null;
 }) {
     const params = useParams();
     const id = Number(params.id);
@@ -51,6 +55,7 @@ export function CourseDetailClient({
     const [course, setCourse] = React.useState<CourseDetail | null>(initialCourse);
     const [stats, setStats] = React.useState<CatalogCourse | null>(initialStats);
     const [related, setRelated] = React.useState<CatalogCourse[]>(initialRelated);
+    const [category, setCategory] = React.useState<LandingSpecialization | null>(initialCategory);
     const [enrolled, setEnrolled] = React.useState(false);
     const [loading, setLoading] = React.useState(!initialCourse);
     const [error, setError] = React.useState(false);
@@ -68,6 +73,10 @@ export function CourseDetailClient({
                 catalogApi
                     .search({ category: data.category, sort: 'popular', size: 5 })
                     .then((page) => !cancelled && setRelated(page.content.filter((c) => c.id !== id).slice(0, 4)))
+                    .catch(() => undefined);
+                specializationsApi
+                    .getPublic()
+                    .then((list) => !cancelled && setCategory(list.find((s) => s.slug === data.category) ?? null))
                     .catch(() => undefined);
             })
             .catch(() => !cancelled && setError(true))
@@ -238,7 +247,7 @@ export function CourseDetailClient({
                             <>
                                 <span className="mx-2">/</span>
                                 <Link href={`/courses?category=${encodeURIComponent(course.category)}`} className="hover:text-white">
-                                    {course.category}
+                                    {(locale === 'ar' ? category?.nameAr : category?.nameEn) || category?.nameEn || course.category}
                                 </Link>
                             </>
                         ) : null}

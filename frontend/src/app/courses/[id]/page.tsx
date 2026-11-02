@@ -3,6 +3,6 @@ import { getCourseData } from "./course-data"
 
 export default async function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const { course, stats, related } = await getCourseData(id)
-  return <CourseDetailClient initialCourse={course} initialStats={stats} initialRelated={related} />
+  const { course, stats, related, category } = await getCourseData(id)
+  return <CourseDetailClient initialCourse={course} initialStats={stats} initialRelated={related} initialCategory={category} />
 }

@@ -38,7 +38,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 async function fetchCourses(): Promise<CourseItem[]> {
-  const data = await fetchPublic<{ content: CourseItem[] }>("/api/catalog?sort=popular&size=48", 3600);
+  const data = await fetchPublic<{ content: CourseItem[] }>("/api/catalog?sort=popular&size=48", 300);
   return data?.content ?? [];
 }
 

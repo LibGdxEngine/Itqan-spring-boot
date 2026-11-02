@@ -19,7 +19,8 @@ export default async function CoursesPage({
     return Array.isArray(value) ? value[0] : value
   })
   const [result, categories] = await Promise.all([
-    fetchPublic<Page<CatalogCourse>>(catalogApiPath(params), 120),
+    // No caching: a course an instructor just published must show up for students right away.
+    fetchPublic<Page<CatalogCourse>>(catalogApiPath(params), 0),
     fetchPublic<LandingSpecialization[]>("/api/specializations", 3600),
   ])
   return <CatalogPage initial={{ key: catalogQueryKey(params), result, categories: categories ?? [] }} />

@@ -14,8 +14,8 @@ type Page<T> = { content: T[] }
 export const getCourseData = cache(async (id: string) => {
   if (!/^\d+$/.test(id)) return { course: null, stats: null, related: [], reviews: [], category: null }
   const [course, stats, reviews, specializations] = await Promise.all([
-    fetchPublic<StudioCourse>(`/api/courses/${id}`),
-    fetchPublic<CatalogCourse>(`/api/catalog/courses/${id}`),
+    fetchPublic<StudioCourse>(`/api/courses/${id}`, 0),
+    fetchPublic<CatalogCourse>(`/api/catalog/courses/${id}`, 0),
     fetchPublic<Page<Review>>(`/api/courses/${id}/reviews?size=5`),
     fetchPublic<LandingSpecialization[]>("/api/specializations", 3600),
   ])
@@ -24,6 +24,7 @@ export const getCourseData = cache(async (id: string) => {
   const related = course
     ? ((await fetchPublic<Page<CatalogCourse>>(
         `/api/catalog?category=${encodeURIComponent(course.category)}&sort=popular&size=5`,
+        0,
       ))?.content ?? []).filter((c) => c.id !== course.id).slice(0, 4)
     : []
   return { course, stats, related, reviews: reviews?.content ?? [], category }

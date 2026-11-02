@@ -81,6 +81,17 @@ export default function HomeClient({ data }: HomeClientProps) {
       {/* ===== 1. HERO ===== */}
       <section id="main-content" className="relative pt-28 pb-20 overflow-hidden">
         <div className="absolute inset-0 pattern-islamic -z-10" />
+        <div className="absolute inset-0 hero-glow -z-10 pointer-events-none" aria-hidden="true" />
+        <div className="absolute inset-0 hero-lattice opacity-70 dark:opacity-40 -z-10 pointer-events-none" aria-hidden="true" />
+        <div
+          className="hero-ornament absolute -top-32 -end-32 h-[34rem] w-[34rem] opacity-40 dark:opacity-30 -z-10 pointer-events-none"
+          aria-hidden="true"
+        />
+        <div
+          className="hero-ornament absolute -bottom-40 -start-40 h-[28rem] w-[28rem] opacity-30 dark:opacity-20 -z-10 pointer-events-none"
+          style={{ animationDirection: "reverse" }}
+          aria-hidden="true"
+        />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div

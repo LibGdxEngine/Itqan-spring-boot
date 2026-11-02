@@ -309,6 +309,25 @@ h1, h2, h3 {
   flex-direction: row;
 }
 
+/* Responsive stacks (`flex flex-col sm:flex-row ... ltr-flex`): the rule above would
+   otherwise turn the stack into a row on phones too. Keep the column below the
+   breakpoint and switch to a reading-order row at it. */
+[dir="rtl"] .flex-col.ltr-flex {
+  flex-direction: column;
+}
+
+@media (width >= 40rem) {
+  [dir="rtl"] .sm\:flex-row.ltr-flex {
+    flex-direction: row;
+  }
+}
+
+@media (width >= 48rem) {
+  [dir="rtl"] .md\:flex-row.ltr-flex {
+    flex-direction: row;
+  }
+}
+
 [dir="rtl"] .gap-2 > svg,
 [dir="rtl"] .gap-3 > svg {
   margin-left: 0;

@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { GoogleOAuthProvider } from "@react-oauth/google"
+import { MotionConfig } from "framer-motion"
 
 import { AuthProvider } from "@/components/auth-context"
 import { ToastProvider } from "@/components/ui/toast"
@@ -11,10 +12,13 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
 
   const tree = (
-    <AuthProvider>
-      <ToastProvider>{children}</ToastProvider>
-      <ServiceWorkerRegister />
-    </AuthProvider>
+    // reducedMotion="user": framer animations honour the OS "reduce motion" setting site-wide.
+    <MotionConfig reducedMotion="user">
+      <AuthProvider>
+        <ToastProvider>{children}</ToastProvider>
+        <ServiceWorkerRegister />
+      </AuthProvider>
+    </MotionConfig>
   )
 
   if (googleClientId) {

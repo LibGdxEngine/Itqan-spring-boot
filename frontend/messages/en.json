@@ -53,7 +53,8 @@
     "accountMenu": "Account menu",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
-    "scholarships": "Scholarships"
+    "scholarships": "Scholarships",
+    "more": "More"
   },
   "instructors": {
     "title": "Our Teachers",
@@ -888,7 +889,13 @@
     "heroSubtitle": "Structured video lessons in the tafseer of the Qur'an, with quizzes, progress tracking and a certificate of completion.",
     "hero": {
       "featuredCaption": "Featured lesson",
-      "featuredTeacher": "Sheikh Osama Al-Marakbi"
+      "featuredTeacher": "Sheikh Osama Al-Marakbi",
+      "play": "Play lesson",
+      "proof": {
+        "gradual": "Step-by-step curriculum",
+        "quizzes": "Quizzes after lessons",
+        "certificate": "Completion certificate"
+      }
     },
     "teachers": {
       "eyebrow": "Learn from",

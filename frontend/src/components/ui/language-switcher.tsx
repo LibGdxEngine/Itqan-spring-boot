@@ -35,9 +35,13 @@ export function LanguageSwitcher() {
       disabled={isPending}
       className="gap-2"
     >
-      <Languages className="w-4 h-4" />
+      <Languages className="hidden w-4 h-4 sm:block" aria-hidden />
       <span className="hidden sm:inline">
         {locale === 'en' ? 'العربية' : 'English'}
+      </span>
+      {/* Phones: a short code instead of an ambiguous glyph. */}
+      <span className="font-semibold tracking-wide sm:hidden" aria-hidden>
+        {locale === 'en' ? 'ع' : 'EN'}
       </span>
     </Button>
   )

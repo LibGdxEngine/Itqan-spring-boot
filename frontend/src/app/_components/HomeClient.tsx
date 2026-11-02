@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import {
   ArrowRight,
@@ -11,6 +12,7 @@ import {
   ClipboardCheck,
   Award,
   Quote,
+  Check,
   type LucideIcon,
 } from "lucide-react"
 import { Navbar } from "@/components/Navbar"
@@ -18,6 +20,8 @@ import { SiteFooter } from "@/components/SiteFooter"
 import { useTranslations, useLocale } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { getYouTubeVideoId } from "@/lib/videoSource"
+import { useAuth } from "@/components/auth-context"
+import { HeroVideo } from "./HeroVideo"
 import { motion } from "framer-motion"
 import { ArticleCard } from "@/components/articles/ArticleCard"
 import type {
@@ -53,6 +57,17 @@ export default function HomeClient({ data }: HomeClientProps) {
   const heroTitle = (isAr ? data?.hero.titleAr : data?.hero.titleEn) ?? null
   const heroTeacher = (isAr ? data?.hero.teacherNameAr : data?.hero.teacherNameEn) ?? t("home.hero.featuredTeacher")
   const heroDuration = (isAr ? data?.hero.durationLabelAr : data?.hero.durationLabelEn) ?? null
+  const { isAuthenticated } = useAuth()
+  const heroCtaRef = useRef<HTMLDivElement>(null)
+  const [heroCtaHidden, setHeroCtaHidden] = useState(false)
+  useEffect(() => {
+    const el = heroCtaRef.current
+    if (!el || typeof IntersectionObserver === "undefined") return
+    const io = new IntersectionObserver(([entry]) => setHeroCtaHidden(!entry.isIntersecting && entry.boundingClientRect.top < 0))
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
+  const showStickyCta = !isAuthenticated && heroCtaHidden
   // Without a configured video the hero collapses to a single centered column (no placeholder card).
   const heroHasVideo = Boolean(heroVideoUrl)
 
@@ -79,7 +94,7 @@ export default function HomeClient({ data }: HomeClientProps) {
       <Navbar />
 
       {/* ===== 1. HERO ===== */}
-      <section id="main-content" className="relative pt-28 pb-20 overflow-hidden">
+      <section id="main-content" className="relative pt-24 pb-14 sm:pt-28 lg:pb-16 overflow-hidden">
         <div className="absolute inset-0 pattern-islamic -z-10" />
         <div className="absolute inset-0 hero-glow -z-10 pointer-events-none" aria-hidden="true" />
         <div className="absolute inset-0 hero-lattice opacity-70 dark:opacity-40 -z-10 pointer-events-none" aria-hidden="true" />
@@ -97,13 +112,13 @@ export default function HomeClient({ data }: HomeClientProps) {
           <div
             className={
               heroHasVideo
-                ? "grid lg:grid-cols-[1.1fr_1fr] gap-12 lg:gap-16 items-center"
+                ? "grid lg:grid-cols-[1.1fr_1fr] gap-10 lg:gap-16 items-center"
                 : "max-w-3xl mx-auto text-center"
             }
           >
             {/* Text column */}
             <motion.div
-              className={heroHasVideo ? "space-y-8" : "space-y-8 flex flex-col items-center"}
+              className={heroHasVideo ? "space-y-6 sm:space-y-7" : "space-y-6 sm:space-y-7 flex flex-col items-center"}
               initial="hidden"
               animate="visible"
               variants={staggerParent}
@@ -113,7 +128,7 @@ export default function HomeClient({ data }: HomeClientProps) {
                 className="inline-flex items-center gap-2 text-xs tracking-[0.12px] uppercase text-ink-3"
               >
                 <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand opacity-60" />
+                  <span className="absolute inline-flex h-full w-full motion-safe:animate-ping rounded-full bg-brand opacity-60" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-brand" />
                 </span>
                 {t("home.badge")}
@@ -129,28 +144,46 @@ export default function HomeClient({ data }: HomeClientProps) {
 
               <motion.p
                 variants={fadeUp}
-                className={`text-[20px] leading-[1.6] text-ink-2 max-w-xl${heroHasVideo ? "" : " mx-auto"}`}
+                className={`text-[17px] sm:text-[20px] leading-[1.7] sm:leading-[1.6] text-ink-2 max-w-xl${heroHasVideo ? "" : " mx-auto"}`}
               >
                 {t("home.heroSubtitle")}
               </motion.p>
 
               <motion.div
                 variants={fadeUp}
-                className={`flex flex-col sm:flex-row gap-3 ltr-flex ${heroHasVideo ? "items-start" : "items-center justify-center"}`}
+                ref={heroCtaRef}
+                className={`flex flex-wrap items-center gap-x-6 gap-y-3 ltr-flex ${heroHasVideo ? "" : "justify-center"}`}
               >
-                <Link href="/register">
-                  <Button size="lg" className="text-base px-7">
+                <Button size="lg" className="text-base px-7" asChild>
+                  <Link href="/register">
                     {t("common.startLearning")}
-                    <ArrowRight className="w-4 h-4 rtl:rotate-180" />
-                  </Button>
-                </Link>
-                <Link href="/courses">
-                  <Button size="lg" variant="secondary" className="text-base px-7">
-                    {t("nav.publicCourses")}
-                    <ChevronRight className="w-4 h-4 rtl:rotate-180" />
-                  </Button>
+                    <ArrowRight className="w-4 h-4 rtl:rotate-180" aria-hidden />
+                  </Link>
+                </Button>
+                <Link
+                  href="/courses"
+                  className="group inline-flex items-center gap-1.5 rounded-md px-1 py-2 text-base font-medium text-ink-button underline-offset-[6px] decoration-brand/60 transition-colors hover:text-ink hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus ltr-flex"
+                >
+                  {t("home.cta.exploreCourses")}
+                  <ChevronRight
+                    className="w-4 h-4 rtl:rotate-180 transition-transform motion-safe:group-hover:translate-x-0.5 motion-safe:rtl:group-hover:-translate-x-0.5"
+                    aria-hidden
+                  />
                 </Link>
               </motion.div>
+
+              {/* Proof row: concrete, true facts only (no invented numbers). */}
+              <motion.ul
+                variants={fadeUp}
+                className={`flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-ink-2 ltr-flex ${heroHasVideo ? "" : "justify-center"}`}
+              >
+                {(["gradual", "quizzes", "certificate"] as const).map((key) => (
+                  <li key={key} className="inline-flex items-center gap-1.5">
+                    <Check className="w-4 h-4 text-brand shrink-0" aria-hidden />
+                    {t(`home.hero.proof.${key}`)}
+                  </li>
+                ))}
+              </motion.ul>
             </motion.div>
 
             {/* Featured video card (only when an admin configured a video) */}
@@ -164,59 +197,61 @@ export default function HomeClient({ data }: HomeClientProps) {
                 {/* Ambient warm glow */}
                 <div
                   aria-hidden
-                  className="pointer-events-none absolute -inset-10 -z-10 opacity-25 blur-3xl"
+                  className="pointer-events-none absolute -inset-10 -z-10 opacity-15 blur-3xl"
                   style={{
                     background:
                       "radial-gradient(circle at 50% 50%, #d97757 0%, transparent 60%)",
                   }}
                 />
-                <div className="bg-surface border border-line rounded-[32px] p-5 shadow-whisper">
+                <figure className="bg-surface border border-line-strong rounded-[28px] p-3 sm:p-4">
                   <div className="relative aspect-video rounded-[20px] overflow-hidden bg-night-2">
-                    {heroYouTubeId ? (
-                      <iframe
-                        src={`https://www.youtube.com/embed/${heroYouTubeId}`}
-                        title={heroTitle ?? t("home.hero.featuredCaption")}
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                        className="absolute inset-0 w-full h-full"
-                      />
-                    ) : (
-                      <video
-                        src={heroVideoUrl}
-                        controls
-                        preload="metadata"
-                        className="absolute inset-0 w-full h-full object-cover"
-                      />
-                    )}
-                    {heroDuration ? (
-                      <div className="absolute bottom-3 start-3 bg-night/80 text-on-night text-xs px-2.5 py-1 rounded-md flex items-center gap-1.5 ltr-flex">
-                        <Clock className="w-3 h-3" />
-                        {heroDuration}
-                      </div>
-                    ) : null}
+                    <HeroVideo
+                      videoUrl={heroVideoUrl}
+                      youTubeId={heroYouTubeId}
+                      title={heroTitle ?? t("home.hero.featuredCaption")}
+                      playLabel={t("home.hero.play")}
+                    />
                   </div>
-                  {heroTitle || heroTeacher ? (
-                    <div className="pt-5 pb-1 px-1 space-y-1.5">
-                      <span className="text-xs tracking-[0.12px] uppercase text-ink-3">
-                        {t("home.hero.featuredCaption")}
-                      </span>
-                      {heroTitle ? (
-                        <h3
-                          className="text-[22px] leading-tight text-ink"
-                          style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
-                        >
-                          {heroTitle}
-                        </h3>
+                  <figcaption className="pt-4 pb-1 px-2 space-y-1">
+                    <span className="text-xs tracking-[0.12px] uppercase text-ink-3">
+                      {t("home.hero.featuredCaption")}
+                    </span>
+                    {heroTitle ? (
+                      <p
+                        className="text-[20px] sm:text-[22px] leading-tight text-ink"
+                        style={{ fontFamily: "var(--font-serif-ar)", fontWeight: 500 }}
+                      >
+                        {heroTitle}
+                      </p>
+                    ) : null}
+                    <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink-2 ltr-flex">
+                      {heroTeacher ? <span>{heroTeacher}</span> : null}
+                      {heroDuration ? (
+                        <span className="inline-flex items-center gap-1 text-ink-3">
+                          <Clock className="w-3.5 h-3.5" aria-hidden />
+                          {heroDuration}
+                        </span>
                       ) : null}
-                      {heroTeacher ? <p className="text-sm text-ink-2">{heroTeacher}</p> : null}
-                    </div>
-                  ) : null}
-                </div>
+                    </p>
+                  </figcaption>
+                </figure>
               </motion.div>
             ) : null}
           </div>
         </div>
       </section>
+
+      {/* Mobile sticky CTA: appears once the hero buttons scroll away (visitors only). */}
+      {showStickyCta ? (
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-canvas/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur md:hidden">
+          <Button size="lg" className="w-full text-base" asChild>
+            <Link href="/register">
+              {t("common.startLearning")}
+              <ArrowRight className="w-4 h-4 rtl:rotate-180" aria-hidden />
+            </Link>
+          </Button>
+        </div>
+      ) : null}
 
       {/* ===== 2. SHEIKHS & SCHOLARS (dark chapter break; admin-curated) ===== */}
       {featuredInstructors.length > 0 ? (
@@ -532,6 +567,8 @@ export default function HomeClient({ data }: HomeClientProps) {
 
       {/* ===== 7. FOOTER ===== */}
       <SiteFooter />
+      {/* Keeps the footer clear of the mobile sticky CTA. */}
+      {!isAuthenticated ? <div className="h-[76px] md:hidden" aria-hidden /> : null}
     </div>
   )
 }

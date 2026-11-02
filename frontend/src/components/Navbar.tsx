@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
-import { ArrowRight, User, LogOut, Menu, X } from "lucide-react"
+import { ArrowRight, User, LogOut, Menu, X, ChevronDown, LayoutDashboard, GraduationCap } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { LanguageSwitcher } from "@/components/ui/language-switcher"
@@ -42,17 +42,23 @@ export function Navbar() {
     return () => window.removeEventListener("keydown", onKey)
   }, [mobileMenuOpen])
 
-  const links: NavLink[] = [
+  // Desktop bar keeps the core learning links; secondary pages sit under "More" and
+  // staff portals under the account menu. The mobile drawer lists everything.
+  const primaryLinks: NavLink[] = [
     { href: "/courses", label: t("nav.publicCourses") },
-    { href: "/services", label: t("nav.services") },
     { href: "/muqtatafat", label: t("nav.muqtatafat") },
     { href: "/articles", label: t("nav.articles") },
     { href: "/instructors", label: t("nav.instructors") },
+  ]
+  if (isAuthenticated && user?.role === "STUDENT") primaryLinks.push({ href: "/dashboard", label: t("nav.myLearning") })
+  const moreLinks: NavLink[] = [
+    { href: "/services", label: t("nav.services") },
     { href: "/scholarships", label: t("nav.scholarships") },
   ]
-  if (isAuthenticated && user?.role === "STUDENT") links.push({ href: "/dashboard", label: t("nav.myLearning") })
-  if (user?.role === "INSTRUCTOR" || user?.role === "ADMIN") links.push({ href: "/instructor", label: t("nav.instructor") })
-  if (user?.role === "ADMIN") links.push({ href: "/admin", label: t("nav.admin") })
+  const portalLinks: (NavLink & { Icon: typeof User })[] = []
+  if (user?.role === "INSTRUCTOR" || user?.role === "ADMIN") portalLinks.push({ href: "/instructor", label: t("nav.instructor"), Icon: GraduationCap })
+  if (user?.role === "ADMIN") portalLinks.push({ href: "/admin", label: t("nav.admin"), Icon: LayoutDashboard })
+  const links: NavLink[] = [...primaryLinks, ...moreLinks, ...portalLinks]
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`)
 
@@ -78,19 +84,39 @@ export function Navbar() {
           </Link>
 
           <nav aria-label={t("nav.mainLabel")} className="hidden items-center gap-6 text-[15px] font-medium text-ink-2 md:flex">
-            {links.map((link) => (
+            {primaryLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 aria-current={isActive(link.href) ? "page" : undefined}
                 className={cn(
-                  "transition-colors hover:text-ink",
+                  "rounded-sm transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-4 focus-visible:ring-offset-canvas",
                   isActive(link.href) && "text-ink underline decoration-brand decoration-2 underline-offset-[6px]",
                 )}
               >
                 {link.label}
               </Link>
             ))}
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                className={cn(
+                  "ltr-flex inline-flex items-center gap-1 rounded-sm transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-4 focus-visible:ring-offset-canvas data-[state=open]:text-ink",
+                  moreLinks.some((link) => isActive(link.href)) && "text-ink",
+                )}
+              >
+                {t("nav.more")}
+                <ChevronDown className="h-4 w-4" aria-hidden />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="center" className="min-w-44">
+                {moreLinks.map((link) => (
+                  <DropdownMenuItem key={link.href} asChild>
+                    <Link href={link.href} aria-current={isActive(link.href) ? "page" : undefined}>
+                      {link.label}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </nav>
 
           <div className="ltr-flex flex items-center gap-2 sm:gap-3">
@@ -123,6 +149,15 @@ export function Navbar() {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
+                  {portalLinks.map(({ href, label, Icon }) => (
+                    <DropdownMenuItem key={href} asChild>
+                      <Link href={href}>
+                        <Icon className="me-2 h-4 w-4" />
+                        <span>{label}</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  ))}
+                  {portalLinks.length > 0 ? <DropdownMenuSeparator /> : null}
                   <DropdownMenuItem asChild>
                     <Link href="/profile">
                       <User className="me-2 h-4 w-4" />

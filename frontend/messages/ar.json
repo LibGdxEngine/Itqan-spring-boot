@@ -53,7 +53,8 @@
     "accountMenu": "قائمة الحساب",
     "openMenu": "فتح القائمة",
     "closeMenu": "إغلاق القائمة",
-    "scholarships": "المنح"
+    "scholarships": "المنح",
+    "more": "المزيد"
   },
   "instructors": {
     "title": "المعلمون",
@@ -888,7 +889,13 @@
     "heroSubtitle": "دروس مرئية متدرجة في تفسير القرآن الكريم وتدبّره، مع اختبارات ومتابعة للتقدم وشهادة إتمام.",
     "hero": {
       "featuredCaption": "الدرس المميّز",
-      "featuredTeacher": "الشيخ أسامة المراكبي"
+      "featuredTeacher": "الشيخ أسامة المراكبي",
+      "play": "تشغيل الدرس",
+      "proof": {
+        "gradual": "منهج متدرّج",
+        "quizzes": "اختبارات بعد الدروس",
+        "certificate": "شهادة إتمام"
+      }
     },
     "teachers": {
       "eyebrow": "تعلّم على يد",

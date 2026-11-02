@@ -1,5 +1,4 @@
 import type { CatalogCourse } from "@/lib/learning-api"
-import type { LandingSpecialization } from "@/lib/landingPage"
 import { fetchPublic } from "@/lib/seo"
 
 import { CatalogPage } from "./CatalogClient"
@@ -18,10 +17,7 @@ export default async function CoursesPage({
     const value = raw[key]
     return Array.isArray(value) ? value[0] : value
   })
-  const [result, categories] = await Promise.all([
-    // No caching: a course an instructor just published must show up for students right away.
-    fetchPublic<Page<CatalogCourse>>(catalogApiPath(params), 0),
-    fetchPublic<LandingSpecialization[]>("/api/specializations", 3600),
-  ])
-  return <CatalogPage initial={{ key: catalogQueryKey(params), result, categories: categories ?? [] }} />
+  // No caching: a course an instructor just published must show up for students right away.
+  const result = await fetchPublic<Page<CatalogCourse>>(catalogApiPath(params), 0)
+  return <CatalogPage initial={{ key: catalogQueryKey(params), result }} />
 }

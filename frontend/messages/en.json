@@ -1771,6 +1771,8 @@
     "clearFilters": "Clear filters",
     "noResults": "No courses match your search",
     "noResultsHint": "Try other words or remove some filters.",
+    "empty": "No courses available yet",
+    "emptyHint": "New courses are coming soon.",
     "pagination": "Pages",
     "previous": "Previous page",
     "next": "Next page"

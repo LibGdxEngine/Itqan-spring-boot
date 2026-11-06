@@ -154,6 +154,14 @@ class EasyKashIntegrationTest extends BaseIntegrationTest {
     }
 
     @Test
+    void callbackUrl_answersAvailabilityChecksAndRefusesAnEmptyPost() {
+        assertThat(restTemplate.getForEntity("/api/payments/webhook/easykash", String.class).getStatusCode())
+                .isEqualTo(HttpStatus.OK);
+        assertThat(restTemplate.postForEntity("/api/payments/webhook/easykash", HttpEntity.EMPTY, String.class).getStatusCode())
+                .isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
     void callback_forAnotherSaleOnTheAccountIsAcknowledgedAndIgnored() {
         assertThat(postCallback(signed("SHOPIFY-1", "PAID", "10.00", "9")).getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(paymentRepository.findAll()).isEmpty();

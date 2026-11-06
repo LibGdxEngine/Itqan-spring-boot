@@ -82,6 +82,9 @@ public class EasyKashService {
 
     /** Exact decimals: a numeric Amount of 11.00 must stay "11.00" or the signature won't match. */
     private JsonNode parse(String rawBody) {
+        if (rawBody == null || rawBody.isBlank()) {
+            throw new BusinessException(ErrorCode.PAYMENT_SIGNATURE_INVALID);
+        }
         try {
             JsonNode payload = objectMapper.reader()
                     .with(JsonNodeFactory.withExactBigDecimals(true))

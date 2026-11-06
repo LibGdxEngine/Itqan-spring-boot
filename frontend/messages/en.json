@@ -1187,7 +1187,9 @@
     },
     "payment": {
       "title": "Choose a payment method",
-      "paymob": "Online payment (Paymob)",
+      "online": "Online payment",
+      "mobileLabel": "Mobile number (required for online payment)",
+      "mobileRequired": "Please enter your mobile number first",
       "comingSoon": "Currently unavailable",
       "vodafoneCash": "Vodafone Cash",
       "instapay": "InstaPay",
@@ -1195,7 +1197,7 @@
       "numberMissing": "Contact number is unavailable",
       "whatsappMessage": "I want to buy the course \"{course}\" for ${amount} via {method}.",
       "whatsappCoupon": " (coupon: {coupon})",
-      "paymobHint": "Bank card or mobile wallet through Paymob's secure checkout",
+      "onlineHint": "Bank card, mobile wallet, Meeza or cash through EasyKash's secure checkout",
       "onlineFailed": "Could not start the online payment"
     }
   },
@@ -1310,7 +1312,12 @@
       "missingSession": "Missing checkout session id.",
       "paymentStatus": "Payment status: {status}",
       "startLearning": "Start Learning",
-      "goToDashboard": "Go to Dashboard"
+      "goToDashboard": "Go to Dashboard",
+      "backToCourse": "Back to the course",
+      "gatewayFailed": "The payment was not completed and the course was not activated. You can try again.",
+      "waitingTitle": "Waiting for your payment",
+      "waitingDescription": "The course will be activated on your account automatically once the payment is confirmed. You can close this page.",
+      "voucherLabel": "Payment number (use it at the nearest Fawry or Aman outlet)"
     },
     "cancel": {
       "title": "Checkout canceled",

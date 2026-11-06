@@ -17,6 +17,10 @@ export interface CreateCheckoutSessionRequest {
   couponCode?: string;
 }
 
+export interface EasyKashCheckoutRequest extends CreateCheckoutSessionRequest {
+  phone?: string;
+}
+
 export interface CreateCheckoutSessionResponse {
   mode: CheckoutMode;
   checkoutUrl?: string;
@@ -82,9 +86,14 @@ export const paymentsBillingApi = {
     return response.data;
   },
 
-  /** Paymob hosted checkout for a course (card / wallet). */
-  async createPaymobCheckout(request: CreateCheckoutSessionRequest): Promise<CreateCheckoutSessionResponse> {
-    const response = await api.post<CreateCheckoutSessionResponse>("/api/payments/paymob/checkout", request);
+  /** EasyKash hosted payment page for a course (card, wallet, Meeza, cash...). */
+  async createEasyKashCheckout(request: EasyKashCheckoutRequest): Promise<CreateCheckoutSessionResponse> {
+    const response = await api.post<CreateCheckoutSessionResponse>("/api/payments/easykash/checkout", request);
+    return response.data;
+  },
+
+  async getPaymentOptions(): Promise<{ easykashEnabled: boolean }> {
+    const response = await api.get<{ easykashEnabled: boolean }>("/api/payments/options");
     return response.data;
   },
 

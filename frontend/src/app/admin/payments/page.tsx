@@ -177,6 +177,7 @@ export default function AdminPaymentsPage() {
               onChange={(e) => setFilters((f) => ({ ...f, gateway: e.target.value }))}
             >
               <option value="">{t("allGateways")}</option>
+              <option value="EASYKASH">EasyKash</option>
               <option value="STRIPE">Stripe</option>
               <option value="MANUAL">{t("gateways.MANUAL")}</option>
             </Select>

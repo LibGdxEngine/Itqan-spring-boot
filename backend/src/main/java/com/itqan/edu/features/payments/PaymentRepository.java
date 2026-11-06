@@ -2,9 +2,12 @@ package com.itqan.edu.features.payments;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import jakarta.persistence.LockModeType;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,6 +27,15 @@ public interface PaymentRepository extends JpaRepository<Payment, Long>, JpaSpec
     Optional<Payment> findFirstByStripePaymentIntentId(String stripePaymentIntentId);
 
     Optional<Payment> findByGatewayReference(String gatewayReference);
+
+    /** Serializes a callback and an inquiry that report on the same payment at the same moment. */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT p FROM Payment p WHERE p.gatewayReference = :reference")
+    Optional<Payment> findLockedByGatewayReference(@Param("reference") String reference);
+
+    boolean existsByGatewayReferenceAndPaymentGatewayAndStatus(String gatewayReference, String paymentGateway, PaymentStatus status);
+
+    List<Payment> findByPaymentGatewayAndStatus(String paymentGateway, PaymentStatus status);
 
     List<Payment> findByStudentIdAndCourseIdAndStatus(Long studentId, Long courseId, PaymentStatus status);
 

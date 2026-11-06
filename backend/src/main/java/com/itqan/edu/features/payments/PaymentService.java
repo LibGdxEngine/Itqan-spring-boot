@@ -24,6 +24,12 @@ import com.itqan.edu.features.payments.paymob.PaymobIntentionRequest;
 import com.itqan.edu.features.payments.paymob.PaymobOutcome;
 import com.itqan.edu.features.payments.paymob.PaymobProperties;
 import com.itqan.edu.features.payments.paymob.PaymobWebhookService;
+import com.itqan.edu.features.payments.dto.CouponPricingResponse;
+import com.itqan.edu.features.payments.easykash.EasyKashGateway;
+import com.itqan.edu.features.payments.easykash.EasyKashMobile;
+import com.itqan.edu.features.payments.easykash.EasyKashPayRequest;
+import com.itqan.edu.features.payments.easykash.EasyKashProperties;
+import com.itqan.edu.features.payments.easykash.EasyKashResult;
 import com.itqan.edu.features.students.Student;
 import com.itqan.edu.features.students.StudentRepository;
 import lombok.RequiredArgsConstructor;
@@ -31,16 +37,22 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class PaymentService {
+
+    public static final String EASYKASH_GATEWAY = "EASYKASH";
 
     private final PaymentRepository paymentRepository;
     private final CourseRepository courseRepository;
@@ -55,6 +67,8 @@ public class PaymentService {
     private final AuditLogService auditLogService;
     private final PaymobGateway paymobGateway;
     private final PaymobProperties paymobProperties;
+    private final EasyKashGateway easyKashGateway;
+    private final EasyKashProperties easyKashProperties;
 
     @Transactional
     public CreateCheckoutSessionResponse createCheckoutSession(CreateCheckoutSessionRequest request, Long studentId) {
@@ -218,54 +232,14 @@ public class PaymentService {
         if (!paymobProperties.isConfigured()) {
             throw new BusinessException(ErrorCode.ONLINE_PAYMENT_DISABLED);
         }
-        Student student = studentRepository.findById(studentId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.STUDENT_NOT_FOUND));
-        Course course = courseRepository.findById(request.getCourseId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.COURSE_NOT_FOUND));
-
-        if (enrollmentRepository.findByStudentIdAndCourseId(studentId, course.getId())
-                .filter(e -> e.getStatus() != EnrollmentStatus.DROPPED).isPresent()) {
-            throw new BusinessException(ErrorCode.ENROLLMENT_ALREADY_EXISTS);
-        }
-        // A student who abandoned an earlier Paymob page can start again: the old attempt is cancelled.
-        paymentRepository.findByStudentIdAndCourseIdAndStatus(studentId, course.getId(), PaymentStatus.PENDING)
-                .forEach(this::cancelPendingAttempt);
-
-        CouponService.CouponValidationResult couponValidation = couponService.validateForCheckout(
-                course.getId(), request.getCouponCode(), studentId);
-        Coupon coupon = couponValidation.getCoupon();
-        var pricing = couponValidation.getPricing();
-
-        Payment payment = paymentRepository.save(Payment.builder()
-                .student(student)
-                .course(course)
-                .amount(pricing.getFinalAmount())
-                .originalAmount(pricing.getOriginalAmount())
-                .discountAmount(pricing.getDiscountAmount())
-                .currency(paymobProperties.getCurrency().toUpperCase())
-                .status(PaymentStatus.PENDING)
-                .paymentGateway("PAYMOB")
-                .paymentMethod("PAYMOB_CHECKOUT")
-                .coupon(coupon)
-                .build());
-
+        HostedCheckout started = openHostedPayment(request, studentId, "PAYMOB", "PAYMOB_CHECKOUT",
+                paymobProperties.getCurrency());
+        Payment payment = started.payment();
+        Student student = started.student();
+        Course course = started.course();
+        var pricing = started.pricing();
         if (Boolean.TRUE.equals(pricing.getFree())) {
-            payment.setStatus(PaymentStatus.COMPLETED);
-            payment.setCompletedAt(LocalDateTime.now());
-            payment.setNotes("Completed by 100% coupon or free price");
-            paymentRepository.save(payment);
-            Enrollment enrollment = enrollIfNeeded(student, course);
-            if (coupon != null) {
-                markCouponAsRedeemed(payment, null);
-            }
-            auditLogService.recordSuccess("PAYMENT_COMPLETED", "PAYMENT", String.valueOf(payment.getId()),
-                    Map.of("amount", payment.getAmount(), "currency", payment.getCurrency(), "studentId", student.getId()));
-            return CreateCheckoutSessionResponse.builder()
-                    .mode(CheckoutMode.FREE_ENROLLED)
-                    .paymentId(payment.getId())
-                    .enrollmentId(enrollment != null ? enrollment.getId() : null)
-                    .pricing(pricing)
-                    .build();
+            return completeFreePayment(started);
         }
 
         String reference = PaymobWebhookService.PAYMENT_PREFIX + payment.getId() + "-"
@@ -287,14 +261,7 @@ public class PaymentService {
                 .notificationUrl(origin + "/api/payments/webhook/paymob")
                 .build());
 
-        if (coupon != null) {
-            couponRedemptionRepository.save(CouponRedemption.builder()
-                    .coupon(coupon)
-                    .student(student)
-                    .payment(payment)
-                    .status(CouponRedemptionStatus.RESERVED)
-                    .build());
-        }
+        reserveCoupon(started);
 
         return CreateCheckoutSessionResponse.builder()
                 .mode(CheckoutMode.REDIRECT)
@@ -356,6 +323,211 @@ public class PaymentService {
             }
             default -> {
             }
+        }
+    }
+
+    /**
+     * Starts an EasyKash Direct Pay checkout for a course. Free (or 100%-coupon) purchases enroll at
+     * once without a redirect. EasyKash requires a mobile number, which students may not have on file.
+     */
+    @Transactional
+    public CreateCheckoutSessionResponse createEasyKashCheckout(CreateCheckoutSessionRequest request, Long studentId) {
+        if (!easyKashProperties.isConfigured()) {
+            throw new BusinessException(ErrorCode.ONLINE_PAYMENT_DISABLED);
+        }
+        HostedCheckout started = openHostedPayment(request, studentId, EASYKASH_GATEWAY, "EASYKASH_CHECKOUT",
+                easyKashProperties.getCurrency());
+        Payment payment = started.payment();
+        Student student = started.student();
+        var pricing = started.pricing();
+        if (Boolean.TRUE.equals(pricing.getFree())) {
+            return completeFreePayment(started);
+        }
+
+        String mobile = EasyKashMobile.normalize(request.getPhone() != null ? request.getPhone() : student.getPhoneNumber());
+        if (mobile == null) {
+            throw new BusinessException(ErrorCode.VALIDATION_ERROR, "A valid mobile number is required");
+        }
+
+        // Letters and digits only, and no query on the redirect URL: EasyKash appends its own
+        // "?status=...&customerReference=..." to it, which is how the return page finds this payment.
+        String reference = "ITQ" + payment.getId() + "X"
+                + UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT);
+        payment.setGatewayReference(reference);
+        paymentRepository.save(payment);
+
+        String checkoutUrl = easyKashGateway.createPayLink(new EasyKashPayRequest(
+                BigDecimal.valueOf(pricing.getFinalAmount()).setScale(2, RoundingMode.HALF_UP),
+                payment.getCurrency(),
+                (student.getFirstName() + " " + student.getLastName()).trim(),
+                student.getEmail(),
+                mobile,
+                easyKashProperties.publicOrigin() + "/courses/success",
+                reference));
+
+        reserveCoupon(started);
+
+        return CreateCheckoutSessionResponse.builder()
+                .mode(CheckoutMode.REDIRECT)
+                .checkoutUrl(checkoutUrl)
+                .sessionId(reference)
+                .paymentId(payment.getId())
+                .pricing(pricing)
+                .build();
+    }
+
+    /**
+     * Applies what EasyKash reports about a payment. Money received always wins: a voucher paid after
+     * the student started a newer attempt still enrolls them. A replay after a refund does not.
+     */
+    @Transactional
+    public void applyEasyKashResult(String reference, EasyKashResult result) {
+        Payment payment = paymentRepository.findLockedByGatewayReference(reference)
+                .filter(p -> EASYKASH_GATEWAY.equals(p.getPaymentGateway()))
+                .orElse(null);
+        if (payment == null) {
+            // Other sales on the same EasyKash account also reach the callback URL.
+            log.warn("EasyKash result for unknown payment reference '{}'", reference);
+            return;
+        }
+        switch (result.outcome()) {
+            case PAID -> {
+                if (payment.getStatus() == PaymentStatus.COMPLETED || payment.getStatus() == PaymentStatus.REFUNDED) {
+                    return;
+                }
+                warnIfUnderpaid(payment, result.amount());
+                payment.setStatus(PaymentStatus.COMPLETED);
+                payment.setCompletedAt(LocalDateTime.now());
+                if (!result.easykashRef().isBlank()) {
+                    payment.setTransactionId(result.easykashRef());
+                }
+                if (!result.paymentMethod().isBlank()) {
+                    payment.setPaymentMethod(result.paymentMethod());
+                }
+                payment.setNotes("EasyKash reported amount: " + result.amount());
+                paymentRepository.save(payment);
+                enrollIfNeeded(payment.getStudent(), payment.getCourse());
+                if (payment.getCoupon() != null) {
+                    markCouponAsRedeemed(payment, null);
+                }
+                auditLogService.recordSuccess("PAYMENT_COMPLETED", "PAYMENT", String.valueOf(payment.getId()),
+                        Map.of("amount", payment.getAmount(), "currency", payment.getCurrency(),
+                                "studentId", payment.getStudent().getId(), "gateway", EASYKASH_GATEWAY));
+            }
+            case FAILED -> {
+                if (payment.getStatus() == PaymentStatus.PENDING) {
+                    payment.setStatus(PaymentStatus.FAILED);
+                    payment.setNotes("EasyKash reported the payment as not completed");
+                    paymentRepository.save(payment);
+                    releaseReservedCoupon(payment);
+                    auditLogService.recordFailure("PAYMENT_FAILED", "PAYMENT", String.valueOf(payment.getId()),
+                            "EasyKash payment not completed");
+                }
+            }
+            case PENDING -> {
+            }
+        }
+    }
+
+    /** Closes an attempt EasyKash never reported on, past the voucher lifetime, and frees its coupon. */
+    @Transactional
+    public void abandonEasyKashPayment(String reference) {
+        paymentRepository.findLockedByGatewayReference(reference)
+                .filter(p -> p.getStatus() == PaymentStatus.PENDING)
+                .ifPresent(payment -> {
+                    payment.setStatus(PaymentStatus.CANCELLED);
+                    payment.setNotes("Abandoned: no payment reported by EasyKash");
+                    paymentRepository.save(payment);
+                    releaseReservedCoupon(payment);
+                });
+    }
+
+    /**
+     * Logged rather than refused: the callback is signed and the amount was set server-side, so the
+     * buyer can't change it, while fee settings on the EasyKash account can legitimately alter it.
+     */
+    private void warnIfUnderpaid(Payment payment, String reported) {
+        if (!"EGP".equalsIgnoreCase(payment.getCurrency())) {
+            return; // EasyKash reports EGP; other currencies aren't comparable without the exchange rate.
+        }
+        try {
+            if (new BigDecimal(reported).compareTo(BigDecimal.valueOf(payment.getAmount())) < 0) {
+                log.warn("EasyKash reported {} for payment {} which costs {}", reported, payment.getId(), payment.getAmount());
+            }
+        } catch (NumberFormatException e) {
+            log.warn("EasyKash reported a non-numeric amount for payment {}", payment.getId());
+        }
+    }
+
+    /** What a Paymob or EasyKash checkout needs once the shared checks have passed. */
+    private record HostedCheckout(Student student, Course course, Coupon coupon, CouponPricingResponse pricing,
+                                  Payment payment) {
+    }
+
+    private HostedCheckout openHostedPayment(CreateCheckoutSessionRequest request, Long studentId, String gateway,
+                                             String method, String currency) {
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.STUDENT_NOT_FOUND));
+        Course course = courseRepository.findById(request.getCourseId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.COURSE_NOT_FOUND));
+
+        if (enrollmentRepository.findByStudentIdAndCourseId(studentId, course.getId())
+                .filter(e -> e.getStatus() != EnrollmentStatus.DROPPED).isPresent()) {
+            throw new BusinessException(ErrorCode.ENROLLMENT_ALREADY_EXISTS);
+        }
+        // A student who abandoned an earlier payment page can start again: the old attempt is cancelled.
+        paymentRepository.findByStudentIdAndCourseIdAndStatus(studentId, course.getId(), PaymentStatus.PENDING)
+                .forEach(this::cancelPendingAttempt);
+
+        CouponService.CouponValidationResult couponValidation = couponService.validateForCheckout(
+                course.getId(), request.getCouponCode(), studentId);
+        Coupon coupon = couponValidation.getCoupon();
+        CouponPricingResponse pricing = couponValidation.getPricing();
+
+        Payment payment = paymentRepository.save(Payment.builder()
+                .student(student)
+                .course(course)
+                .amount(pricing.getFinalAmount())
+                .originalAmount(pricing.getOriginalAmount())
+                .discountAmount(pricing.getDiscountAmount())
+                .currency(currency.toUpperCase(Locale.ROOT))
+                .status(PaymentStatus.PENDING)
+                .paymentGateway(gateway)
+                .paymentMethod(method)
+                .coupon(coupon)
+                .build());
+        return new HostedCheckout(student, course, coupon, pricing, payment);
+    }
+
+    private CreateCheckoutSessionResponse completeFreePayment(HostedCheckout started) {
+        Payment payment = started.payment();
+        payment.setStatus(PaymentStatus.COMPLETED);
+        payment.setCompletedAt(LocalDateTime.now());
+        payment.setNotes("Completed by 100% coupon or free price");
+        paymentRepository.save(payment);
+        Enrollment enrollment = enrollIfNeeded(started.student(), started.course());
+        if (started.coupon() != null) {
+            markCouponAsRedeemed(payment, null);
+        }
+        auditLogService.recordSuccess("PAYMENT_COMPLETED", "PAYMENT", String.valueOf(payment.getId()),
+                Map.of("amount", payment.getAmount(), "currency", payment.getCurrency(),
+                        "studentId", started.student().getId()));
+        return CreateCheckoutSessionResponse.builder()
+                .mode(CheckoutMode.FREE_ENROLLED)
+                .paymentId(payment.getId())
+                .enrollmentId(enrollment != null ? enrollment.getId() : null)
+                .pricing(started.pricing())
+                .build();
+    }
+
+    private void reserveCoupon(HostedCheckout started) {
+        if (started.coupon() != null) {
+            couponRedemptionRepository.save(CouponRedemption.builder()
+                    .coupon(started.coupon())
+                    .student(started.student())
+                    .payment(started.payment())
+                    .status(CouponRedemptionStatus.RESERVED)
+                    .build());
         }
     }
 

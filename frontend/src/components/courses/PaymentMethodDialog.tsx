@@ -12,11 +12,12 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useAuth } from "@/components/auth-context";
 import { useToast } from "@/components/ui/use-toast";
 import { getErrorMessage } from "@/lib/api-axios";
+import { StudentsService } from "@/lib/api";
 import { paymentsBillingApi } from "@/lib/payments-billing";
-import { useSiteSettings } from "@/lib/use-site-currency";
 
 interface PaymentMethodDialogProps {
     courseId: number;
@@ -35,9 +36,9 @@ export function PaymentMethodDialog({ courseId, courseTitle, amount, couponCode 
     const router = useRouter();
     const { toast } = useToast();
     const { isAuthenticated } = useAuth();
-    const settings = useSiteSettings();
-    // Online payment (Paymob) is offered once an admin turns on card payments in the settings.
-    const onlineEnabled = settings.cardPaymentsEnabled === "true";
+    // Online payment is offered once the EasyKash credentials are set on the server.
+    const [onlineEnabled, setOnlineEnabled] = useState(false);
+    const [phone, setPhone] = useState("");
     const [redirecting, setRedirecting] = useState(false);
     const [config, setConfig] = useState<PaymentConfig>({ vodafoneNumber: "", instapayNumber: "" });
 
@@ -51,19 +52,49 @@ export function PaymentMethodDialog({ courseId, courseTitle, amount, couponCode 
             .catch(() => {
                 // Numbers stay empty -> manual options render disabled.
             });
+        paymentsBillingApi.getPaymentOptions()
+            .then((options) => {
+                if (active) setOnlineEnabled(options.easykashEnabled);
+            })
+            .catch(() => {
+                // Stays disabled.
+            });
         return () => {
             active = false;
         };
     }, []);
+
+    useEffect(() => {
+        if (!isAuthenticated) return;
+        let active = true;
+        StudentsService.getProfile()
+            .then((profile) => {
+                if (active && profile.phoneNumber) setPhone((current) => current || profile.phoneNumber || "");
+            })
+            .catch(() => {
+                // The student just types the number.
+            });
+        return () => {
+            active = false;
+        };
+    }, [isAuthenticated]);
 
     const payOnline = async () => {
         if (!isAuthenticated) {
             router.push(`/login?redirect=/courses/${courseId}`);
             return;
         }
+        if (!phone.trim()) {
+            toast({ variant: "destructive", title: t("courses.payment.mobileRequired") });
+            return;
+        }
         setRedirecting(true);
         try {
-            const response = await paymentsBillingApi.createPaymobCheckout({ courseId, couponCode: couponCode || undefined });
+            const response = await paymentsBillingApi.createEasyKashCheckout({
+                courseId,
+                couponCode: couponCode || undefined,
+                phone: phone.trim(),
+            });
             if (response.mode === "FREE_ENROLLED") {
                 router.push(`/learn/${courseId}`);
                 return;
@@ -106,7 +137,25 @@ export function PaymentMethodDialog({ courseId, courseTitle, amount, couponCode 
                 </DialogHeader>
 
                 <div className="space-y-3">
-                    {/* Paymob (online card / wallet) */}
+                    {/* EasyKash (card, wallet, Meeza, cash...) */}
+                    {onlineEnabled ? (
+                        <div className="space-y-1">
+                            <label htmlFor="easykash-mobile" className="block text-sm font-medium text-ink">
+                                {t("courses.payment.mobileLabel")}
+                            </label>
+                            <Input
+                                id="easykash-mobile"
+                                type="tel"
+                                dir="ltr"
+                                inputMode="tel"
+                                autoComplete="tel"
+                                placeholder="01012345678"
+                                value={phone}
+                                onChange={(e) => setPhone(e.target.value)}
+                                className="text-ink"
+                            />
+                        </div>
+                    ) : null}
                     <button
                         type="button"
                         disabled={!onlineEnabled || redirecting}
@@ -115,8 +164,8 @@ export function PaymentMethodDialog({ courseId, courseTitle, amount, couponCode 
                     >
                         <CreditCard className="h-6 w-6 shrink-0 text-brand" />
                         <span className="flex-1">
-                            <span className="block font-medium text-ink">{t("courses.payment.paymob")}</span>
-                            <span className="block text-xs text-ink-3">{t("courses.payment.paymobHint")}</span>
+                            <span className="block font-medium text-ink">{t("courses.payment.online")}</span>
+                            <span className="block text-xs text-ink-3">{t("courses.payment.onlineHint")}</span>
                         </span>
                         {redirecting ? (
                             <Loader2 className="h-5 w-5 shrink-0 animate-spin text-brand" />

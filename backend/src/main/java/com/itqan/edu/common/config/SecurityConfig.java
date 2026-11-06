@@ -63,6 +63,8 @@ public class SecurityConfig {
                                 "/api/certificates/verify/**",
                                 "/api/payments/webhook/stripe",
                                 "/api/payments/webhook/paymob",
+                                "/api/payments/webhook/easykash",
+                                "/api/payments/options",
                                 "/api/donations/checkout",
                                 "/api/donations/checkout/**",
                                 "/v3/api-docs/**",

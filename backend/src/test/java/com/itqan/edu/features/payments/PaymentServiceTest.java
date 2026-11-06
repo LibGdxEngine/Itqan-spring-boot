@@ -8,6 +8,8 @@ import com.itqan.edu.features.enrollments.Enrollment;
 import com.itqan.edu.features.enrollments.EnrollmentRepository;
 import com.itqan.edu.features.payments.stripe.StripeGateway;
 import com.itqan.edu.features.payments.stripe.StripeWebhookEvent;
+import com.itqan.edu.features.payments.easykash.EasyKashGateway;
+import com.itqan.edu.features.payments.easykash.EasyKashProperties;
 import com.itqan.edu.features.payments.paymob.PaymobGateway;
 import com.itqan.edu.features.payments.paymob.PaymobProperties;
 import com.itqan.edu.features.students.Student;
@@ -49,6 +51,8 @@ class PaymentServiceTest {
     private AuditLogService auditLogService;
     @Mock
     private PaymobGateway paymobGateway;
+    @Mock
+    private EasyKashGateway easyKashGateway;
 
     private PaymentService paymentService;
 
@@ -74,7 +78,9 @@ class PaymentServiceTest {
                 stripeProperties,
                 auditLogService,
                 paymobGateway,
-                new PaymobProperties());
+                new PaymobProperties(),
+                easyKashGateway,
+                new EasyKashProperties());
     }
 
     @Test

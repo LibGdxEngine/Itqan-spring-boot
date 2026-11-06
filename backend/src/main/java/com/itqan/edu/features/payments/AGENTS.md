@@ -29,6 +29,8 @@ Payment processing via Stripe — checkout sessions, webhook handling, coupon/di
 |-----------|---------|
 | `dto/` | Checkout session, payment response, coupon request/response, pricing DTOs |
 | `stripe/` | StripeGateway interface and StripeGatewayImpl — Stripe API abstraction |
+| `paymob/` | Paymob gateway and callback — now used by scholarship donations |
+| `easykash/` | EasyKash Direct Pay for course payments — gateway, signed callback (`/api/payments/webhook/easykash`), inquiry-based reconciliation |
 
 ## For AI Agents
 

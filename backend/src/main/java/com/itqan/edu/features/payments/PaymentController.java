@@ -5,6 +5,8 @@ import com.itqan.edu.features.payments.dto.CheckoutSessionStatusResponse;
 import com.itqan.edu.features.payments.dto.CreateCheckoutSessionRequest;
 import com.itqan.edu.features.payments.dto.CreateCheckoutSessionResponse;
 import com.itqan.edu.features.payments.dto.PaymentResponse;
+import com.itqan.edu.features.payments.easykash.EasyKashProperties;
+import com.itqan.edu.features.payments.easykash.EasyKashService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,6 +28,8 @@ public class PaymentController {
 
     private final PaymentService paymentService;
     private final CurrentUserService currentUserService;
+    private final EasyKashService easyKashService;
+    private final EasyKashProperties easyKashProperties;
 
     @PostMapping("/checkout-sessions")
     @PreAuthorize("hasRole('STUDENT') or hasRole('ADMIN')")
@@ -48,6 +52,23 @@ public class PaymentController {
             Authentication authentication) {
         Long studentId = currentUserService.getCurrentStudentId(authentication);
         return ResponseEntity.ok(paymentService.createPaymobCheckout(request, studentId));
+    }
+
+    @PostMapping("/easykash/checkout")
+    @PreAuthorize("hasRole('STUDENT') or hasRole('ADMIN')")
+    @SecurityRequirement(name = "Bearer Authentication")
+    @Operation(summary = "Start an EasyKash checkout", description = "Returns the EasyKash hosted payment page URL for a course")
+    public ResponseEntity<CreateCheckoutSessionResponse> createEasyKashCheckout(
+            @Valid @RequestBody CreateCheckoutSessionRequest request,
+            Authentication authentication) {
+        Long studentId = currentUserService.getCurrentStudentId(authentication);
+        return ResponseEntity.ok(paymentService.createEasyKashCheckout(request, studentId));
+    }
+
+    @GetMapping("/options")
+    @Operation(summary = "Online payment availability", description = "Whether online course payment is set up")
+    public ResponseEntity<Map<String, Boolean>> paymentOptions() {
+        return ResponseEntity.ok(Map.of("easykashEnabled", easyKashProperties.isConfigured()));
     }
 
     @PostMapping("/webhook/stripe")
@@ -76,6 +97,7 @@ public class PaymentController {
             @PathVariable String sessionId,
             Authentication authentication) {
         Long studentId = currentUserService.getCurrentStudentId(authentication);
+        easyKashService.refreshIfPending(sessionId);
         return ResponseEntity.ok(paymentService.getCheckoutSessionStatus(sessionId, studentId));
     }
 }
